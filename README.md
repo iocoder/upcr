@@ -1,3 +1,0 @@
-# UPCR
-
-Universal Platform for Configurable Routing.
