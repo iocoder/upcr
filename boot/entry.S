@@ -1,11 +1,26 @@
 
+  /* includes */
+  .include "efi.inc"
+
   /* globals */
-  .globl entry
+  .globl Entry
 
   /* text section */
   .text
 
-entry:
+Entry:
   /* entry point */
-  mov    $0xABCD, %r11
+  mov    %rcx, ImageHandle@GOTPCREL(%rip)
+  mov    %rdx, SystemTable@GOTPCREL(%rip)
+
+  /* get (SystemTable->ConOut, Msg) */
+  mov    SystemTable@GOTPCREL(%rip), %rsi
+  mov    ConOut(%rsi), %rcx
+  lea    Msg@GOTPCREL(%rip), %rdx
+
+  /* call SystemTable->ConOut->OutputString */
+  mov    OutputString(%rcx), %rsi
+  call   *%rsi
+
+  /* halt */
   jmp    .

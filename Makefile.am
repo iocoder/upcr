@@ -6,7 +6,6 @@ LDSCRIPT=${srcdir}/package.ld
 MODULES=boot/boot.o
 
 ${TARGET}: ${LDSCRIPT} ${MODULES}
-	${LD} --oformat=binary -e 0 -T ${LDSCRIPT} -o $@ ${MODULES}
+	${LD} --oformat=binary -e 0 -pie -T ${LDSCRIPT} -o $@ ${MODULES}
 
 all-local: ${TARGET}
-

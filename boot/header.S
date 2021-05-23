@@ -99,4 +99,4 @@ sect:
 
 code:
   /* jump to entry point */
-  jmp     entry
+  jmp     Entry

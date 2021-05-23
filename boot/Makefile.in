@@ -404,7 +404,7 @@ ${TARGET}: ${SFILES_OUT}
 	${LD} -o $@ ${LDFLAGS} $^
 
 %.o:%.S
-	${CC} -c -o $@ ${ASFLAGS} $<
+	${CC} -I${srcdir} -c -o $@ ${ASFLAGS} $<
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

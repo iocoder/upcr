@@ -15,4 +15,4 @@ ${TARGET}: ${SFILES_OUT}
 	${LD} -o $@ ${LDFLAGS} $^
 
 %.o:%.S
-	${CC} -c -o $@ ${ASFLAGS} $<
+	${CC} -I${srcdir} -c -o $@ ${ASFLAGS} $<
