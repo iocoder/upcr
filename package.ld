@@ -1,9 +1,13 @@
 
 SECTIONS {
 
-    .header : {*(.header         )}
-	.text   : {*(.text .rodata   )}
-	.data   : {*(.data           )}
-	.bss    : {*(.bss            )}
+	.text   : {
+    *(.header)
+    *(.text)
+    *(.rodata)
+    *(.data)
+    *(.bss)
+    *(.footer)
+  }
 
 }

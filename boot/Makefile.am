@@ -3,8 +3,8 @@ TARGET=boot.o
 ASFLAGS=
 LDFLAGS=-r
 
-SFILES_IN=$(shell ls ${srcdir}/*.s)
-SFILES_OUT=$(shell cd ${srcdir}; ls *.s | sed 's/\.s/\.o/g')
+SFILES_IN=$(shell ls ${srcdir}/*.S)
+SFILES_OUT=$(shell cd ${srcdir}; ls *.S | sed 's/\.S/\.o/g')
 
 all: ${TARGET}
 
@@ -14,6 +14,5 @@ clean:
 ${TARGET}: ${SFILES_OUT}
 	${LD} -o $@ ${LDFLAGS} $^
 
-%.o:%.s
-	${AS} -o $@ ${ASFLAGS} $<
-
+%.o:%.S
+	${CC} -c -o $@ ${ASFLAGS} $<

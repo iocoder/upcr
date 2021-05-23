@@ -207,8 +207,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 TARGET = boot.o
 ASFLAGS = 
-SFILES_IN = $(shell ls ${srcdir}/*.s)
-SFILES_OUT = $(shell cd ${srcdir}; ls *.s | sed 's/\.s/\.o/g')
+SFILES_IN = $(shell ls ${srcdir}/*.S)
+SFILES_OUT = $(shell cd ${srcdir}; ls *.S | sed 's/\.S/\.o/g')
 all: all-am
 
 .SUFFIXES:
@@ -403,8 +403,8 @@ clean:
 ${TARGET}: ${SFILES_OUT}
 	${LD} -o $@ ${LDFLAGS} $^
 
-%.o:%.s
-	${AS} -o $@ ${ASFLAGS} $<
+%.o:%.S
+	${CC} -c -o $@ ${ASFLAGS} $<
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
