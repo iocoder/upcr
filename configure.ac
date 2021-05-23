@@ -6,7 +6,9 @@ AC_INIT([UPCR], [21.09], [admin@ramses.ca])
 AM_INIT_AUTOMAKE
 
 # Checks for programs.
+AM_PROG_AS
 AC_PROG_CC
+AC_PROG_MAKE_SET
 
 # Checks for libraries.
 
@@ -16,6 +18,6 @@ AC_PROG_CC
 
 # Checks for library functions.
 
-AC_CONFIG_FILES(Makefile)
 AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_FILES([Makefile boot/Makefile])
 AC_OUTPUT

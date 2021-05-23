@@ -13,7 +13,7 @@ aclocal
 autoheader
 
 # config.h.in + Makefile.am -> Makefile.in
-automake --add-missing -c
+automake --foreign --add-missing -c
 
 # generate configure
 autoconf

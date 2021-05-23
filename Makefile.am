@@ -1,10 +1,12 @@
-SUBDIRS= 
+SUBDIRS=boot
 
-all-local:
+TARGET=${PACKAGE}-${PACKAGE_VERSION}.efi
+LDSCRIPT=${srcdir}/package.ld
 
-clean-local:
+MODULES=boot/boot.o
 
-install-exec-local:
+${TARGET}: ${LDSCRIPT} ${MODULES}
+	${LD} --oformat=binary -e 0 -T ${LDSCRIPT} -o $@ ${MODULES}
 
-uninstall-local:
+all-local: ${TARGET}
 
