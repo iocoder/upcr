@@ -17,11 +17,14 @@ Entry:
     /* initialize boot loader */
     call   InitLoader
 
-    /* get memory map */
-    call   GetMemMap
-
     /* print banner */
     call   ShowBanner
+
+    /* get BLT information */
+    call   GetBlt
+
+    /* get memory map */
+    call   GetMemMap
 
     /* exit from EFI boot services */
     call   ExitBoot

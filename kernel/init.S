@@ -8,5 +8,14 @@
 /* KernelInit function */
 KernelInit:
 
+    /* initialize kernel data */
+    call   KernelDataInit
+
+    /* initialize console */
+    call   KernelConsoleInit
+
+    /* initialize splash */
+    call   KernelSplashInit
+
     /* halt */
     jmp    .

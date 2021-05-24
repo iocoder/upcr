@@ -9,8 +9,8 @@ cp build/*.efi /tmp/qemu-dir/efi/boot/bootx64.efi
 
 qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd \
                    -m 1G \
-                   -nographic \
                    -serial stdio \
                    -monitor none \
                    -nodefaults \
+                   -vga std \
                    -drive file=fat:rw:/tmp/qemu-dir,format=raw

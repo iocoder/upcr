@@ -95,3 +95,25 @@
 .equ   EfiPalCode,                 0x0D
 .equ   EfiPersistentMemory,        0x0E
 .equ   EfiMaxMemoryType,           0x0F
+
+/* Graphics output protocol */
+.equ   QueryMode,                  0x00
+.equ   SetMode,                    0x08
+.equ   Blt,                        0x10
+.equ   Mode,                       0x18
+
+/* Graphics output protocol mode */
+.equ   MaxMode,                    0x00
+.equ   ModeNum,                    0x04
+.equ   Info,                       0x08
+.equ   SizeOfInfo,                 0x10
+.equ   FrameBufferBase,            0x18
+.equ   FrameBufferSize,            0x20
+
+/* Graphics output protocol mode information */
+.equ   Version,                    0x00
+.equ   HorizontalResolution,       0x04
+.equ   VerticalResolution,         0x08
+.equ   PixelFormat,                0x0C
+.equ   PixelInformation,           0x10
+.equ   PixelsPerScanLine,          0x20
