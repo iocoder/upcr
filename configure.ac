@@ -19,5 +19,8 @@ AC_PROG_MAKE_SET
 # Checks for library functions.
 
 AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_FILES([Makefile boot/Makefile])
+AC_CONFIG_FILES([Makefile
+                 boot/Makefile
+                 kernel/Makefile])
+
 AC_OUTPUT

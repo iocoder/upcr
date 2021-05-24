@@ -1,9 +1,9 @@
 
 /* C includes */
-#include "asm.h"
+#include "boot/macros.h"
 
 /* assembler includes */
-.include "efi.inc"
+.include "boot/efi.inc"
 
 /* linker symbols to export */
 .globl ExecKernel
@@ -13,6 +13,12 @@
 
 /* ExecKernel function */
 ExecKernel:
+
+    /* get kernel entry point */
+    lea    PTR(_binary_kernel_bin_start), %rbx
+
+    /* execute kernel code */
+    call   *%rbx
 
     /* halt */
     jmp    .

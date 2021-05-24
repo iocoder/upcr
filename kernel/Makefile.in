@@ -85,7 +85,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-subdir = boot
+subdir = kernel
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -143,7 +143,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-LDFLAGS = -r
+LDFLAGS = --oformat=binary -e 0 -pie -T ${top_srcdir}/ld/binary.ld
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LTLIBOBJS = @LTLIBOBJS@
@@ -205,7 +205,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-TARGET = boot.o
+TARGET = kernel
 SFILES_IN = $(shell ls ${srcdir}/*.S)
 SFILES_OUT = $(shell cd ${srcdir}; ls *.S | sed 's/\.S/\.o/g')
 all: all-am
@@ -220,9 +220,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign boot/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign kernel/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign boot/Makefile
+	  $(AUTOMAKE) --foreign kernel/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -394,13 +394,16 @@ uninstall-am:
 .PRECIOUS: Makefile
 
 
-all: ${TARGET}
+all: ${TARGET}.o
+
+${TARGET}.o: ${TARGET}.bin
+	objcopy -I binary -O elf64-x86-64 $< $@
 
 clean:
 	rm -rf ${SFILES_OUT} ${TARGET}
 
-${TARGET}: ${SFILES_OUT}
-	${LD} -o $@ ${LDFLAGS} $^
+${TARGET}.bin: ${SFILES_OUT}
+	${LD} ${LDFLAGS} -o $@ $^
 
 %.o:%.S
 	${CC} -c ${CCASFLAGS} -o $@ ${ASFLAGS} $<

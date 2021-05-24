@@ -1,6 +1,6 @@
 TARGET=boot.o
 
-ASFLAGS=
+CCASFLAGS=-I${top_srcdir}
 LDFLAGS=-r
 
 SFILES_IN=$(shell ls ${srcdir}/*.S)
@@ -15,4 +15,4 @@ ${TARGET}: ${SFILES_OUT}
 	${LD} -o $@ ${LDFLAGS} $^
 
 %.o:%.S
-	${CC} -I${srcdir} -c -o $@ ${ASFLAGS} $<
+	${CC} -c ${CCASFLAGS} -o $@ ${ASFLAGS} $<

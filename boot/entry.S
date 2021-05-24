@@ -1,9 +1,9 @@
 
 /* C includes */
-#include "asm.h"
+#include "boot/macros.h"
 
 /* assembler includes */
-.include "efi.inc"
+.include "boot/efi.inc"
 
 /* linker symbols to export */
 .globl Entry

@@ -1,11 +1,10 @@
-SUBDIRS=boot
+SUBDIRS=boot kernel
+MODULES=boot/boot.o kernel/kernel.o
 
 TARGET=${PACKAGE}-${PACKAGE_VERSION}.efi
-LDSCRIPT=${srcdir}/package.ld
+LDFLAGS=--oformat=binary -e 0 -pie -T ${top_srcdir}/ld/package.ld
 
-MODULES=boot/boot.o
-
-${TARGET}: ${LDSCRIPT} ${MODULES}
-	${LD} --oformat=binary -e 0 -pie -T ${LDSCRIPT} -o $@ ${MODULES}
+${TARGET}: ${MODULES}
+	${LD} ${LDFLAGS} -o $@ ${MODULES}
 
 all-local: ${TARGET}

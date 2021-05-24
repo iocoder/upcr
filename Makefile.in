@@ -226,7 +226,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-LDFLAGS = @LDFLAGS@
+LDFLAGS = --oformat=binary -e 0 -pie -T ${top_srcdir}/ld/package.ld
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LTLIBOBJS = @LTLIBOBJS@
@@ -288,10 +288,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = boot
+SUBDIRS = boot kernel
+MODULES = boot/boot.o kernel/kernel.o
 TARGET = ${PACKAGE}-${PACKAGE_VERSION}.efi
-LDSCRIPT = ${srcdir}/package.ld
-MODULES = boot/boot.o
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -767,8 +766,8 @@ uninstall-am:
 .PRECIOUS: Makefile
 
 
-${TARGET}: ${LDSCRIPT} ${MODULES}
-	${LD} --oformat=binary -e 0 -pie -T ${LDSCRIPT} -o $@ ${MODULES}
+${TARGET}: ${MODULES}
+	${LD} ${LDFLAGS} -o $@ ${MODULES}
 
 all-local: ${TARGET}
 
