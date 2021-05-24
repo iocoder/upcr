@@ -1,26 +1,30 @@
 
-  /* includes */
-  .include "efi.inc"
+/* C includes */
+#include "asm.h"
 
-  /* globals */
-  .globl Entry
+/* assembler includes */
+.include "efi.inc"
 
-  /* text section */
-  .text
+/* linker symbols to export */
+.globl Entry
 
+/* text section */
+.text
+
+/* boot loader entry point */
 Entry:
-  /* entry point */
-  mov    %rcx, ImageHandle@GOTPCREL(%rip)
-  mov    %rdx, SystemTable@GOTPCREL(%rip)
 
-  /* get (SystemTable->ConOut, Msg) */
-  mov    SystemTable@GOTPCREL(%rip), %rsi
-  mov    ConOut(%rsi), %rcx
-  lea    Msg@GOTPCREL(%rip), %rdx
+    /* initialize boot loader */
+    call   InitLoader
 
-  /* call SystemTable->ConOut->OutputString */
-  mov    OutputString(%rcx), %rsi
-  call   *%rsi
+    /* get memory map */
+    call   GetMemMap
 
-  /* halt */
-  jmp    .
+    /* print banner */
+    call   ShowBanner
+
+    /* exit from EFI boot services */
+    call   ExitBoot
+
+    /* execute kernel code */
+    call   ExecKernel

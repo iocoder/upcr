@@ -1,12 +1,12 @@
 
-  /* globals */
-  .globl  last
+/* linker symbols to export */
+.globl  last
 
-  /* place in footer section */
-  .section  .footer, "ax"
+/* place in footer section */
+.section  .footer, "ax"
 
-  /* make sure file end is page aligned */
-  .align 0x1000, 0
+/* make sure file end is page aligned */
+.align 0x1000, 0
 
+/* end of image symbol */
 last:
-  /* end of image */
