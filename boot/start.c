@@ -1,6 +1,6 @@
 #include "boot/boot.h"
 
-EFI_API void BootStart(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
+EFI_API VOID BootStart(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
 {
   /* initialize graphics card framebuffer to be used by kernel */
   BootVga(ImageHandle, SystemTable);

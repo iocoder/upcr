@@ -13,9 +13,25 @@
     {0x96, 0xfb, 0x7a, 0xde, 0xd0, 0x80, 0x51, 0x6a } \
   }
 
-typedef void      * EFI_HANDLE;
-typedef int16_t   * EFI_STRING;
-typedef uint64_t    EFI_STATUS;
+typedef void      VOID;
+
+typedef int8_t    INT8;
+typedef int16_t   INT16;
+typedef int32_t   INT32;
+typedef int64_t   INT64;
+typedef intn_t    INTN;
+
+typedef uint8_t   UINT8;
+typedef uint16_t  UINT16;
+typedef uint32_t  UINT32;
+typedef uint64_t  UINT64;
+typedef uintn_t   UINTN;
+
+typedef int8_t    CHAR8;
+typedef int16_t   CHAR16;
+
+typedef void    * EFI_HANDLE;
+typedef UINT64    EFI_STATUS;
 
 typedef enum {
   PixelRedGreenBlueReserved8BitPerColor,
@@ -45,25 +61,25 @@ typedef enum {
 } EFI_MEMORY_TYPE;
 
 typedef struct {
-  uint32_t  Data1;
-  uint16_t  Data2;
-  uint16_t  Data3;
-  uint8_t   Data4[8];
+  UINT32  Data1;
+  UINT16  Data2;
+  UINT16  Data3;
+  UINT8   Data4[8];
 } EFI_GUID;
 
 /* UEFI table header */
-typedef struct __attribute__((packed)) {
-  uint64_t  Signature;
-  uint32_t  Revision;
-  uint32_t  HeaderSize;
-  uint32_t  CRC32;
-  uint32_t  Reserved;
+typedef struct {
+  UINT64  Signature;
+  UINT32  Revision;
+  UINT32  HeaderSize;
+  UINT32  CRC32;
+  UINT32  Reserved;
 } EFI_TABLE_HEADER;
 
 /* Text output protocol */
-typedef struct __attribute__((packed)) {
+typedef struct {
   EFI_STATUS (* EFI_API Reset)();
-  EFI_STATUS (* EFI_API OutputString)(void *, EFI_STRING);
+  EFI_STATUS (* EFI_API OutputString)(VOID *, CHAR16 *);
   EFI_STATUS (* EFI_API TestString)();
   EFI_STATUS (* EFI_API QueryMode)();
   EFI_STATUS (* EFI_API SetMode)();
@@ -73,50 +89,50 @@ typedef struct __attribute__((packed)) {
   EFI_STATUS (* EFI_API EnableCursor)();
 } EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL;
 
-typedef struct __attribute__((packed)) {
-  uint32_t          RedMask;
-  uint32_t          GreenMask;
-  uint32_t          BlueMask;
-  uint32_t          ReservedMask;
+typedef struct {
+  UINT32          RedMask;
+  UINT32          GreenMask;
+  UINT32          BlueMask;
+  UINT32          ReservedMask;
 } EFI_PIXEL_BITMASK;
 
 /* graphics output protocol mode information */
-typedef struct __attribute__((packed)) {
-  uint32_t                   Version;
-  uint32_t                   HorizontalResolution;
-  uint32_t                   VerticalResolution;
+typedef struct {
+  UINT32                     Version;
+  UINT32                     HorizontalResolution;
+  UINT32                     VerticalResolution;
   EFI_GRAPHICS_PIXEL_FORMAT  PixelFormat;
   EFI_PIXEL_BITMASK          PixelInformation;
-  uint32_t                   PixelsPerScanLine;
+  UINT32                     PixelsPerScanLine;
 } EFI_GRAPHICS_OUTPUT_MODE_INFORMATION;
 
 /* graphics output protocol mode */
-typedef struct __attribute__((packed)) {
-  uint32_t                                 MaxMode;
-  uint32_t                                 Mode;
+typedef struct {
+  UINT32                                   MaxMode;
+  UINT32                                   Mode;
   EFI_GRAPHICS_OUTPUT_MODE_INFORMATION    *Info;
-  uintn_t                                  SizeOfInfo;
-  void                                    *FrameBufferBase;
-  uintn_t                                  FrameBufferSize;
+  UINTN                                    SizeOfInfo;
+  VOID                                    *FrameBufferBase;
+  UINTN                                    FrameBufferSize;
 } EFI_GRAPHICS_OUTPUT_PROTOCOL_MODE;
 
 /* graphics output protocol */
 typedef struct {
-  EFI_STATUS (* EFI_API QueryMode)(void *, uint32_t, uintn_t *, void *);
-  EFI_STATUS (* EFI_API SetMode)(void *, uint32_t);
+  EFI_STATUS (* EFI_API QueryMode)(VOID *, UINT32, UINTN *, VOID *);
+  EFI_STATUS (* EFI_API SetMode)(VOID *, UINT32);
   EFI_STATUS (* EFI_API Blt)();
   EFI_GRAPHICS_OUTPUT_PROTOCOL_MODE *Mode;
 } EFI_GRAPHICS_OUTPUT_PROTOCOL;
 
 /* BootServices */
-typedef struct __attribute__((packed)) {
+typedef struct {
   EFI_TABLE_HEADER Hdr;
   EFI_STATUS (* EFI_API RaiseTPL)();
   EFI_STATUS (* EFI_API RestoreTPL)();
   EFI_STATUS (* EFI_API AllocatePages)();
   EFI_STATUS (* EFI_API FreePages)();
   EFI_STATUS (* EFI_API GetMemoryMap)();
-  EFI_STATUS (* EFI_API AllocatePool)(EFI_MEMORY_TYPE, uintn_t, void *);
+  EFI_STATUS (* EFI_API AllocatePool)(EFI_MEMORY_TYPE, UINTN, VOID *);
   EFI_STATUS (* EFI_API FreePool)();
   EFI_STATUS (* EFI_API CreateEvent)();
   EFI_STATUS (* EFI_API SetTimer)();
@@ -148,7 +164,7 @@ typedef struct __attribute__((packed)) {
   EFI_STATUS (* EFI_API OpenProtocolInfo)();
   EFI_STATUS (* EFI_API ProtocolsPerHandle)();
   EFI_STATUS (* EFI_API LocateHandleBuffer)();
-  EFI_STATUS (* EFI_API LocateProtocol)(EFI_GUID *, void *, void *);
+  EFI_STATUS (* EFI_API LocateProtocol)(EFI_GUID *, VOID *, VOID *);
   EFI_STATUS (* EFI_API InstallMultiProtocol)();
   EFI_STATUS (* EFI_API UninstallMultiProtocol)();
   EFI_STATUS (* EFI_API CalculateCrc32)();
@@ -158,29 +174,27 @@ typedef struct __attribute__((packed)) {
 } EFI_BOOT_SERVICES;
 
 /* EFI system table */
-typedef struct __attribute__((packed)) {
+typedef struct {
   EFI_TABLE_HEADER                   Hdr;
-  EFI_STRING                         FirmwareVendor;
-  uint32_t                           FirmwareRevision;
-  uint32_t                           Padding;
+  CHAR16 *                           FirmwareVendor;
+  UINT32                             FirmwareRevision;
   EFI_HANDLE                         ConsoleInHandle;
-  void                              *ConIn;
+  VOID                              *ConIn;
   EFI_HANDLE                         ConsoleOutHandle;
   EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL   *ConOut;
   EFI_HANDLE                         StandardErrorHandle;
-  void                              *StdErr;
-  void                              *RuntimeServices;
+  VOID                              *StdErr;
+  VOID                              *RuntimeServices;
   EFI_BOOT_SERVICES                 *BootServices;
-  uint64_t                           NumberOfTableEntries;
-  void                              *ConfigurationTable;
+  UINT64                             NumberOfTableEntries;
+  VOID                              *ConfigurationTable;
 } EFI_SYSTEM_TABLE;
 
-
 /* bootloader functions */
-EFI_API void BootStart(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
-EFI_API void BootVga(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
-EFI_API void BootRam(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
-EFI_API void BootExit(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
-EFI_API void BootKern(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
+EFI_API VOID BootStart(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
+EFI_API VOID BootVga  (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
+EFI_API VOID BootRam  (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
+EFI_API VOID BootExit (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
+EFI_API VOID BootKern (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
 
 #endif /* BOOT_H */

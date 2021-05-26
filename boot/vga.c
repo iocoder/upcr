@@ -7,21 +7,21 @@
 /* VGA information to be retrieve by kernel */
 KernelInitVga BootVgaInfo = {0};
 
-EFI_API void BootVga(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
+EFI_API VOID BootVga(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
 {
   /* GOP related data (GOP here has nothing to do with politics I swear) */
   EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop = NULL;
   EFI_GUID GopGuid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
 
   /* GOP mode information */
-  uint32_t CurMode   = 0;
-  uintn_t  InfoSize  = 0;
-  uint32_t ModeFound = 0;
+  UINT32 CurMode   = 0;
+  INTN   InfoSize  = 0;
+  UINT32 ModeFound = 0;
   EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *ModeInfo = NULL;
 
   /* virtual frame buf */
-  void    *BufAddr = NULL;
-  uintn_t  BufSize = 0;
+  VOID    *BufAddr = NULL;
+  INTN     BufSize = 0;
 
   /* BootService pointer retrieved from EFI system table */
   EFI_BOOT_SERVICES *BootServices = NULL;
@@ -65,9 +65,13 @@ EFI_API void BootVga(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
     if (ModeFound) {
       /* initialize kernel boot info structure */
       BootVgaInfo.FrameBufferAvailable = 1;
+
+      /* load framebuffer info */
       BootVgaInfo.FrameBufferVirt = BufAddr;
       BootVgaInfo.FrameBufferPhys = Gop->Mode->FrameBufferBase;
       BootVgaInfo.FrameBufferSize = Gop->Mode->FrameBufferSize;
+
+      /* load mode info */
       BootVgaInfo.FrameBufferWidth = ModeInfo->HorizontalResolution;
       BootVgaInfo.FrameBufferHeight = ModeInfo->VerticalResolution;
       BootVgaInfo.FrameBufferScanLine = ModeInfo->PixelsPerScanLine;
