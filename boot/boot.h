@@ -30,8 +30,10 @@ typedef uintn_t   UINTN;
 typedef int8_t    CHAR8;
 typedef int16_t   CHAR16;
 
-typedef void    * EFI_HANDLE;
 typedef UINT64    EFI_STATUS;
+typedef UINT64    EFI_PHYSICAL_ADDRESS;
+typedef UINT64    EFI_VIRTUAL_ADDRESS;
+typedef VOID     *EFI_HANDLE;
 
 typedef enum {
   PixelRedGreenBlueReserved8BitPerColor,
@@ -112,17 +114,25 @@ typedef struct {
   UINT32                                   Mode;
   EFI_GRAPHICS_OUTPUT_MODE_INFORMATION    *Info;
   UINTN                                    SizeOfInfo;
-  VOID                                    *FrameBufferBase;
+  EFI_PHYSICAL_ADDRESS                     FrameBufferBase;
   UINTN                                    FrameBufferSize;
 } EFI_GRAPHICS_OUTPUT_PROTOCOL_MODE;
 
 /* graphics output protocol */
 typedef struct {
-  EFI_STATUS (* EFI_API QueryMode)(VOID *, UINT32, UINTN *, VOID *);
-  EFI_STATUS (* EFI_API SetMode)(VOID *, UINT32);
+  EFI_STATUS (* EFI_API QueryMode)(VOID*, UINT32, UINTN*, VOID*);
+  EFI_STATUS (* EFI_API SetMode)(VOID*, UINT32);
   EFI_STATUS (* EFI_API Blt)();
   EFI_GRAPHICS_OUTPUT_PROTOCOL_MODE *Mode;
 } EFI_GRAPHICS_OUTPUT_PROTOCOL;
+
+typedef struct {
+  EFI_MEMORY_TYPE       Type;
+  EFI_PHYSICAL_ADDRESS  PhysicalStart;
+  EFI_VIRTUAL_ADDRESS   VirtualStart;
+  UINT64                NumberOfPages;
+  UINT64                Attribute;
+} EFI_MEMORY_DESCRIPTOR;
 
 /* BootServices */
 typedef struct {
@@ -131,8 +141,8 @@ typedef struct {
   EFI_STATUS (* EFI_API RestoreTPL)();
   EFI_STATUS (* EFI_API AllocatePages)();
   EFI_STATUS (* EFI_API FreePages)();
-  EFI_STATUS (* EFI_API GetMemoryMap)();
-  EFI_STATUS (* EFI_API AllocatePool)(EFI_MEMORY_TYPE, UINTN, VOID *);
+  EFI_STATUS (* EFI_API GetMemoryMap)(UINTN*, VOID*, UINTN*, UINTN*, UINT32*);
+  EFI_STATUS (* EFI_API AllocatePool)(EFI_MEMORY_TYPE, UINTN, VOID*);
   EFI_STATUS (* EFI_API FreePool)();
   EFI_STATUS (* EFI_API CreateEvent)();
   EFI_STATUS (* EFI_API SetTimer)();
@@ -164,7 +174,7 @@ typedef struct {
   EFI_STATUS (* EFI_API OpenProtocolInfo)();
   EFI_STATUS (* EFI_API ProtocolsPerHandle)();
   EFI_STATUS (* EFI_API LocateHandleBuffer)();
-  EFI_STATUS (* EFI_API LocateProtocol)(EFI_GUID *, VOID *, VOID *);
+  EFI_STATUS (* EFI_API LocateProtocol)(EFI_GUID*, VOID*, VOID*);
   EFI_STATUS (* EFI_API InstallMultiProtocol)();
   EFI_STATUS (* EFI_API UninstallMultiProtocol)();
   EFI_STATUS (* EFI_API CalculateCrc32)();
@@ -189,6 +199,9 @@ typedef struct {
   UINT64                             NumberOfTableEntries;
   VOID                              *ConfigurationTable;
 } EFI_SYSTEM_TABLE;
+
+/* bootloader global variables */
+extern KernelInitInfoT KernelInitInfo;
 
 /* bootloader functions */
 EFI_API VOID BootStart(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);

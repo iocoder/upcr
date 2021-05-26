@@ -4,9 +4,6 @@
 #define BOOT_VGA_RES_WIDTH        800
 #define BOOT_VGA_RES_HEIGHT       600
 
-/* VGA information to be retrieve by kernel */
-KernelInitVga BootVgaInfo = {0};
-
 EFI_API VOID BootVga(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
 {
   /* GOP related data (GOP here has nothing to do with politics I swear) */
@@ -20,8 +17,8 @@ EFI_API VOID BootVga(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
   EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *ModeInfo = NULL;
 
   /* virtual frame buf */
-  VOID    *BufAddr = NULL;
-  INTN     BufSize = 0;
+  UINT64 BufAddr = 0;
+  INTN   BufSize = 0;
 
   /* BootService pointer retrieved from EFI system table */
   EFI_BOOT_SERVICES *BootServices = NULL;
@@ -34,7 +31,7 @@ EFI_API VOID BootVga(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
     BootServices = SystemTable->BootServices;
   }
 
-  /* get pointer to graphics protocol if exists*/
+  /* get pointer to graphics protocol if exists */
   if (Status == EFI_SUCCESS) {
     Status = BootServices->LocateProtocol(&GopGuid, NULL, &Gop);
   }
@@ -64,17 +61,17 @@ EFI_API VOID BootVga(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
   if (Status == EFI_SUCCESS) {
     if (ModeFound) {
       /* initialize kernel boot info structure */
-      BootVgaInfo.FrameBufferAvailable = 1;
+      KernelInitInfo.VgaInfo.FrameBufferAvailable = 1;
 
       /* load framebuffer info */
-      BootVgaInfo.FrameBufferVirt = BufAddr;
-      BootVgaInfo.FrameBufferPhys = Gop->Mode->FrameBufferBase;
-      BootVgaInfo.FrameBufferSize = Gop->Mode->FrameBufferSize;
+      KernelInitInfo.VgaInfo.FrameBufferVirt = BufAddr;
+      KernelInitInfo.VgaInfo.FrameBufferPhys = Gop->Mode->FrameBufferBase;
+      KernelInitInfo.VgaInfo.FrameBufferSize = Gop->Mode->FrameBufferSize;
 
       /* load mode info */
-      BootVgaInfo.FrameBufferWidth = ModeInfo->HorizontalResolution;
-      BootVgaInfo.FrameBufferHeight = ModeInfo->VerticalResolution;
-      BootVgaInfo.FrameBufferScanLine = ModeInfo->PixelsPerScanLine;
+      KernelInitInfo.VgaInfo.FrameBufferWidth = ModeInfo->HorizontalResolution;
+      KernelInitInfo.VgaInfo.FrameBufferHeight = ModeInfo->VerticalResolution;
+      KernelInitInfo.VgaInfo.FrameBufferScanLine = ModeInfo->PixelsPerScanLine;
     }
   }
 }
