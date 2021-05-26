@@ -1,4 +1,4 @@
-#include "boot/internal.h"
+#include "boot/boot.h"
 
 /* the resolution that the graphics card will be initialized with */
 #define BOOT_VGA_RES_WIDTH        800
@@ -63,6 +63,7 @@ EFI_API void BootVga(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
   /* finally, store information in BootVgaInfo structure */
   if (Status == EFI_SUCCESS) {
     if (ModeFound) {
+      /* initialize kernel boot info structure */
       BootVgaInfo.FrameBufferAvailable = 1;
       BootVgaInfo.FrameBufferVirt = BufAddr;
       BootVgaInfo.FrameBufferPhys = Gop->Mode->FrameBufferBase;

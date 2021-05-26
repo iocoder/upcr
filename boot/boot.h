@@ -1,7 +1,7 @@
-#ifndef BOOT_EFI_H
-#define BOOT_EFI_H
+#ifndef BOOT_H
+#define BOOT_H
 
-#include "kernel/types.h"
+#include "kernel/kernel.h"
 
 #define  EFI_API      __attribute__((ms_abi))
 #define  EFI_SUCCESS  0
@@ -175,4 +175,12 @@ typedef struct __attribute__((packed)) {
   void                              *ConfigurationTable;
 } EFI_SYSTEM_TABLE;
 
-#endif /* BOOT_EFI_H */
+
+/* bootloader functions */
+EFI_API void BootStart(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
+EFI_API void BootVga(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
+EFI_API void BootRam(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
+EFI_API void BootExit(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
+EFI_API void BootKern(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
+
+#endif /* BOOT_H */

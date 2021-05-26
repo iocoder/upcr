@@ -1,6 +1,6 @@
 
-# C includes
-#include "kernel/asm.h"
+/* assist with position-independent code */
+#define PTR(SomeVariable)   SomeVariable@GOTPCREL(%rip)
 
 # symbols to export to linker
 .globl KernelVgaInit
@@ -290,4 +290,4 @@ Palette:        .quad   0x00000000  /* 00: BLACK */
                 .quad   0x00FFFFFF  /* 0F: WHITE */
 
 /* Font data */
-Font:           .incbin "kernel/8x16.fnt"
+Font:           .incbin "kernel/vga.fnt"

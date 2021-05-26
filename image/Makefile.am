@@ -2,7 +2,7 @@ TARGET=${PACKAGE}-${PACKAGE_VERSION}
 
 MODULES=${top_builddir}/boot/boot.o \
         ${top_builddir}/kernel/kernel.o \
-        ${top_builddir}/image/coff.o
+        ${top_builddir}/image/metadata.o
 
 CCASFLAGS=-I${top_srcdir}
 LDFLAGS=--oformat=binary -e 0 -T ${srcdir}/layout.ld

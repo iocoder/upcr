@@ -211,7 +211,7 @@ top_srcdir = @top_srcdir@
 TARGET = ${PACKAGE}-${PACKAGE_VERSION}
 MODULES = ${top_builddir}/boot/boot.o \
         ${top_builddir}/kernel/kernel.o \
-        ${top_builddir}/image/coff.o
+        ${top_builddir}/image/metadata.o
 
 all: all-am
 

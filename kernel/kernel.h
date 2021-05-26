@@ -1,5 +1,5 @@
-#ifndef KERNEL_TYPES_H
-#define KERNEL_TYPES_H
+#ifndef KERNEL_H
+#define KERNEL_H
 
 #define NULL   0
 
@@ -14,5 +14,16 @@ typedef unsigned short int      uint16_t;
 typedef unsigned int            uint32_t;
 typedef unsigned long int       uint64_t;
 typedef unsigned long int       uintn_t;
+
+typedef struct {
+  uint64_t  FrameBufferAvailable;
+  void     *FrameBufferVirt;
+  void     *FrameBufferPhys;
+  uint64_t  FrameBufferSize;
+  uint64_t  FrameBufferWidth;
+  uint64_t  FrameBufferHeight;
+  uint64_t  FrameBufferScanLine;
+} KernelInitVga;
+
 
 #endif /* KERNEL_TYPES_H */

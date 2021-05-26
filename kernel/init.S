@@ -1,6 +1,7 @@
 
-/* C includes */
-#include "kernel/asm.h"
+/* assist with position-independent code */
+#define PTR(SomeVariable)   SomeVariable@GOTPCREL(%rip)
+
 
 /* place in init section */
 .section  .init, "ax"
