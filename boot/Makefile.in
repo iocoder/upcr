@@ -129,7 +129,10 @@ CCAS = @CCAS@
 CCASDEPMODE = @CCASDEPMODE@
 CCASFLAGS = -I${top_srcdir}
 CCDEPMODE = @CCDEPMODE@
-CFLAGS = @CFLAGS@
+CFLAGS = -I${top_srcdir} --save-temps -Werror -fshort-wchar -fpie \
+        -ffreestanding -nostdlib -nostdinc -fno-stack-protector -O3
+
+CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
@@ -137,13 +140,15 @@ DEPDIR = @DEPDIR@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
+EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-LDFLAGS = -r
+LDFLAGS = 
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LTLIBOBJS = @LTLIBOBJS@
@@ -208,6 +213,8 @@ top_srcdir = @top_srcdir@
 TARGET = boot.o
 SFILES_IN = $(shell ls ${srcdir}/*.S)
 SFILES_OUT = $(shell cd ${srcdir}; ls *.S | sed 's/\.S/\.o/g')
+CFILES_IN = $(shell ls ${srcdir}/*.c)
+CFILES_OUT = $(shell cd ${srcdir}; ls *.c | sed 's/\.c/\.o/g')
 all: all-am
 
 .SUFFIXES:
@@ -397,13 +404,16 @@ uninstall-am:
 all: ${TARGET}
 
 clean:
-	rm -rf ${SFILES_OUT} ${TARGET}
+	rm -rf ${SFILES_OUT} ${CFILES_OUT} ${TARGET}
 
-${TARGET}: ${SFILES_OUT}
-	${LD} -o $@ ${LDFLAGS} $^
+${TARGET}: ${SFILES_OUT} ${CFILES_OUT}
+	${LD} -r ${LDFLAGS} -o $@ $^
 
 %.o:%.S
-	${CC} -c ${CCASFLAGS} -o $@ ${ASFLAGS} $<
+	${CC} -c ${CCASFLAGS} -o $@ $<
+
+%.o:%.c
+	${CC} -c ${CFLAGS} -o $@ $<
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

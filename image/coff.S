@@ -1,7 +1,3 @@
-
-/* linker symbols to export */
-.globl  first
-
 /* place in header section */
 .section  .header, "ax"
 
@@ -105,4 +101,10 @@ sect:
 code:
 
     /* jump to boot-loader entry point */
-    jmp     Entry
+    jmp     BootInit
+
+/* place the following in footer section */
+.section  .footer, "ax"
+
+/* end of image symbol */
+last:

@@ -15,10 +15,19 @@ AC_PROG_MAKE_SET
 # Checks for header files.
 
 # Checks for typedefs, structures, and compiler characteristics.
+AC_TYPE_INT16_T
+AC_TYPE_INT32_T
+AC_TYPE_INT64_T
+AC_TYPE_INT8_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
+AC_TYPE_UINT64_T
+AC_TYPE_UINT8_T
 
 # Checks for library functions.
 
 AC_CONFIG_FILES([Makefile
                  boot/Makefile
+                 image/Makefile
                  kernel/Makefile])
 AC_OUTPUT

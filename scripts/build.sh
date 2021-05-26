@@ -12,3 +12,14 @@ cd build
 
 ../configure
 make
+
+rm -rf /tmp/qemu-dir
+mkdir -p /tmp/qemu-dir/efi/boot
+cp image/*.efi /tmp/qemu-dir/efi/boot/bootx64.efi
+
+qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd \
+                   -m 1G \
+                   -nodefaults \
+                   -vga std \
+                   -serial stdio \
+                   -drive file=fat:rw:/tmp/qemu-dir,format=raw
