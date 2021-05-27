@@ -1,26 +1,22 @@
-TARGET=boot.o
+TARGET=boot
 
-CFLAGS=-I${top_srcdir} --save-temps -Werror -fshort-wchar -fpie \
-        -ffreestanding -nostdlib -nostdinc -fno-stack-protector -O3
-CCASFLAGS=-I${top_srcdir}
+CFLAGS=-I${top_srcdir} --save-temps -Werror -nostdlib -nostdinc -O3 \
+        -ffreestanding -fpie -fshort-wchar -fno-stack-protector \
+        -fno-asynchronous-unwind-tables
 LDFLAGS=
-
-SFILES_IN=$(shell ls ${srcdir}/*.S)
-SFILES_OUT=$(shell cd ${srcdir}; ls *.S | sed 's/\.S/\.o/g')
 
 CFILES_IN=$(shell ls ${srcdir}/*.c)
 CFILES_OUT=$(shell cd ${srcdir}; ls *.c | sed 's/\.c/\.o/g')
+IFILES_OUT=$(shell cd ${srcdir}; ls *.c | sed 's/\.i/\.o/g')
+SFILES_OUT=$(shell cd ${srcdir}; ls *.c | sed 's/\.s/\.o/g')
 
-all: ${TARGET}
+all: ${TARGET}.o
 
 clean:
-	rm -rf ${SFILES_OUT} ${CFILES_OUT} ${TARGET}
+	rm -rf ${CFILES_OUT} ${IFILES_OUT} ${SFILES_OUT} ${TARGET}.o
 
-${TARGET}: ${SFILES_OUT} ${CFILES_OUT}
+${TARGET}.o: ${CFILES_OUT}
 	${LD} -r ${LDFLAGS} -o $@ $^
-
-%.o:%.S
-	${CC} -c ${CCASFLAGS} -o $@ $<
 
 %.o:%.c
 	${CC} -c ${CFLAGS} -o $@ $<

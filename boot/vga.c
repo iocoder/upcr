@@ -61,17 +61,17 @@ EFI_API VOID BootVga(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
   if (Status == EFI_SUCCESS) {
     if (ModeFound) {
       /* initialize kernel boot info structure */
-      KernelInitInfo.VgaInfo.FrameBufferAvailable = 1;
+      BootDataKernInit.VgaInfo.VgaAvailable = 1;
 
       /* load framebuffer info */
-      KernelInitInfo.VgaInfo.FrameBufferVirt = BufAddr;
-      KernelInitInfo.VgaInfo.FrameBufferPhys = Gop->Mode->FrameBufferBase;
-      KernelInitInfo.VgaInfo.FrameBufferSize = Gop->Mode->FrameBufferSize;
+      BootDataKernInit.VgaInfo.VgaMemVirt = BufAddr;
+      BootDataKernInit.VgaInfo.VgaMemPhys = Gop->Mode->FrameBufferBase;
+      BootDataKernInit.VgaInfo.VgaMemSize = Gop->Mode->FrameBufferSize;
 
       /* load mode info */
-      KernelInitInfo.VgaInfo.FrameBufferWidth = ModeInfo->HorizontalResolution;
-      KernelInitInfo.VgaInfo.FrameBufferHeight = ModeInfo->VerticalResolution;
-      KernelInitInfo.VgaInfo.FrameBufferScanLine = ModeInfo->PixelsPerScanLine;
+      BootDataKernInit.VgaInfo.VgaScreenWidth  = ModeInfo->HorizontalResolution;
+      BootDataKernInit.VgaInfo.VgaScreenHeight = ModeInfo->VerticalResolution;
+      BootDataKernInit.VgaInfo.VgaScreenLine   = ModeInfo->PixelsPerScanLine;
     }
   }
 }

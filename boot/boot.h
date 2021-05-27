@@ -163,7 +163,7 @@ typedef struct {
   EFI_STATUS (* EFI_API StartImage)();
   EFI_STATUS (* EFI_API Exit)();
   EFI_STATUS (* EFI_API UnloadImage)();
-  EFI_STATUS (* EFI_API ExitBootServices)();
+  EFI_STATUS (* EFI_API ExitBootServices)(EFI_HANDLE, UINTN);
   EFI_STATUS (* EFI_API GetNextMonotonicCount)();
   EFI_STATUS (* EFI_API Stall)();
   EFI_STATUS (* EFI_API SetWatchdogTimer)();
@@ -201,7 +201,8 @@ typedef struct {
 } EFI_SYSTEM_TABLE;
 
 /* bootloader global variables */
-extern KernelInitInfoT KernelInitInfo;
+extern UINTN BootDataMemKey;
+extern KernelInitInfoT BootDataKernInit;
 
 /* bootloader functions */
 EFI_API VOID BootStart(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);

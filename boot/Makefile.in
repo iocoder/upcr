@@ -127,10 +127,11 @@ AWK = @AWK@
 CC = @CC@
 CCAS = @CCAS@
 CCASDEPMODE = @CCASDEPMODE@
-CCASFLAGS = -I${top_srcdir}
+CCASFLAGS = @CCASFLAGS@
 CCDEPMODE = @CCDEPMODE@
-CFLAGS = -I${top_srcdir} --save-temps -Werror -fshort-wchar -fpie \
-        -ffreestanding -nostdlib -nostdinc -fno-stack-protector -O3
+CFLAGS = -I${top_srcdir} --save-temps -Werror -nostdlib -nostdinc -O3 \
+        -ffreestanding -fpie -fshort-wchar -fno-stack-protector \
+        -fno-asynchronous-unwind-tables
 
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
@@ -210,11 +211,11 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-TARGET = boot.o
-SFILES_IN = $(shell ls ${srcdir}/*.S)
-SFILES_OUT = $(shell cd ${srcdir}; ls *.S | sed 's/\.S/\.o/g')
+TARGET = boot
 CFILES_IN = $(shell ls ${srcdir}/*.c)
 CFILES_OUT = $(shell cd ${srcdir}; ls *.c | sed 's/\.c/\.o/g')
+IFILES_OUT = $(shell cd ${srcdir}; ls *.c | sed 's/\.i/\.o/g')
+SFILES_OUT = $(shell cd ${srcdir}; ls *.c | sed 's/\.s/\.o/g')
 all: all-am
 
 .SUFFIXES:
@@ -401,16 +402,13 @@ uninstall-am:
 .PRECIOUS: Makefile
 
 
-all: ${TARGET}
+all: ${TARGET}.o
 
 clean:
-	rm -rf ${SFILES_OUT} ${CFILES_OUT} ${TARGET}
+	rm -rf ${CFILES_OUT} ${IFILES_OUT} ${SFILES_OUT} ${TARGET}.o
 
-${TARGET}: ${SFILES_OUT} ${CFILES_OUT}
+${TARGET}.o: ${CFILES_OUT}
 	${LD} -r ${LDFLAGS} -o $@ $^
-
-%.o:%.S
-	${CC} -c ${CCASFLAGS} -o $@ $<
 
 %.o:%.c
 	${CC} -c ${CFLAGS} -o $@ $<

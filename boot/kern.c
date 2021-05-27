@@ -1,8 +1,13 @@
 #include "boot/boot.h"
 
-KernelInitInfoT KernelInitInfo = {0};
-
 EFI_API VOID BootKern(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
 {
-  while (1);
+  /* boot up the kernel */
+  KernelBootInit(&BootDataKernInit);
+
+  /* create init task */
+  /* KernelTaskCreate() */
+
+  /* start the operating system */
+  KernelSystemStart();
 }

@@ -17,13 +17,13 @@ typedef unsigned long int       uint64_t;
 typedef unsigned long int       uintn_t;
 
 typedef struct {
-  uint64_t  FrameBufferAvailable;
-  uint64_t  FrameBufferVirt;
-  uint64_t  FrameBufferPhys;
-  uint64_t  FrameBufferSize;
-  uint64_t  FrameBufferWidth;
-  uint64_t  FrameBufferHeight;
-  uint64_t  FrameBufferScanLine;
+  uint64_t  VgaAvailable;
+  uint64_t  VgaMemVirt;
+  uint64_t  VgaMemPhys;
+  uint64_t  VgaMemSize;
+  uint64_t  VgaScreenWidth;
+  uint64_t  VgaScreenHeight;
+  uint64_t  VgaScreenLine;
 } KernelInitVgaT;
 
 typedef struct {
@@ -41,5 +41,13 @@ typedef struct {
   KernelInitRamT   RamInfo;
   KernelInitProcT  ProcInfo;
 } KernelInitInfoT;
+
+/* boot module */
+uint64_t KernelBootInit(KernelInitInfoT *InitInfo);
+
+/* system module */
+uint64_t KernelSystemInit(KernelInitInfoT *InitInfo);
+uint64_t KernelSystemStart(void);
+uint64_t KernelSystemStop(void);
 
 #endif /* KERNEL_TYPES_H */

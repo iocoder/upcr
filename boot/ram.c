@@ -46,11 +46,14 @@ EFI_API VOID BootRam(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
 
   /* (III) now load the whole memory map into ther buffer */
   if (Status == EFI_SUCCESS) {
+    /* retrieve memory map */
     Status = BootServices->GetMemoryMap(&MapSize,
                                         MapBuff,
                                         &MapKey,
                                         &DescSize,
                                         &DescVersion);
+    /* store the key in a global variable */
+    BootDataMemKey = MapKey;
   }
 
   /* (IV) loop over entries to detect RAM information */
@@ -76,9 +79,9 @@ EFI_API VOID BootRam(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
   /* (V) store data in kernel init structure */
   if (Status == EFI_SUCCESS) {
     if (RamFound == 1) {
-      KernelInitInfo.RamInfo.RamAvailable = 1;
-      KernelInitInfo.RamInfo.RamStart     = RamStart;
-      KernelInitInfo.RamInfo.RamEnd       = RamEnd;
+      BootDataKernInit.RamInfo.RamAvailable = 1;
+      BootDataKernInit.RamInfo.RamStart     = RamStart;
+      BootDataKernInit.RamInfo.RamEnd       = RamEnd;
     }
   }
 }
