@@ -1,4 +1,7 @@
 
+    # common definitions used by kernel
+    .include "kernel/macro.inc"
+
     # text section
     .text
 

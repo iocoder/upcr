@@ -1,0 +1,174 @@
+    # common definitions used by kernel
+    .include "kernel/macro.inc"
+
+    # LAPIC REGISTERS
+    # ---------------
+    # (I) LAPIC ID and VERSION
+    .equ     LapicIdReg,          0xFEE00020
+    .equ     LapicVersionReg,     0xFEE00030
+    # (II) LAPIC BUS PRIORITY REGISTERS
+    .equ     LapicTaskPriReg,     0xFEE00080
+    .equ     LapicArbiPriReg,     0xFEE00090
+    .equ     LapicProcPriReg,     0xFEE000A0
+    # (III) LAPIC OPERATION REGISTERS
+    .equ     LapicEndOfIntReg,    0xFEE000B0
+    .equ     LapicRemoteRdReg,    0xFEE000C0
+    .equ     LapicLogicalDestReg, 0xFEE000D0
+    .equ     LapicDestFormatReg,  0xFEE000E0
+    .equ     LapicSpuriousIvtReg, 0xFEE000F0
+    .equ     LapicInServiceReg,   0xFEE00100
+    .equ     LapicTriggModeReg,   0xFEE00180
+    .equ     LapicIntReqReg,      0xFEE00200
+    .equ     LapicErrStatusReg,   0xFEE00280
+    .equ     LapicIntCmdLoReg,    0xFEE00300
+    .equ     LapicIntCmdHiReg,    0xFEE00310
+    # (IV) IVT REGISTERS
+    .equ     LapicTimerIvtReg,    0xFEE00320
+    .equ     LapicThermIvtReg,    0xFEE00330
+    .equ     LapicPerfcIvtReg,    0xFEE00340
+    .equ     LapicLint0IvtReg,    0xFEE00350
+    .equ     LapicLint1IvtReg,    0xFEE00360
+    .equ     LapicErrorIvtReg,    0xFEE00370
+    # (V) TIMER REGISTERS
+    .equ     LapicTimerInitReg,   0xFEE00380
+    .equ     LapicTimerCurrReg,   0xFEE00390
+    .equ     LapicTimerConfReg,   0xFEE003E0
+
+    # text section
+    .text
+
+###############################################################################
+#                            KernelIrqInit()                                  #
+###############################################################################
+
+    # declare a linker symbol
+    .global  KernelIrqInit
+    .set     KernelIrqInit, .
+
+    # print heading of line
+    mov      $0x0A, %rdi
+    mov      $-1, %rsi
+    call     KernelLogColour
+    leaq     IrqModuleStr(%rip), %rdi
+    call     KernelLogString
+    mov      $0x0B, %rdi
+    mov      $-1, %rsi
+    call     KernelLogColour
+
+    # print irq module info
+    leaq     IrqStartStr(%rip), %rdi
+    call     KernelLogString
+    mov      $'\n', %rdi
+    call     KernelLogChar
+
+    # done
+1:  xor      %rax, %rax
+    ret
+
+###############################################################################
+#                           KernelIrqEnable()                                 #
+###############################################################################
+
+    # declare a linker symbol
+    .global  KernelIrqEnable
+    .set     KernelIrqEnable, .
+
+    # set heading colour
+    mov      $0x0A, %rdi
+    mov      $-1, %rsi
+    call     KernelLogColour
+
+    # print module name
+    leaq     IrqModuleStr(%rip), %rdi
+    call     KernelLogString
+
+    # reset colour
+    mov      $0x0B, %rdi
+    mov      $-1, %rsi
+    call     KernelLogColour
+
+    # print lapic string
+    leaq     IrqLapicStr(%rip), %rdi
+    call     KernelLogString
+
+    # Initialize APIC address MSR
+    xor      %rax, %rax
+    xor      %rcx, %rcx
+    xor      %rdx, %rdx
+    mov      $0xFEE00800, %eax
+    mov      $ApicBaseAddrMsr, %ecx
+    wrmsr
+    nop
+    nop
+
+    # read local APIC ID
+    xor      %rax, %rax
+    movl     LapicIdReg, %eax
+    shr      $24, %eax
+
+    # print LAPIC ID
+    mov      %rax, %rdi
+    call     KernelLogDecimal
+
+    # print new line
+    mov      $'\n', %rdi
+    call     KernelLogChar
+
+    # done
+1:  xor      %rax, %rax
+    ret
+
+###############################################################################
+#                             KernelIrqIpi()                                  #
+###############################################################################
+
+    # declare a linker symbol
+    .global  KernelIrqIpi
+    .set     KernelIrqIpi, .
+
+    # broadcast the INIT IPI to all processors except self
+    mov      $LapicIntCmdLoReg, %rsi
+    mov      $0x000C4500, %eax
+    mov      %eax, (%rsi)
+
+    # 10-millisecond delay loop.
+    # TBD
+    mov      $0x1000000, %rcx
+    loop     .
+
+    # broadcast the SIPI IPI to all processors except self
+    mov      $LapicIntCmdLoReg, %rsi
+    mov      $0x000C4600, %eax  # vector 0x0000:0x0000
+    mov      %eax, (%rsi)
+
+    # 200-microsecond delay loop
+    # TBD
+
+    # broadcast the SIPI IPI to all processors except self
+    #mov      $LapicIntCmdLoReg, %rsi
+    #mov      $0x000C4610, %eax  # vector 0x1000:0x0000
+    #mov      %eax, (%rsi)
+
+    # 1-ms delay loop
+    # TBD
+
+    # done
+    xor      %rax, %rax
+    ret
+
+##############################################################################
+
+    # data section
+    .data
+
+    # IRQ heading
+    .set     IrqModuleStr, .
+    .string  " [KERNEL IRQ SUBSYSTEM] "
+
+    # IRQ start ascii string
+    .set     IrqStartStr, .
+    .string  "Supported x86 interrupt controllers: LAPIC, I/O APIC"
+
+    # IRQ lapic ascii string
+    .set     IrqLapicStr, .
+    .string  "Initializing LAPIC with ID: "

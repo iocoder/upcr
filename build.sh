@@ -18,8 +18,8 @@ mkdir -p /tmp/qemu-dir/efi/boot
 cp image/*.efi /tmp/qemu-dir/efi/boot/bootx64.efi
 
 qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd \
+                   -smp 4 \
                    -m 1G \
-                   -nodefaults \
                    -vga std \
                    -serial stdio \
                    -drive file=fat:rw:/tmp/qemu-dir,format=raw

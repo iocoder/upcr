@@ -1,3 +1,7 @@
+
+    # common definitions used by kernel
+    .include "kernel/macro.inc"
+
     # text section
     .text
 
@@ -22,6 +26,16 @@
     # initialize ram module
     push     %rdi
     call     KernelRamInit
+    pop      %rdi
+
+    # initialize irq module
+    push     %rdi
+    call     KernelIrqInit
+    pop      %rdi
+
+    # initialize cpu module
+    push     %rdi
+    call     KernelCpuInit
     pop      %rdi
 
     # initialize system module
