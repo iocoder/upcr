@@ -6,25 +6,25 @@
     .text
 
 ###############################################################################
-#                            KernelPagingInit()                               #
+#                             KernelStackInit()                               #
 ###############################################################################
 
     # declare a linker symbol
-    .global  KernelPagingInit
-    .set     KernelPagingInit, .
+    .global  KernelStackInit
+    .set     KernelStackInit, .
 
     # print heading of line
     mov      $0x0A, %rdi
     mov      $-1, %rsi
     call     KernelLogColour
-    leaq     PagingModuleStr(%rip), %rdi
+    leaq     StackModuleStr(%rip), %rdi
     call     KernelLogString
     mov      $0x0B, %rdi
     mov      $-1, %rsi
     call     KernelLogColour
 
-    # print paging module info
-    leaq     PagingStartStr(%rip), %rdi
+    # print module info
+    leaq     StackStartStr(%rip), %rdi
     call     KernelLogString
     mov      $'\n', %rdi
     call     KernelLogChar
@@ -38,10 +38,10 @@
     # data section
     .data
 
-    # Paging heading
-    .set     PagingModuleStr, .
-    .string  " [KERNEL PAGING] "
+    # Stack heading
+    .set     StackModuleStr, .
+    .string  " [KERNEL STACK] "
 
-    # Paging start ascii string
-    .set     PagingStartStr, .
-    .string  "Initializing paging module..."
+    # Stack start ascii string
+    .set     StackStartStr, .
+    .string  "Initializing kernel stacks..."

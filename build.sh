@@ -18,7 +18,7 @@ mkdir -p /tmp/qemu-dir/efi/boot
 cp image/*.efi /tmp/qemu-dir/efi/boot/bootx64.efi
 
 qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd \
-                   -smp 4 \
+                   -smp 8 \
                    -m 1G \
                    -vga std \
                    -serial stdio \

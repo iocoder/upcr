@@ -28,6 +28,36 @@
     call     KernelRamInit
     pop      %rdi
 
+    # initialize page module
+    push     %rdi
+    call     KernelPageInit
+    pop      %rdi
+
+    # initialize gop module
+    push     %rdi
+    call     KernelTrumpInit
+    pop      %rdi
+
+    # initialize gdt module
+    push     %rdi
+    call     KernelGdtInit
+    pop      %rdi
+
+    # initialize idt module
+    push     %rdi
+    call     KernelIdtInit
+    pop      %rdi
+
+    # initialize tss module
+    push     %rdi
+    call     KernelTssInit
+    pop      %rdi
+
+    # initialize stack module
+    push     %rdi
+    call     KernelStackInit
+    pop      %rdi
+
     # initialize irq module
     push     %rdi
     call     KernelIrqInit

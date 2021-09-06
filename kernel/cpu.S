@@ -132,7 +132,6 @@
 
     # done
     xor      %eax, %eax
-    lock
     mov      %eax, AccessSemaphore-TrampolineStart
 
     # halt here

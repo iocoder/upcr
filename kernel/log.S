@@ -134,7 +134,7 @@
     push     %rdi
     leaq     Digits(%rip), %rsi
     and      $0x0F, %rdi
-    movzbl   (%rsi, %rdi), %rdi
+    movzbq   (%rsi, %rdi), %rdi
     call     KernelLogChar
     pop      %rdi
     pop      %rcx
