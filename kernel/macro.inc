@@ -45,16 +45,24 @@
     .equ     TrampolineStackBase, 0x00001000
     .equ     TrampolineStackSize, 0x00001000
 
+    # GDTR Descriptor
+    .equ     GdtrDescBase,        0x00002000
+    .equ     GdtrDescSize,        0x00001000
+
     # GDT Table
     .equ     GdtTableBase,        0x00003000
     .equ     GdtTableSize,        0x00001000
 
+    # IDTR Descriptor
+    .equ     IdtrDescBase,        0x00004000
+    .equ     IdtrDescSize,        0x00001000
+
     # IDT Table
-    .equ     IdtTableBase,        0x00004000
+    .equ     IdtTableBase,        0x00005000
     .equ     IdtTableSize,        0x00001000
 
     # TSS Segments (32 segments for 32 CPUs)
-    .equ     TssSegmentsBase,     0x00005000
+    .equ     TssSegmentsBase,     0x00006000
     .equ     TssSegmentsSize,     0x00001000 # 0x80*32
 
     # Kernel Stacks (32 stacks for 32 CPUs)

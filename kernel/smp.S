@@ -1,6 +1,6 @@
 ###############################################################################
-# File name:    boot.S
-# Description:  Kernel boot procedures
+# File name:    cpu.S
+# Description:  Kernel cpu initialization code
 # Author:       Ramses A.
 ###############################################################################
 #
@@ -44,75 +44,54 @@
     .text
 
 ###############################################################################
-#                             KernelBootInit()                                #
+#                            KernelSmpInit()                                  #
 ###############################################################################
 
     # declare a linker symbol
-    .global  KernelBootInit
-    .set     KernelBootInit, .
+    .global  KernelSmpInit
+    .set     KernelSmpInit, .
 
-    # initialize vga module
-    push     %rdi
-    call     KernelVgaInit
-    pop      %rdi
+    # print heading of line
+    mov      $0x0A, %rdi
+    mov      $-1, %rsi
+    call     KernelLogColour
+    leaq     SmpModuleStr(%rip), %rdi
+    call     KernelLogString
+    mov      $0x0B, %rdi
+    mov      $-1, %rsi
+    call     KernelLogColour
 
-    # initialize log module
-    push     %rdi
-    call     KernelLogInit
-    pop      %rdi
+    # print module info
+    leaq     SmpStartStr(%rip), %rdi
+    call     KernelLogString
+    mov      $'\n', %rdi
+    call     KernelLogChar
 
-    # initialize ram module
-    push     %rdi
-    call     KernelRamInit
-    pop      %rdi
+    # first we need to initialize local APIC
+    call     KernelIrqEnable
 
-    # initialize page module
-    push     %rdi
-    call     KernelPageInit
-    pop      %rdi
-
-    # initialize gop module
-    push     %rdi
-    call     KernelTrumpInit
-    pop      %rdi
-
-    # initialize gdt module
-    push     %rdi
-    call     KernelGdtInit
-    pop      %rdi
-
-    # initialize idt module
-    push     %rdi
-    call     KernelIdtInit
-    pop      %rdi
-
-    # initialize tss module
-    push     %rdi
-    call     KernelTssInit
-    pop      %rdi
-
-    # initialize stack module
-    push     %rdi
-    call     KernelStackInit
-    pop      %rdi
-
-    # initialize irq module
-    push     %rdi
-    call     KernelIrqInit
-    pop      %rdi
-
-    # initialize smp module
-    push     %rdi
-    call     KernelSmpInit
-    pop      %rdi
-
-    # initialize system module
-    push     %rdi
-    call     KernelSystemInit
-    pop      %rdi
-
-    # no error
-    xor      %rax, %rax
+    # send INIT-SIPI-SIPI sequence to other CPUs
+    call     KernelIrqIpi
 
     # done
+1:  xor      %rax, %rax
     ret
+
+###############################################################################
+#                              DATA SECTION                                   #
+###############################################################################
+
+    # data section
+    .data
+
+###############################################################################
+#                            LOGGING STRINGS                                  #
+###############################################################################
+
+    # SMP heading
+    .set     SmpModuleStr, .
+    .string  " [KERNEL SMP SUPPORT] "
+
+    # SMP start ascii string
+    .set     SmpStartStr, .
+    .string  "Detecting other cores in the system..."

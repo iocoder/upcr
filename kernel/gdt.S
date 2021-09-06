@@ -67,6 +67,24 @@
     mov      $'\n', %rdi
     call     KernelLogChar
 
+    # copy the GDTR descriptor to lower memory
+    movq     $GdtrDescBase, %rdi
+    movq     GdtrDesc(%rip), %rax
+    movq     %rax, (%rdi)
+
+    # copy the GDT table to lower memory
+    movq     $GdtTableBase, %rdi
+    leaq     GdtStart(%rip), %rsi
+    leaq     GdtEnd(%rip), %rcx
+    subq     %rsi, %rcx
+
+    # copy loop
+1:  movb     (%rsi), %al
+    movb     %al, (%rdi)
+    inc      %rsi
+    inc      %rdi
+    loop     1b
+
     # done
 1:  xor      %rax, %rax
     ret
@@ -77,6 +95,28 @@
 
     # data section
     .data
+
+###############################################################################
+#                              MODULE DATA                                    #
+###############################################################################
+
+    # GDT table for protected & long mode
+    .set     GdtStart, .
+    .quad    0x0000000000000000  # 0x00
+    .quad    0x0000000000000000  # 0x00
+    .quad    0x00CF9A000000FFFF  # 0x10 (KERN CODE 32-bit)
+    .quad    0x00CF92000000FFFF  # 0x18 (KERN DATA 32-bit)
+    .quad    0x00AF9A000000FFFF  # 0x20 (KERN CODE 64-bit)
+    .quad    0x00AF92000000FFFF  # 0x28 (KERN DATA 64-bit)
+    .quad    0x00AFFA000000FFFF  # 0x30 (USER CODE 64-bit)
+    .quad    0x00AFF2000000FFFF  # 0x38 (USER DATA 64-bit)
+    .set     GdtEnd, .
+
+    # GDTR descriptor
+    .set     GdtrDesc, .
+    .word    GdtTableSize-1
+    .long    GdtTableBase
+    .word    0
 
 ###############################################################################
 #                            LOGGING STRINGS                                  #
