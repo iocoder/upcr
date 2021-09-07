@@ -51,6 +51,9 @@
     .global  KernelLogInit
     .set     KernelLogInit, .
 
+    # clear screen
+    call     KernelLogClear
+
     # header colour
     mov      $0x0A, %rdi
     mov      $-1,   %rsi
@@ -235,6 +238,28 @@
     call     KernelVgaColour
     pop      %rsi
     pop      %rdi
+
+    # done
+    xor      %rax, %rax
+    ret
+
+
+##############################################################################
+#                             KernelLogClear()                               #
+##############################################################################
+
+    # declare a linker symbol
+    .global  KernelLogClear
+    .set     KernelLogClear, .
+
+    # clear vga screen
+    push     %rdi
+    push     %rsi
+    push     %rcx
+    call     KernelVgaClear
+    pop      %rsi
+    pop      %rdi
+    pop      %rcx
 
     # done
     xor      %rax, %rax

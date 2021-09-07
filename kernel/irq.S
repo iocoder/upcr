@@ -116,24 +116,6 @@
     .global  KernelIrqEnable
     .set     KernelIrqEnable, .
 
-    # set heading colour
-    mov      $0x0A, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
-
-    # print module name
-    leaq     IrqModuleStr(%rip), %rdi
-    call     KernelLogString
-
-    # reset colour
-    mov      $0x0B, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
-
-    # print lapic string
-    leaq     IrqLapicStr(%rip), %rdi
-    call     KernelLogString
-
     # Initialize APIC address MSR
     xor      %rax, %rax
     xor      %rcx, %rcx
@@ -144,30 +126,17 @@
     nop
     nop
 
-    # read local APIC ID
-    xor      %rax, %rax
-    movl     LapicIdReg, %eax
-    shr      $24, %eax
-
-    # print LAPIC ID
-    mov      %rax, %rdi
-    call     KernelLogDecimal
-
-    # print new line
-    mov      $'\n', %rdi
-    call     KernelLogChar
-
     # done
 1:  xor      %rax, %rax
     ret
 
 ###############################################################################
-#                             KernelIrqIpi()                                  #
+#                             KernelIrqIipi()                                 #
 ###############################################################################
 
     # declare a linker symbol
-    .global  KernelIrqIpi
-    .set     KernelIrqIpi, .
+    .global  KernelIrqIipi
+    .set     KernelIrqIipi, .
 
     # broadcast the INIT IPI to all processors except self
     mov      $LapicIntCmdLoReg, %rsi
@@ -179,6 +148,18 @@
     mov      $0x1000000, %rcx
     loop     .
 
+    # done
+    xor      %rax, %rax
+    ret
+
+###############################################################################
+#                             KernelIrqSipi()                                 #
+###############################################################################
+
+    # declare a linker symbol
+    .global  KernelIrqSipi
+    .set     KernelIrqSipi, .
+
     # broadcast the SIPI IPI to all processors except self
     mov      $LapicIntCmdLoReg, %rsi
     mov      $0x000C4600, %eax  # vector 0x0000:0x0000
@@ -186,14 +167,8 @@
 
     # 200-microsecond delay loop
     # TBD
-
-    # broadcast the SIPI IPI to all processors except self
-    #mov      $LapicIntCmdLoReg, %rsi
-    #mov      $0x000C4610, %eax  # vector 0x1000:0x0000
-    #mov      %eax, (%rsi)
-
-    # 1-ms delay loop
-    # TBD
+    mov      $0x1000000, %rcx
+    loop     .
 
     # done
     xor      %rax, %rax
@@ -217,7 +192,3 @@
     # IRQ start ascii string
     .set     IrqStartStr, .
     .string  "Supported x86 interrupt controllers: LAPIC, I/O APIC"
-
-    # IRQ lapic ascii string
-    .set     IrqLapicStr, .
-    .string  "Initializing LAPIC with ID: "

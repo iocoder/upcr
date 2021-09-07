@@ -1,6 +1,6 @@
 ###############################################################################
-# File name:    cpu.S
-# Description:  Kernel cpu initialization code
+# File name:    lock.S
+# Description:  Kernel semaphore to protect kernel code access
 # Author:       Ramses A.
 ###############################################################################
 #
@@ -44,91 +44,69 @@
     .text
 
 ###############################################################################
-#                            KernelSmpInit()                                  #
+#                             KernelLockInit()                                #
 ###############################################################################
 
     # declare a linker symbol
-    .global  KernelSmpInit
-    .set     KernelSmpInit, .
+    .global  KernelLockInit
+    .set     KernelLockInit, .
 
     # print heading of line
     mov      $0x0A, %rdi
     mov      $-1, %rsi
     call     KernelLogColour
-    leaq     SmpModuleStr(%rip), %rdi
+    leaq     LockModuleStr(%rip), %rdi
     call     KernelLogString
     mov      $0x0B, %rdi
     mov      $-1, %rsi
     call     KernelLogColour
 
     # print module info
-    leaq     SmpStartStr(%rip), %rdi
+    leaq     LockStartStr(%rip), %rdi
     call     KernelLogString
     mov      $'\n', %rdi
     call     KernelLogChar
 
-    # first we need to initialize core 0
-    call     KernelSmpEnable
-
-    # send INIT-SIPI-SIPI sequence to other CPUs
-    call     KernelIrqIipi
-    call     KernelIrqSipi
-    call     KernelIrqSipi
+    # initialize the semaphore with 0
+    movq     $0, AccessSemaphore(%rip)
 
     # done
 1:  xor      %rax, %rax
     ret
 
 ###############################################################################
-#                            KernelSmpEnable()                                #
+#                            KernelLockAcquire()                              #
 ###############################################################################
 
     # declare a linker symbol
-    .global  KernelSmpEnable
-    .set     KernelSmpEnable, .
+    .global  KernelLockAcquire
+    .set     KernelLockAcquire, .
 
-    # acquire kernel lock to avoid race conditions with other CPUS
-    call     KernelLockAcquire
-
-    # initialize LAPIC and enable IRQs
-    call     KernelIrqEnable
-
-    # set heading colour
-    mov      $0x0A, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
-
-    # print module name
-    leaq     SmpModuleStr(%rip), %rdi
-    call     KernelLogString
-
-    # reset colour
-    mov      $0x0B, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
-
-    # print lapic detection string
-    leaq     SmpLapicStr(%rip), %rdi
-    call     KernelLogString
-
-    # print LAPIC ID
-    xorq     %rax, %rax
-    movl     0xFEE00020, %eax
-    shrl     $24, %eax
-    movq     %rax, %rdi
-    call     KernelLogDecimal
-
-    # print new line
-    mov      $'\n', %rdi
-    call     KernelLogChar
-
-    # release the lock
-    push     %rdi
-    call     KernelLockRelease
-    pop      %rdi
+    # cmpxchg loop to acquire the semaphore
+1:  xor      %eax, %eax
+    mov      $1, %ebx
+    lock
+    cmpxchg  %ebx, AccessSemaphore(%rip)
+    jne      1b
 
     # done
-    xor      %rax, %rax
+2:  xor      %rax, %rax
+    ret
+
+###############################################################################
+#                            KernelLockRelease()                              #
+###############################################################################
+
+    # declare a linker symbol
+    .global  KernelLockRelease
+    .set     KernelLockRelease, .
+
+    # release the kernel access semaphore
+    xor      %eax, %eax
+    mov      %eax, AccessSemaphore(%rip)
+
+    # done
+2:  xor      %rax, %rax
     ret
 
 ###############################################################################
@@ -139,17 +117,24 @@
     .data
 
 ###############################################################################
+#                              MODULE DATA                                    #
+###############################################################################
+
+    # alignment to 8 bytes
+    .align 8
+
+    # Access semaphore
+    .set     AccessSemaphore, .
+    .quad    0
+
+###############################################################################
 #                            LOGGING STRINGS                                  #
 ###############################################################################
 
-    # SMP heading
-    .set     SmpModuleStr, .
-    .string  " [KERNEL SMP SUPPORT] "
+    # Lock heading
+    .set     LockModuleStr, .
+    .string  " [KERNEL LOCK] "
 
-    # SMP start ascii string
-    .set     SmpStartStr, .
-    .string  "Detecting CPU cores available in the system..."
-
-    # SMP lapic ascii string
-    .set     SmpLapicStr, .
-    .string  "Successfully initialized CPU core with LAPIC ID: "
+    # Lock start ascii string
+    .set     LockStartStr, .
+    .string  "Initializing kernel access semaphore..."

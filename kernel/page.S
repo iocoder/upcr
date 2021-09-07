@@ -67,8 +67,23 @@
     mov      $'\n', %rdi
     call     KernelLogChar
 
+    # initialize PML4Table
+    movq     %cr3, %rsi
+    movq     $RootPageTableBase, %rdi
+    movq     $RootPageTableSize, %rcx
+    # copy loop
+1:  movb     (%rsi), %al
+    movb     %al, (%rdi)
+    inc      %rsi
+    inc      %rdi
+    loop     1b
+
+    # load CR3 with PML4 table base
+    movq     $RootPageTableBase, %rax
+    movq     %rax, %cr3
+
     # done
-1:  xor      %rax, %rax
+2:  xor      %rax, %rax
     ret
 
 ###############################################################################

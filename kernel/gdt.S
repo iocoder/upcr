@@ -85,8 +85,26 @@
     inc      %rdi
     loop     1b
 
+    # load GDTR descriptor
+    lgdt     GdtrDescBase
+
+    # make a far jump to reload CS using long-mode lretq
+    movq     $0x20, %rax
+    pushq    %rax
+    leaq     2f(%rip), %rax
+    pushq    %rax
+    lretq
+
+    # reload other segment registers
+2:  mov      $0x28, %ax
+    mov      %ax, %ds
+    mov      %ax, %es
+    mov      %ax, %fs
+    mov      %ax, %gs
+    mov      %ax, %ss
+
     # done
-1:  xor      %rax, %rax
+3:  xor      %rax, %rax
     ret
 
 ###############################################################################

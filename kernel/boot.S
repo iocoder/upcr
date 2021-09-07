@@ -61,6 +61,11 @@
     call     KernelLogInit
     pop      %rdi
 
+    # initialize panic module
+    push     %rdi
+    call     KernelPanicInit
+    pop      %rdi
+
     # initialize ram module
     push     %rdi
     call     KernelRamInit
@@ -111,8 +116,6 @@
     call     KernelSystemInit
     pop      %rdi
 
-    # no error
-    xor      %rax, %rax
-
     # done
+    xor      %rax, %rax
     ret

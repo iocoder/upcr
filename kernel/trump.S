@@ -111,7 +111,7 @@
     wrmsr
 
     # load CR3 with PML4 table base
-    mov      PML4TableAddress-TrampolineStart, %eax
+    mov      $RootPageTableBase, %eax
     mov      %eax, %cr3
 
     # enable paging; this activates long mode
@@ -151,44 +151,34 @@
     mov      $0xCCCCCCCCCCCCCCCC, %r14
     mov      $0xDDDDDDDDDDDDDDDD, %r15
 
-    # initialize stack
-    movq     $(TrampolineStackBase), %rax
-    addq     $(TrampolineStackSize), %rax
+    # read local APIC ID
+    xor      %rax, %rax
+    movl     0xFEE00020, %eax
+    shr      $24, %eax
+
+    # use this particular CPU stack
     mov      %rax, %rsp
-    mov      %rax, %rbp
+    shl      $12, %rsp
+    addq     $(KernelStacksBase), %rsp
+    addq     $0x1000, %rsp
+    mov      %rsp, %rbp
     nop
 
-    # try to obtain the semaphore
-4:  xor      %eax, %eax
-    mov      $1, %ebx
-    lock
-    cmpxchg  %ebx, AccessSemaphore-TrampolineStart
-    jne      4b
+    # initialize IDT
+    lidt     IdtrDescBase
 
-    # now initialize LAPIC and IDT
-    mov      IrqEnableAddress-TrampolineStart, %rbx
-    call     *%rbx
+    # jump to KernelSmpEnable
+    mov      SmpFunAddress-TrampolineStart, %rax
+    call     *%rax
 
-    # done
-    xor      %eax, %eax
-    mov      %eax, AccessSemaphore-TrampolineStart
-
-    # halt here
+    # loop forever
     jmp      .
 
     # alignment for data
     .align   8
 
-    # Access semaphore
-    .set     AccessSemaphore, .
-    .quad    0
-
-    # PML4TableAddress
-    .set     PML4TableAddress, .
-    .quad    0
-
-    # IrqEnableAddress
-    .set     IrqEnableAddress, .
+    # SmpFunAddress
+    .set     SmpFunAddress, .
     .quad    0
 
     # end of trampoline
@@ -218,13 +208,9 @@
     mov      $'\n', %rdi
     call     KernelLogChar
 
-    # store CR3 into PML4TableAddress to be fetched by trampoline
-    mov      %cr3, %rax
-    mov      %eax, PML4TableAddress(%rip)
-
-    # store the address of KernelIrqEnable() to be fetched by trampoline
-    leaq     KernelIrqEnable(%rip), %rax
-    movq     %rax, IrqEnableAddress(%rip)
+    # store the address of KernelSmpEnable() to be fetched by trampoline
+    leaq     KernelSmpEnable(%rip), %rax
+    movq     %rax, SmpFunAddress(%rip)
 
     # copy the real-mode trampoline to lower memory
     movq     $TrampolineCodeBase, %rdi

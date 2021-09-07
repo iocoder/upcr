@@ -93,6 +93,18 @@
     shr      $4, %rax                     # RAX = HeightInPixels/16
     mov      %rax, VgaOutputRows(%rip)    # i.e. number of glyphs per column
 
+    # done
+2:  xor      %rax, %rax
+    ret
+
+###############################################################################
+#                           KernelVgaClear()                                  #
+###############################################################################
+
+    # declare a linker symbol
+    .global  KernelVgaClear
+    .set     KernelVgaClear, .
+
     # load buffer addresses and size to registers
     mov      VgaMemVirt(%rip), %rsi
     mov      VgaMemPhys(%rip), %rdi
@@ -108,6 +120,10 @@
     add      $4, %rdi
     sub      $4, %rcx
     jnz      1b
+
+    # set (X,Y) to (0,0)
+    movq     $0, VgaCursorX(%rip)
+    movq     $0, VgaCursorY(%rip)
 
     # done
 2:  xor      %rax, %rax
