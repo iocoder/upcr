@@ -1,122 +1,117 @@
-###############################################################################
-# File name:    boot.S
-# Description:  Kernel boot procedures
-# Author:       Ramses A.
-###############################################################################
-#
-# UPCR Operating System for x86_64 architecture
-# Copyright (c) 2021 Ramses A.
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software AND associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, AND/or sell
-# copies of the Software, AND to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice AND this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-###############################################################################
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-#
-###############################################################################
+;###############################################################################
+;# File name:    boot.S
+;# Description:  Kernel boot procedures
+;# Author:       Ramses A.
+;###############################################################################
+;#
+;# UPCR Operating System for x86_64 architecture
+;# Copyright (c) 2021 Ramses A.
+;#
+;# Permission is hereby granted, free of charge, to any person obtaining a copy
+;# of this software AND associated documentation files (the "Software"), to deal
+;# in the Software without restriction, including without limitation the rights
+;# to use, copy, modify, merge, publish, distribute, sublicense, AND/or sell
+;# copies of the Software, AND to permit persons to whom the Software is
+;# furnished to do so, subject to the following conditions:
+;#
+;# The above copyright notice AND this permission notice shall be included in all
+;# copies or substantial portions of the Software.
+;#
+;###############################################################################
+;#
+;# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+;# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+;# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+;# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+;# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+;# SOFTWARE.
+;#
+;###############################################################################
 
-###############################################################################
-#                                INCLUDES                                     #
-###############################################################################
+;###############################################################################
+;#                                INCLUDES                                     #
+;###############################################################################
 
-    # common definitions used by kernel
+    ;# common definitions used by kernel
     .include "kernel/macro.inc"
-    .intel_syntax noprefix
 
-###############################################################################
-#                              TEXT SECTION                                   #
-###############################################################################
+;###############################################################################
+;#                                GLOBALS                                      #
+;###############################################################################
 
-    # text section
+    ;# global symbols
+    .global KernelBootInit
+
+;###############################################################################
+;#                              TEXT SECTION                                   #
+;###############################################################################
+
+    ;# text section
     .text
 
-###############################################################################
-#                             KernelBootInit()                                #
-###############################################################################
+;###############################################################################
+;#                             KernelBootInit()                                #
+;###############################################################################
 
-    # declare a linker symbol
-    .global  KernelBootInit
+    ;# declare a linker symbol
     .set     KernelBootInit, .
 
-    # initialize vga module
-    PUSH     RDI
+    ;# initialize vga module
+    PUSH     %rdi
     CALL     KernelVgaInit
-    POP      RDI
+    POP      %rdi
 
-    # initialize log module
+    ;# initialize log module
     PUSH     %rdi
     CALL     KernelLogInit
     POP      %rdi
 
-    # initialize panic module
+    ;# initialize panic module
     PUSH     %rdi
     CALL     KernelPanicInit
     POP      %rdi
 
-    # initialize ram module
+    ;# initialize ram module
     PUSH     %rdi
     CALL     KernelRamInit
     POP      %rdi
 
-    # initialize page module
+    ;# initialize page module
     PUSH     %rdi
     CALL     KernelPageInit
     POP      %rdi
 
-    # initialize gop module
-    PUSH     %rdi
-    CALL     KernelTrumpInit
-    POP      %rdi
-
-    # initialize gdt module
+    ;# initialize gdt module
     PUSH     %rdi
     CALL     KernelGdtInit
     POP      %rdi
 
-    # initialize idt module
+    ;# initialize idt module
     PUSH     %rdi
     CALL     KernelIdtInit
     POP      %rdi
 
-    # initialize tss module
+    ;# initialize tss module
     PUSH     %rdi
     CALL     KernelTssInit
     POP      %rdi
 
-    # initialize stack module
+    ;# initialize stack module
     PUSH     %rdi
     CALL     KernelStackInit
     POP      %rdi
 
-    # initialize irq module
+    ;# initialize irq module
     PUSH     %rdi
     CALL     KernelIrqInit
     POP      %rdi
 
-    # initialize smp module
+    ;# initialize smp module
     PUSH     %rdi
     CALL     KernelSmpInit
     POP      %rdi
 
-    # initialize system module
-    PUSH     %rdi
-    CALL     KernelSystemInit
-    POP      %rdi
-
-    # done
+    ;# done
     XOR      %rax, %rax
     RET

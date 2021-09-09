@@ -1,55 +1,55 @@
-###############################################################################
-# File name:    irq.S
-# Description:  Kernel I/O APIC AND LAPIC driver
-# Author:       Ramses A.
-###############################################################################
-#
-# UPCR Operating System for x86_64 architecture
-# Copyright (c) 2021 Ramses A.
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software AND associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, AND/or sell
-# copies of the Software, AND to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice AND this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-###############################################################################
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-#
-###############################################################################
+;###############################################################################
+;# File name:    irq.S
+;# Description:  Kernel I/O APIC AND LAPIC driver
+;# Author:       Ramses A.
+;###############################################################################
+;#
+;# UPCR Operating System for x86_64 architecture
+;# Copyright (c) 2021 Ramses A.
+;#
+;# Permission is hereby granted, free of charge, to any person obtaining a copy
+;# of this software AND associated documentation files (the "Software"), to deal
+;# in the Software without restriction, including without limitation the rights
+;# to use, copy, modify, merge, publish, distribute, sublicense, AND/or sell
+;# copies of the Software, AND to permit persons to whom the Software is
+;# furnished to do so, subject to the following conditions:
+;#
+;# The above copyright notice AND this permission notice shall be included in all
+;# copies or substantial portions of the Software.
+;#
+;###############################################################################
+;#
+;# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+;# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+;# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+;# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+;# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+;# SOFTWARE.
+;#
+;###############################################################################
 
-###############################################################################
-#                                INCLUDES                                     #
-###############################################################################
+;###############################################################################
+;#                                INCLUDES                                     #
+;###############################################################################
 
-    # common definitions used by kernel
+    ;# common definitions used by kernel
     .include "kernel/macro.inc"
 
-###############################################################################
-#                                 MACROS                                     #
-###############################################################################
+;###############################################################################
+;#                                 MACROS                                     #
+;###############################################################################
 
-    # LAPIC REGISTERS
-    # ---------------
-    # (I) LAPIC ID AND VERSION
+    ;# LAPIC REGISTERS
+    ;# ---------------
+    ;# (I) LAPIC ID AND VERSION
     .equ     LapicIdReg,          0xFEE00020
     .equ     LapicVersionReg,     0xFEE00030
-    # (II) LAPIC BUS PRIORITY REGISTERS
+    ;# (II) LAPIC BUS PRIORITY REGISTERS
     .equ     LapicTaskPriReg,     0xFEE00080
     .equ     LapicArbiPriReg,     0xFEE00090
     .equ     LapicProcPriReg,     0xFEE000A0
-    # (III) LAPIC OPERATION REGISTERS
+    ;# (III) LAPIC OPERATION REGISTERS
     .equ     LapicEndOfIntReg,    0xFEE000B0
     .equ     LapicRemoteRdReg,    0xFEE000C0
     .equ     LapicLogicalDestReg, 0xFEE000D0
@@ -61,34 +61,43 @@
     .equ     LapicErrStatusReg,   0xFEE00280
     .equ     LapicIntCmdLoReg,    0xFEE00300
     .equ     LapicIntCmdHiReg,    0xFEE00310
-    # (IV) IVT REGISTERS
+    ;# (IV) IVT REGISTERS
     .equ     LapicTimerIvtReg,    0xFEE00320
     .equ     LapicThermIvtReg,    0xFEE00330
     .equ     LapicPerfcIvtReg,    0xFEE00340
     .equ     LapicLint0IvtReg,    0xFEE00350
     .equ     LapicLint1IvtReg,    0xFEE00360
     .equ     LapicErrorIvtReg,    0xFEE00370
-    # (V) TIMER REGISTERS
+    ;# (V) TIMER REGISTERS
     .equ     LapicTimerInitReg,   0xFEE00380
     .equ     LapicTimerCurrReg,   0xFEE00390
     .equ     LapicTimerConfReg,   0xFEE003E0
 
-###############################################################################
-#                              TEXT SECTION                                   #
-###############################################################################
+;###############################################################################
+;#                                GLOBALS                                      #
+;###############################################################################
 
-    # text section
+    ;# global symbols
+    .global KernelIrqInit
+    .global KernelIrqEnable
+    .global KernelIrqIipi
+    .global KernelIrqSipi
+
+;###############################################################################
+;#                              TEXT SECTION                                   #
+;###############################################################################
+
+    ;# text section
     .text
 
-###############################################################################
-#                            KernelIrqInit()                                  #
-###############################################################################
+;###############################################################################
+;#                            KernelIrqInit()                                  #
+;###############################################################################
 
-    # declare a linker symbol
-    .global  KernelIrqInit
+    ;# declare a linker symbol
     .set     KernelIrqInit, .
 
-    # print heading of line
+    ;# print heading of line
     MOV      $0x0A, %rdi
     MOV      $-1, %rsi
     CALL     KernelLogColour
@@ -98,25 +107,25 @@
     MOV      $-1, %rsi
     CALL     KernelLogColour
 
-    # print irq module info
+    ;# print irq module info
     LEA      IrqStartStr(%rip), %rdi
     CALL     KernelLogString
     MOV      $'\n', %rdi
     CALL     KernelLogChar
 
-    # done
+    ;# done
 1:  XOR      %rax, %rax
     RET
 
-###############################################################################
-#                           KernelIrqEnable()                                 #
-###############################################################################
+;###############################################################################
+;#                           KernelIrqEnable()                                 #
+;###############################################################################
 
-    # declare a linker symbol
+    ;# declare a linker symbol
     .global  KernelIrqEnable
     .set     KernelIrqEnable, .
 
-    # Initialize APIC address MSR
+    ;# Initialize APIC address MSR
     XOR      %rax, %rax
     XOR      %rcx, %rcx
     XOR      %rdx, %rdx
@@ -126,69 +135,67 @@
     NOP
     NOP
 
-    # done
+    ;# done
 1:  XOR      %rax, %rax
     RET
 
-###############################################################################
-#                             KernelIrqIipi()                                 #
-###############################################################################
+;###############################################################################
+;#                             KernelIrqIipi()                                 #
+;###############################################################################
 
-    # declare a linker symbol
-    .global  KernelIrqIipi
+    ;# declare a linker symbol
     .set     KernelIrqIipi, .
 
-    # broadcast the INIT IPI to all processors except self
+    ;# broadcast the INIT IPI to all processors except self
     MOV      $LapicIntCmdLoReg, %rsi
     MOV      $0x000C4500, %eax
     MOV      %eax, (%rsi)
 
-    # 10-millisecond delay LOOP.
-    # TBD
+    ;# 10-millisecond delay LOOP.
+    ;# TBD
     MOV      $0x1000000, %rcx
     LOOP     .
 
-    # done
+    ;# done
     XOR      %rax, %rax
     RET
 
-###############################################################################
-#                             KernelIrqSipi()                                 #
-###############################################################################
+;###############################################################################
+;#                             KernelIrqSipi()                                 #
+;###############################################################################
 
-    # declare a linker symbol
-    .global  KernelIrqSipi
+    ;# declare a linker symbol
     .set     KernelIrqSipi, .
 
-    # broadcast the SIPI IPI to all processors except self
+    ;# broadcast the SIPI IPI to all processors except self
     MOV      $LapicIntCmdLoReg, %rsi
-    MOV      $0x000C4600, %eax  # vector 0x0000:0x0000
+    MOV      $0x000C4600, %eax  ;# vector 0x0000:0x0000
     MOV      %eax, (%rsi)
 
-    # 200-microsecond delay LOOP
-    # TBD
+    ;# 200-microsecond delay LOOP
+    ;# TBD
     MOV      $0x1000000, %rcx
     LOOP     .
 
-    # done
+    ;# done
     XOR      %rax, %rax
     RET
 
-###############################################################################
-#                              DATA SECTION                                   #
-###############################################################################
+;###############################################################################
+;#                              DATA SECTION                                   #
+;###############################################################################
 
-    # data section
+    ;# data section
     .data
 
-###############################################################################
-#                            LOGGING STRINGS                                  #
-###############################################################################
+;###############################################################################
+;#                            LOGGING STRINGS                                  #
+;###############################################################################
 
-    # IRQ heading
+    ;# IRQ heading
     .set     IrqModuleStr, .
     .string  " [KERNEL IRQ SUBSYSTEM] "
 
-    # IRQ start ascii string
+    ;# IRQ start ascii string
     .set     IrqStartStr, .
     .string  "Supported x86 interrupt controllers: LAPIC, I/O APIC"

@@ -9,5 +9,6 @@ EFI_API VOID BootKern(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
   /* KernelTaskCreate() */
 
   /* start the operating system */
-  KernelSystemStart();
+  //KernelSchedulerStart();
+  while(1);
 }
