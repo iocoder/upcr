@@ -34,20 +34,20 @@
 ;###############################################################################
 
     ;# common definitions used by kernel
-    .include "kernel/macro.inc"
+    .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
     ;# global symbols
-    .global KernelLogInit
-    .global KernelLogChar
-    .global KernelLogDecimal
-    .global KernelLogHex
-    .global KernelLogString
-    .global KernelLogColour
-    .global KernelLogCLEAr
+    .global KLOGINIT
+    .global KLOGCHR
+    .global KLOGDEC
+    .global KLOGHEX
+    .global KLOGSTR
+    .global KLOGATT
+    .global KLOGCLR
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -57,61 +57,59 @@
     .text
 
 ;###############################################################################
-;#                            KernelLogInit()                                  #
+;#                               KLOGINIT()                                    #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelLogInit, .
+KLOGINIT:
 
-    ;# cLEAr screen
-    CALL     KernelLogCLEAr
+    ;# clear screen
+    CALL     KLOGCLR
 
     ;# header colour
     MOV      $0x0A, %rdi
     MOV      $-1,   %rsi
-    CALL     KernelLogColour
+    CALL     KLOGATT
 
     ;# print header
-    LEA      LogHeader(%rip), %rdi
-    CALL     KernelLogString
+    LEA      KLOGHDR(%rip), %rdi
+    CALL     KLOGSTR
 
     ;# welcome msg colour
     MOV      $0x0E, %rdi
     MOV      $-1,   %rsi
-    CALL     KernelLogColour
+    CALL     KLOGATT
 
     ;# print welcome msg
-    LEA      LogWelcome(%rip), %rdi
-    CALL     KernelLogString
+    LEA      KLOGWEL(%rip), %rdi
+    CALL     KLOGSTR
 
     ;# license colour
     MOV      $0x0F, %rdi
     MOV      $-1,   %rsi
-    CALL     KernelLogColour
+    CALL     KLOGATT
 
     ;# print license
-    LEA      LogLicense(%rip), %rdi
-    CALL     KernelLogString
+    LEA      KLOGLIC(%rip), %rdi
+    CALL     KLOGSTR
 
     ;# set printing colour to yellow
     MOV      $0x0B, %rdi
     MOV      $-1,   %rsi
-    CALL     KernelLogColour
+    CALL     KLOGATT
 
     ;# done
     XOR      %rax, %rax
     RET
 
 ;###############################################################################
-;#                            KernelLogChar()                                  #
+;#                               KLOGCHR()                                     #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelLogChar, .
+KLOGCHR:
 
     ;# print character to VGA
     PUSH     %rdi
-    CALL     KernelVgaPut
+    CALL     KVGAPUT
     POP      %rdi
 
     ;# done
@@ -119,11 +117,10 @@
     RET
 
 ;###############################################################################
-;#                          KernelLogDecimal()                                 #
+;#                              KLOGDEC()                                      #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelLogDecimal, .
+KLOGDEC:
 
     ;# we will keep dividing RDX:RAX by 10
     MOV      %rdi, %rax
@@ -148,7 +145,7 @@
     AND      $0xFF, %rdx
     MOV      %rdx, %rdi
     PUSH     %rcx
-    CALL     KernelLogChar
+    CALL     KLOGCHR
     POP      %rcx
 
     ;# all digits printed?
@@ -160,18 +157,17 @@
     RET
 
 ;###############################################################################
-;#                            KernelLogHex()                                   #
+;#                               KLOGHEX()                                     #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelLogHex, .
+KLOGHEX:
 
     ;# print 0x
     PUSH     %rdi
     MOV      $'0', %rdi
-    CALL     KernelVgaPut
+    CALL     KVGAPUT
     MOV      $'x', %rdi
-    CALL     KernelVgaPut
+    CALL     KVGAPUT
     POP      %rdi
 
     ;# print hexadecimal number (8 bytes - 16 hexdigits)
@@ -186,13 +182,13 @@
     ;# print DL[0:3]
     PUSH     %rcx
     PUSH     %rdi
-    LEA      Digits(%rip), %rsi
+    LEA      KLOGDIGS(%rip), %rsi
     AND      $0x0F, %rdi
     ADD      %rdi, %rsi
     XOR      %rax, %rax
     MOV      (%rsi), %al
     MOV      %rax, %rdi
-    CALL     KernelLogChar
+    CALL     KLOGCHR
     POP      %rdi
     POP      %rcx
 
@@ -205,11 +201,10 @@
     RET
 
 ;###############################################################################
-;#                             KernelLogString()                               #
+;#                                KLOGSTR()                                    #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelLogString, .
+KLOGSTR:
 
     ;# fetch next character
 1:  XOR      %rax, %rax
@@ -222,7 +217,7 @@
     ;# print character
     PUSH     %rdi
     MOV      %rax, %rdi
-    CALL     KernelVgaPut
+    CALL     KVGAPUT
     POP      %rdi
 
     ;# LOOP again
@@ -234,16 +229,15 @@
     RET
 
 ;##############################################################################
-;#                             KernelLogColour()                              #
+;#                                 KLOGATT()                                  #
 ;##############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelLogColour, .
+KLOGATT:
 
     ;# set vga colours
     PUSH     %rdi
     PUSH     %rsi
-    CALL     KernelVgaColour
+    CALL     KVGAATT
     POP      %rsi
     POP      %rdi
 
@@ -253,17 +247,16 @@
 
 
 ;##############################################################################
-;#                             KernelLogCLEAr()                               #
+;#                                KLOGCLR()                                   #
 ;##############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelLogCLEAr, .
+KLOGCLR:
 
     ;# cLEAr vga screen
     PUSH     %rdi
     PUSH     %rsi
     PUSH     %rcx
-    CALL     KernelVgaCLEAr
+    CALL     KVGACLR
     POP      %rsi
     POP      %rdi
     POP      %rcx
@@ -283,25 +276,21 @@
 ;#                              MODULE DATA                                    #
 ;###############################################################################
 
-    ;# digits to print
-    .set     Digits, .
-    .ascii   "0123456789ABCDEF"
+            ;# digits to print
+KLOGDIGS:   .ascii   "0123456789ABCDEF"
 
 ;###############################################################################
 ;#                            LOGGING STRINGS                                  #
 ;###############################################################################
 
-    ;# header text
-    .set     LogHeader, .
-    .incbin  "kernel/header.txt"
-    .byte    0
+            ;# header text
+KLOGHDR:    .INCBIN  "kernel/header.txt"
+            .byte    0
 
-    ;# welcome text
-    .set     LogWelcome, .
-    .incbin  "kernel/welcome.txt"
-    .byte    0
+            ;# welcome text
+KLOGWEL:    .INCBIN  "kernel/welcome.txt"
+            .byte    0
 
-    ;# license text
-    .set     LogLicense, .
-    .incbin  "kernel/license.txt"
-    .byte    0
+            ;# license text
+KLOGLIC:    .INCBIN  "kernel/license.txt"
+            .byte    0

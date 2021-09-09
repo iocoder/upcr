@@ -34,14 +34,14 @@
 ;###############################################################################
 
     ;# common definitions used by kernel
-    .include "kernel/macro.inc"
+    .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
     ;# global symbols
-    .global KernelGdtInit
+    .global KGDTINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -51,37 +51,36 @@
     .text
 
 ;###############################################################################
-;#                              KernelGdtInit()                                #
+;#                                KGDTINIT()                                   #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelGdtInit, .
+KGDTINIT:
 
     ;# print heading of line
     MOV      $0x0A, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
-    LEA      GdtModuleStr(%rip), %rdi
-    CALL     KernelLogString
+    CALL     KLOGATT
+    LEA      KGDTNAME(%rip), %rdi
+    CALL     KLOGSTR
     MOV      $0x0B, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
+    CALL     KLOGATT
 
     ;# print module info
-    LEA      GdtStartStr(%rip), %rdi
-    CALL     KernelLogString
+    LEA      KGDTMSG(%rip), %rdi
+    CALL     KLOGSTR
     MOV      $'\n', %rdi
-    CALL     KernelLogChar
+    CALL     KLOGCHR
 
     ;# copy the GDTR descriptor to lower memory
     MOV      $GdtrDescBase, %rdi
-    MOV      GdtrDesc(%rip), %rax
+    MOV      KGDTDESC(%rip), %rax
     MOV      %rax, (%rdi)
 
     ;# copy the GDT table to lower memory
     MOV      $GdtTableBase, %rdi
-    LEA      GdtStart(%rip), %rsi
-    LEA      GdtEnd(%rip), %rcx
+    LEA      KGDTSTART(%rip), %rsi
+    LEA      KGDTDESC(%rip), %rcx
     SUB      %rsi, %rcx
 
     ;# copy LOOP
@@ -124,32 +123,25 @@
 ;#                              MODULE DATA                                    #
 ;###############################################################################
 
-    ;# GDT table for protected & long mode
-    .set     GdtStart, .
-    .quad    0x0000000000000000  ;# 0x00
-    .quad    0x0000000000000000  ;# 0x00
-    .quad    0x00CF9A000000FFFF  ;# 0x10 (KERN CODE 32-bit)
-    .quad    0x00CF92000000FFFF  ;# 0x18 (KERN DATA 32-bit)
-    .quad    0x00AF9A000000FFFF  ;# 0x20 (KERN CODE 64-bit)
-    .quad    0x00AF92000000FFFF  ;# 0x28 (KERN DATA 64-bit)
-    .quad    0x00AFFA000000FFFF  ;# 0x30 (USER CODE 64-bit)
-    .quad    0x00AFF2000000FFFF  ;# 0x38 (USER DATA 64-bit)
-    .set     GdtEnd, .
+            ;# GDT table for protected & long mode
+KGDTSTART:  DQ       0x0000000000000000  ;# 0x00
+            DQ       0x0000000000000000  ;# 0x00
+            DQ       0x00CF9A000000FFFF  ;# 0x10 (KERN CODE 32-bit)
+            DQ       0x00CF92000000FFFF  ;# 0x18 (KERN DATA 32-bit)
+            DQ       0x00AF9A000000FFFF  ;# 0x20 (KERN CODE 64-bit)
+            DQ       0x00AF92000000FFFF  ;# 0x28 (KERN DATA 64-bit)
+            DQ       0x00AFFA000000FFFF  ;# 0x30 (USER CODE 64-bit)
+            DQ       0x00AFF2000000FFFF  ;# 0x38 (USER DATA 64-bit)
 
-    ;# GDTR descriptor
-    .set     GdtrDesc, .
-    .word    GdtTableSize-1
-    .long    GdtTableBase
-    .word    0
+            ;# GDTR descriptor
+KGDTDESC:   DW       GdtTableSize-1
+            DL       GdtTableBase
+            DW       0
 
 ;###############################################################################
 ;#                            LOGGING STRINGS                                  #
 ;###############################################################################
 
-    ;# GDT heading
-    .set     GdtModuleStr, .
-    .string  " [KERNEL GDT] "
-
-    ;# GDT start ascii string
-    .set     GdtStartStr, .
-    .string  "Initializing GDT module..."
+            ;# GDT heading and ascii strings
+KGDTNAME:   .string  " [KERNEL GDT] "
+KGDTMSG:    .string  "Initializing GDT module..."

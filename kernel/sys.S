@@ -1,6 +1,6 @@
 ;###############################################################################
-;# File name:    boot.S
-;# Description:  Kernel boot procedures
+;# File name:    sys.S
+;# Description:  Kernel system initialization procedures
 ;# Author:       Ramses A.
 ;###############################################################################
 ;#
@@ -34,14 +34,14 @@
 ;###############################################################################
 
     ;# common definitions used by kernel
-    .include "kernel/macro.inc"
+    .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
     ;# global symbols
-    .global KernelBootInit
+    .global KSYSINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -51,65 +51,54 @@
     .text
 
 ;###############################################################################
-;#                             KernelBootInit()                                #
+;#                               KSYSINIT()                                    #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelBootInit, .
+KSYSINIT:
 
     ;# initialize vga module
     PUSH     %rdi
-    CALL     KernelVgaInit
+    CALL     KVGAINIT
     POP      %rdi
 
     ;# initialize log module
     PUSH     %rdi
-    CALL     KernelLogInit
-    POP      %rdi
-
-    ;# initialize panic module
-    PUSH     %rdi
-    CALL     KernelPanicInit
+    CALL     KLOGINIT
     POP      %rdi
 
     ;# initialize ram module
     PUSH     %rdi
-    CALL     KernelRamInit
+    CALL     KRAMINIT
     POP      %rdi
 
     ;# initialize page module
     PUSH     %rdi
-    CALL     KernelPageInit
+    CALL     KVMMINIT
     POP      %rdi
 
     ;# initialize gdt module
     PUSH     %rdi
-    CALL     KernelGdtInit
+    CALL     KGDTINIT
     POP      %rdi
 
     ;# initialize idt module
     PUSH     %rdi
-    CALL     KernelIdtInit
+    CALL     KIDTINIT
     POP      %rdi
 
     ;# initialize tss module
     PUSH     %rdi
-    CALL     KernelTssInit
-    POP      %rdi
-
-    ;# initialize stack module
-    PUSH     %rdi
-    CALL     KernelStackInit
+    CALL     KTSSINIT
     POP      %rdi
 
     ;# initialize irq module
     PUSH     %rdi
-    CALL     KernelIrqInit
+    CALL     KIRQINIT
     POP      %rdi
 
     ;# initialize smp module
     PUSH     %rdi
-    CALL     KernelSmpInit
+    CALL     KSMPINIT
     POP      %rdi
 
     ;# done

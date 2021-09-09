@@ -112,3 +112,19 @@
     .equ     StackFrameRFLAGS,    0xE8
     .equ     StackFrameRSP,       0xF0
     .equ     StackFrameSS,        0xF8
+
+    # --------------------------------------
+    # ASSEMBLER PORTABILITY MACROS
+    # --------------------------------------
+    .macro   DB   Str
+    .ascii   \Str
+    .endm
+    .macro   DW   Data
+    .short   \Data
+    .endm
+    .macro   DL   Data
+    .long    \Data
+    .endm
+    .macro   DQ   Data
+    .quad    \Data
+    .endm

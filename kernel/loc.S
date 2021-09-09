@@ -1,6 +1,6 @@
 ;###############################################################################
-;# File name:    page.S
-;# Description:  Kernel virtual memory module
+;# File name:    loc.S
+;# Description:  Kernel semaphore to protect kernel code access
 ;# Author:       Ramses A.
 ;###############################################################################
 ;#
@@ -34,14 +34,15 @@
 ;###############################################################################
 
     ;# common definitions used by kernel
-    .include "kernel/macro.inc"
+    .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
     ;# global symbols
-    .global KernelPageInit
+    .global KLOCPEND
+    .global KLOCPOST
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -51,42 +52,31 @@
     .text
 
 ;###############################################################################
-;#                             KernelPageInit()                                #
+;#                               KLOCPEND()                                    #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelPageInit, .
+KLOCPEND:
 
-    ;# print heading of line
-    MOV      $0x0A, %rdi
-    MOV      $-1, %rsi
-    CALL     KernelLogColour
-    LEA      PageModuleStr(%rip), %rdi
-    CALL     KernelLogString
-    MOV      $0x0B, %rdi
-    MOV      $-1, %rsi
-    CALL     KernelLogColour
+    ;# cmpxchg LOOP to acquire the semaphore
+1:  XOR      %eax, %eax
+    MOV      $1, %ebx
+    LOCK
+    CMPXCHG  %ebx, KLOC(%rip)
+    JNE      1b
 
-    ;# print module info
-    LEA      PageStartStr(%rip), %rdi
-    CALL     KernelLogString
-    MOV      $'\n', %rdi
-    CALL     KernelLogChar
+    ;# done
+2:  XOR      %rax, %rax
+    RET
 
-    ;# initialize PML4Table
-    MOV      %cr3, %rsi
-    MOV      $RootPageTableBase, %rdi
-    MOV      $RootPageTableSize, %rcx
-    ;# copy LOOP
-1:  MOV      (%rsi), %al
-    MOV      %al, (%rdi)
-    INC      %rsi
-    INC      %rdi
-    LOOP     1b
+;###############################################################################
+;#                               KLOCPOST()                                    #
+;###############################################################################
 
-    ;# load CR3 with PML4 table base
-    MOV      $RootPageTableBase, %rax
-    MOV      %rax, %cr3
+KLOCPOST:
+
+    ;# reLEAse the kernel access semaphore
+    XOR      %eax, %eax
+    MOV      %eax, KLOC(%rip)
 
     ;# done
 2:  XOR      %rax, %rax
@@ -100,13 +90,11 @@
     .data
 
 ;###############################################################################
-;#                            LOGGING STRINGS                                  #
+;#                              MODULE DATA                                    #
 ;###############################################################################
 
-    ;# Paging heading
-    .set     PageModuleStr, .
-    .string  " [KERNEL PAGING] "
+            ;# alignment to 8 bytes
+            .align  8
 
-    ;# Paging start ascii string
-    .set     PageStartStr, .
-    .string  "Initializing paging module..."
+            ;# the lock itself
+KLOC:       DQ      0

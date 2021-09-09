@@ -34,15 +34,15 @@
 ;###############################################################################
 
     ;# common definitions used by kernel
-    .include "kernel/macro.inc"
+    .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
     ;# global symbols
-    .global KernelSmpInit
-    .global KernelSmpEnable
+    .global KSMPINIT
+    .global KSMPEN
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -51,13 +51,11 @@
     ;# text section
     .text
 
-
 ;###############################################################################
 ;#                          REAL MODE TRAMPOLINE                               #
 ;###############################################################################
 
-    ;# start of trampoline
-    .set     TrampolineStart, .
+KSMP16:
 
     ;# 16-bit code
     .code16
@@ -69,7 +67,7 @@
     cli
 
     ;# initialize segment registers
-    LJMP     $0x0000, $(1f-TrampolineStart)
+    LJMP     $0x0000, $(1f-KSMP16)
 1:  XOR      %bx, %bx
     MOV      %bx, %ds
     MOV      %bx, %es
@@ -84,13 +82,15 @@
     MOV      %eax, %cr0
 
     ;# jump into 32-bit mode
-    LJMP     $0x10, $(2f-TrampolineStart)
+    LJMP     $0x10, $(KSMP32-KSMP16)
+
+KSMP32:
 
     ;# 32-bit code
     .code32
 
     ;# initialize segment registers
-2:  MOV      $0x18, %ax
+    MOV      $0x18, %ax
     MOV      %ax, %ds
     MOV      %ax, %es
     MOV      %ax, %fs
@@ -118,13 +118,15 @@
     MOV      %eax, %cr0
 
     ;# we are in compatibility mode now! jump to code64
-    LJMP     $0x0020, $(3f-TrampolineStart)
+    LJMP     $0x0020, $(KSMP64-KSMP16)
+
+KSMP64:
 
     ;# 64-bit code
     .code64
 
     ;# initialize segment registers
-3:  MOV      $0x0028, %ax
+    MOV      $0x0028, %ax
     MOV      %ax, %ds
     MOV      %ax, %es
     MOV      %ax, %fs
@@ -165,8 +167,8 @@
     ;# initialize IDT
     LIDT     IdtrDescBase
 
-    ;# jump to KernelSmpEnable
-    MOV      SmpFunAddress-TrampolineStart, %rax
+    ;# jump to KSMPEN
+    MOV      SmpFunAddress-KSMP16, %rax
     CALL     *%rax
 
     ;# LOOP forever
@@ -179,40 +181,36 @@
     .set     SmpFunAddress, .
     .quad    0
 
-    ;# end of trampoline
-    .set     TrampolineEnd, .
-
 ;###############################################################################
-;#                            KernelSmpInit()                                  #
+;#                              KSMPINIT()                                     #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelSmpInit, .
+KSMPINIT:
 
     ;# print heading of line
     MOV      $0x0A, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
-    LEA      SmpModuleStr(%rip), %rdi
-    CALL     KernelLogString
+    CALL     KLOGATT
+    LEA      KSMPNAME(%rip), %rdi
+    CALL     KLOGSTR
     MOV      $0x0B, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
+    CALL     KLOGATT
 
     ;# print module info
-    LEA      SmpStartStr(%rip), %rdi
-    CALL     KernelLogString
+    LEA      KSMPMSG(%rip), %rdi
+    CALL     KLOGSTR
     MOV      $'\n', %rdi
-    CALL     KernelLogChar
+    CALL     KLOGCHR
 
-    ;# store the address of KernelSmpEnable() to be fetched by trampoline
-    LEA      KernelSmpEnable(%rip), %rax
+    ;# store the address of KSMPEN() to be fetched by trampoline
+    LEA      KSMPEN(%rip), %rax
     MOV      %rax, SmpFunAddress(%rip)
 
     ;# copy the real-mode trampoline to lower memory
     MOV      $TrampolineCodeBase, %rdi
-    LEA      TrampolineStart(%rip), %rsi
-    LEA      TrampolineEnd(%rip), %rcx
+    LEA      KSMP16(%rip), %rsi
+    LEA      KSMPINIT(%rip), %rcx
     SUB      %rsi, %rcx
 
     ;# copy LOOP
@@ -223,62 +221,62 @@
     LOOP     1b
 
     ;# first we need to initialize core 0
-    CALL     KernelSmpEnable
+    CALL     KSMPEN
 
     ;# send INIT-SIPI-SIPI sequence to other CPUs
-    CALL     KernelIrqIipi
-    CALL     KernelIrqSipi
-    CALL     KernelIrqSipi
+    CALL     KIRQIIPI
+    CALL     KIRQSIPI
+    CALL     KIRQSIPI
 
     ;# done
 1:  XOR      %rax, %rax
     RET
 
 ;###############################################################################
-;#                            KernelSmpEnable()                                #
+;#                               KSMPEN()                                      #
 ;###############################################################################
 
     ;# declare a linker symbol
-    .set     KernelSmpEnable, .
+    .set     KSMPEN, .
 
     ;# acquire kernel lock to avoid race conditions with other CPUS
-    CALL     KernelLockAcquire
+    CALL     KLOCPEND
 
     ;# initialize LAPIC AND enable IRQs
-    CALL     KernelIrqEnable
+    CALL     KIRQEN
 
     ;# set heading colour
     MOV      $0x0A, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
+    CALL     KLOGATT
 
     ;# print module name
-    LEA      SmpModuleStr(%rip), %rdi
-    CALL     KernelLogString
+    LEA      KSMPNAME(%rip), %rdi
+    CALL     KLOGSTR
 
     ;# reset colour
     MOV      $0x0B, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
+    CALL     KLOGATT
 
     ;# print lapic detection string
-    LEA      SmpLapicStr(%rip), %rdi
-    CALL     KernelLogString
+    LEA      KSMPID(%rip), %rdi
+    CALL     KLOGSTR
 
     ;# print LAPIC ID
     XOR      %rax, %rax
     MOV      0xFEE00020, %eax
     SHR      $24, %eax
     MOV      %rax, %rdi
-    CALL     KernelLogDecimal
+    CALL     KLOGDEC
 
     ;# print new line
     MOV      $'\n', %rdi
-    CALL     KernelLogChar
+    CALL     KLOGCHR
 
     ;# reLEAse the lock
     PUSH     %rdi
-    CALL     KernelLockReLEAse
+    CALL     KLOCPOST
     POP      %rdi
 
     ;# done
@@ -296,14 +294,7 @@
 ;#                            LOGGING STRINGS                                  #
 ;###############################################################################
 
-    ;# SMP heading
-    .set     SmpModuleStr, .
-    .string  " [KERNEL SMP SUPPORT] "
-
-    ;# SMP start ascii string
-    .set     SmpStartStr, .
-    .string  "Detecting CPU cores available in the system..."
-
-    ;# SMP lapic ascii string
-    .set     SmpLapicStr, .
-    .string  "Successfully initialized CPU core with LAPIC ID: "
+            ;# SMP module name and messages
+KSMPNAME:   .string  " [KERNEL SMP] "
+KSMPMSG:    .string  "Detecting CPU cores available in the system..."
+KSMPID:     .string  "Successfully initialized CPU core with LAPIC ID: "

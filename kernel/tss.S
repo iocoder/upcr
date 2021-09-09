@@ -34,14 +34,14 @@
 ;###############################################################################
 
     ;# common definitions used by kernel
-    .include "kernel/macro.inc"
+    .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
     ;# global symbols
-    .global KernelTssInit
+    .global KTSSINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -51,27 +51,26 @@
     .text
 
 ;###############################################################################
-;#                              KernelTssInit()                                #
+;#                               KTSSINIT()                                    #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelTssInit, .
+KTSSINIT:
 
     ;# print heading of line
     MOV      $0x0A, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
-    LEA      TssModuleStr(%rip), %rdi
-    CALL     KernelLogString
+    CALL     KLOGATT
+    LEA      KTSSNAME(%rip), %rdi
+    CALL     KLOGSTR
     MOV      $0x0B, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
+    CALL     KLOGATT
 
     ;# print module info
-    LEA      TssStartStr(%rip), %rdi
-    CALL     KernelLogString
+    LEA      KTSSMSG(%rip), %rdi
+    CALL     KLOGSTR
     MOV      $'\n', %rdi
-    CALL     KernelLogChar
+    CALL     KLOGCHR
 
     ;# done
 1:  XOR      %rax, %rax
@@ -88,10 +87,6 @@
 ;#                            LOGGING STRINGS                                  #
 ;###############################################################################
 
-    ;# TSS heading
-    .set     TssModuleStr, .
-    .string  " [KERNEL TSS] "
-
-    ;# TSS start ascii string
-    .set     TssStartStr, .
-    .string  "Initializing TSS module..."
+            ;# TSS module name and messages
+KTSSNAME:   .string  " [KERNEL TSS] "
+KTSSMSG:    .string  "Initializing TSS module..."

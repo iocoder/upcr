@@ -34,43 +34,43 @@
 ;###############################################################################
 
     ;# common definitions used by kernel
-    .include "kernel/macro.inc"
+    .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                 MACROS                                      #
 ;###############################################################################
 
     ;# dpl levels
-    .equ     DPL0,       0x0000
-    .equ     DPL1,       0x2000
-    .equ     DPL2,       0x4000
-    .equ     DPL3,       0x6000
+    .EQU     DPL0,       0x0000
+    .EQU     DPL1,       0x2000
+    .EQU     DPL2,       0x4000
+    .EQU     DPL3,       0x6000
 
     ;# gate types
-    .equ     GATE_CALL,  0x0C00    ;# not even in IDT
-    .equ     GATE_INTR,  0x0E00    ;# disables interrupts
-    .equ     GATE_TRAP,  0x0F00    ;# doesn't disable interrupts
+    .EQU     GATE_CALL,  0x0C00    ;# not even in IDT
+    .EQU     GATE_INTR,  0x0E00    ;# disables interrupts
+    .EQU     GATE_TRAP,  0x0F00    ;# doesn't disable interrupts
 
     ;# present field
-    .equ     PRESENT,    0x8000
+    .EQU     PRESENT,    0x8000
 
     ;# gate size
-    .equ     GATE_SIZE,  256
+    .EQU     GATE_SIZE,  256
 
     ;# IDT sections
-    .equ     IDT_EXP_START, 0x00
-    .equ     IDT_EXP_COUNT, 0x20
-    .equ     IDT_IRQ_START, 0x40
-    .equ     IDT_IRQ_COUNT, 0x10
-    .equ     IDT_SVC_START, 0x80
-    .equ     IDT_SVC_COUNT, 0x01
+    .EQU     IDT_EXP_START, 0x00
+    .EQU     IDT_EXP_COUNT, 0x20
+    .EQU     IDT_IRQ_START, 0x40
+    .EQU     IDT_IRQ_COUNT, 0x10
+    .EQU     IDT_SVC_START, 0x80
+    .EQU     IDT_SVC_COUNT, 0x01
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
     ;# global symbols
-    .global KernelIdtInit
+    .global KIDTINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -83,12 +83,36 @@
 ;#                            EXCEPTION GATES                                  #
 ;###############################################################################
 
+    .MACRO   PUSHE   DummyErr
+    .IF      \DummyErr
+    PUSH     $0x00                      ;# PUSH a dummy error code
+    .ENDIF
+    .ENDM
+
+    .MACRO   POPE   DummyErr
+    .IF      \DummyErr
+    ADD      $8, %rsp                   ;# POP dummy error code
+    .ENDIF
+    .ENDM
+
+    .MACRO   CHKDPL   CheckDPL
+    .IF      \CheckDPL
+    MOV      StackFrameCS(%rsp), %rax   ;# load origin's CS
+    AND      $3, %rax                   ;# test if origin is DPL3
+    JNZ      1f                         ;# skip next lines if DPL3
+    CALL     KIRQIIPI              ;# DPL0: disable all other CPUs
+    MOV      %rsp, %rdi                 ;# DPL0: load stack frame address
+    CALL     KERRPANIC          ;# DPL0: kernel panic
+    HLT                                 ;# DPL0: halt here
+    JMP      .                          ;# DPL0: LOOP forever
+1:  NOP
+    .ENDIF
+    .ENDM
+
     ;# template macro for all exception gates
-    .macro   ExpGate  ExpNbr, DummyErr
-    .align   GATE_SIZE
-    .if      \DummyErr
-    PUSH     $0x00               ;# PUSH a dummy error code
-    .endif
+    .MACRO   GATE  Handler, ExpNbr, DummyErr, CheckDPL
+    .ALIGN   GATE_SIZE
+    PUSHE    \DummyErr                  ;# PUSH dummy error if needed
     PUSH     \ExpNbr                    ;# PUSH exception number
     PUSH     %r15                       ;# PUSH a copy of R15
     PUSH     %r14                       ;# PUSH a copy of R14
@@ -106,15 +130,8 @@
     PUSH     %rbx                       ;# PUSH a copy of RBX
     PUSH     %rax                       ;# PUSH a copy of RAX
     SUB      $0x50, %rsp                ;# PUSH padding
-    MOV      StackFrameCS(%rsp), %rax   ;# load origin's CS
-    AND      $3, %rax                   ;# test if origin is DPL3
-    JNZ      1f                         ;# skip next lines if DPL3
-    CALL     KernelIrqIipi              ;# DPL0: disable all other CPUs
-    MOV      %rsp, %rdi                 ;# DPL0: load stack frame address
-    CALL     KernelPanicHandle          ;# DPL0: kernel panic
-    HLT                                 ;# DPL0: halt here
-    JMP      .                          ;# DPL0: LOOP forever
-1:  CALL     KernelIdtExp               ;# DPL3: handle current task exception
+    CHKDPL   \CheckDPL                  ;# CHECK DPL if needed
+    CALL     \Handler                   ;# HANDLE interrupt
     ADD      $0x50, %rsp                ;# POP padding
     POP      %rax                       ;# POP a copy of RAX
     POP      %rbx                       ;# POP a copy of RBX
@@ -132,200 +149,98 @@
     POP      %r14                       ;# POP a copy of R14
     POP      %r15                       ;# POP a copy of R15
     ADD      $8, %rsp                   ;# POP exception number
-    .if      \DummyErr
-    ADD      $8, %rsp                   ;# POP dummy error code
-    .endif
-    iRETq                               ;# RETurn from exception
-    .align   GATE_SIZE
-    .endm
+    POPE     \DummyErr                  ;# POP dummy error if needed
+    IRET                                ;# RETurn from exception
+    .ALIGN   GATE_SIZE
+    .ENDM
 
-    ;# symbol defining the start of exception gates
-    .align   GATE_SIZE
-    .set     ExpGates, .
+;###############################################################################
+;#                               IDT GATES                                     #
+;###############################################################################
 
+    ;# align
+    .ALIGN   GATE_SIZE
+
+ExpGates:
     ;# 32 exception gates for 32 exceptions
-    ExpGate  $0x00, 1
-    ExpGate  $0x01, 1
-    ExpGate  $0x02, 1
-    ExpGate  $0x03, 1
-    ExpGate  $0x04, 1
-    ExpGate  $0x05, 1
-    ExpGate  $0x06, 1
-    ExpGate  $0x07, 1
-    ExpGate  $0x08, 0
-    ExpGate  $0x09, 0
-    ExpGate  $0x0A, 0
-    ExpGate  $0x0B, 0
-    ExpGate  $0x0C, 0
-    ExpGate  $0x0D, 0
-    ExpGate  $0x0E, 0
-    ExpGate  $0x0F, 0
-    ExpGate  $0x10, 1
-    ExpGate  $0x11, 0
-    ExpGate  $0x12, 1
-    ExpGate  $0x13, 1
-    ExpGate  $0x14, 0
-    ExpGate  $0x15, 0
-    ExpGate  $0x16, 0
-    ExpGate  $0x17, 0
-    ExpGate  $0x18, 0
-    ExpGate  $0x19, 0
-    ExpGate  $0x1A, 0
-    ExpGate  $0x1B, 0
-    ExpGate  $0x1C, 0
-    ExpGate  $0x1D, 0
-    ExpGate  $0x1E, 0
-    ExpGate  $0x1F, 0
+    GATE     KIDTEXP, $0x00, 1, 1
+    GATE     KIDTEXP, $0x01, 1, 1
+    GATE     KIDTEXP, $0x02, 1, 1
+    GATE     KIDTEXP, $0x03, 1, 1
+    GATE     KIDTEXP, $0x04, 1, 1
+    GATE     KIDTEXP, $0x05, 1, 1
+    GATE     KIDTEXP, $0x06, 1, 1
+    GATE     KIDTEXP, $0x07, 1, 1
+    GATE     KIDTEXP, $0x08, 0, 1
+    GATE     KIDTEXP, $0x09, 0, 1
+    GATE     KIDTEXP, $0x0A, 0, 1
+    GATE     KIDTEXP, $0x0B, 0, 1
+    GATE     KIDTEXP, $0x0C, 0, 1
+    GATE     KIDTEXP, $0x0D, 0, 1
+    GATE     KIDTEXP, $0x0E, 0, 1
+    GATE     KIDTEXP, $0x0F, 0, 1
+    GATE     KIDTEXP, $0x10, 1, 1
+    GATE     KIDTEXP, $0x11, 0, 1
+    GATE     KIDTEXP, $0x12, 1, 1
+    GATE     KIDTEXP, $0x13, 1, 1
+    GATE     KIDTEXP, $0x14, 0, 1
+    GATE     KIDTEXP, $0x15, 0, 1
+    GATE     KIDTEXP, $0x16, 0, 1
+    GATE     KIDTEXP, $0x17, 0, 1
+    GATE     KIDTEXP, $0x18, 0, 1
+    GATE     KIDTEXP, $0x19, 0, 1
+    GATE     KIDTEXP, $0x1A, 0, 1
+    GATE     KIDTEXP, $0x1B, 0, 1
+    GATE     KIDTEXP, $0x1C, 0, 1
+    GATE     KIDTEXP, $0x1D, 0, 1
+    GATE     KIDTEXP, $0x1E, 0, 1
+    GATE     KIDTEXP, $0x1F, 0, 1
 
-;###############################################################################
-;#                               IRQ GATES                                     #
-;###############################################################################
-
-    ;# template macro for all IRQ gates
-    .macro   IrqGate  IrqNbr
-    .align   GATE_SIZE
-    PUSH     $0x00                      ;# PUSH a dummy error code
-    PUSH     \IrqNbr                    ;# PUSH IRQ number
-    PUSH     %r15                       ;# PUSH a copy of R15
-    PUSH     %r14                       ;# PUSH a copy of R14
-    PUSH     %r13                       ;# PUSH a copy of R13
-    PUSH     %r12                       ;# PUSH a copy of R12
-    PUSH     %r11                       ;# PUSH a copy of R11
-    PUSH     %r10                       ;# PUSH a copy of R10
-    PUSH     %r9                        ;# PUSH a copy of R9
-    PUSH     %r8                        ;# PUSH a copy of R8
-    PUSH     %rbp                       ;# PUSH a copy of RBP
-    PUSH     %rdi                       ;# PUSH a copy of RDI
-    PUSH     %rsi                       ;# PUSH a copy of RSI
-    PUSH     %rdx                       ;# PUSH a copy of RDX
-    PUSH     %rcx                       ;# PUSH a copy of RCX
-    PUSH     %rbx                       ;# PUSH a copy of RBX
-    PUSH     %rax                       ;# PUSH a copy of RAX
-    SUB      $0x50, %rsp                ;# PUSH padding
-    MOV      %rsp, %rdi                 ;# address of register info
-    CALL     KernelIdtIrq               ;# handle external IRQ
-    ADD      $0x50, %rsp                ;# POP padding
-    POP      %rax                       ;# POP a copy of RAX
-    POP      %rbx                       ;# POP a copy of RBX
-    POP      %rcx                       ;# POP a copy of RCX
-    POP      %rdx                       ;# POP a copy of RDX
-    POP      %rsi                       ;# POP a copy of RSI
-    POP      %rdi                       ;# POP a copy of RDI
-    POP      %rbp                       ;# POP a copy of RBP
-    POP      %r8                        ;# POP a copy of R8
-    POP      %r9                        ;# POP a copy of R9
-    POP      %r10                       ;# POP a copy of R10
-    POP      %r11                       ;# POP a copy of R11
-    POP      %r12                       ;# POP a copy of R12
-    POP      %r13                       ;# POP a copy of R13
-    POP      %r14                       ;# POP a copy of R14
-    POP      %r15                       ;# POP a copy of R15
-    ADD      $8, %rsp                   ;# POP exception number
-    ADD      $8, %rsp                   ;# POP dummy error code
-    IRET                                ;# RETurn from exception
-    .align   GATE_SIZE
-    .endm
-
-    ;# symbol defining the beginning of IRQ gates
-    .align   GATE_SIZE
-    .set     IrqGates, .
-
+IrqGates:
     ;# 16 IRQ gates for 16 IRQs
-    IrqGate  $0x00
-    IrqGate  $0x01
-    IrqGate  $0x02
-    IrqGate  $0x03
-    IrqGate  $0x04
-    IrqGate  $0x05
-    IrqGate  $0x06
-    IrqGate  $0x07
-    IrqGate  $0x08
-    IrqGate  $0x09
-    IrqGate  $0x0A
-    IrqGate  $0x0B
-    IrqGate  $0x0C
-    IrqGate  $0x0D
-    IrqGate  $0x0E
-    IrqGate  $0x0F
+    GATE     KIDTIRQ, $0x00, 1, 0
+    GATE     KIDTIRQ, $0x01, 1, 0
+    GATE     KIDTIRQ, $0x02, 1, 0
+    GATE     KIDTIRQ, $0x03, 1, 0
+    GATE     KIDTIRQ, $0x04, 1, 0
+    GATE     KIDTIRQ, $0x05, 1, 0
+    GATE     KIDTIRQ, $0x06, 1, 0
+    GATE     KIDTIRQ, $0x07, 1, 0
+    GATE     KIDTIRQ, $0x08, 1, 0
+    GATE     KIDTIRQ, $0x09, 1, 0
+    GATE     KIDTIRQ, $0x0A, 1, 0
+    GATE     KIDTIRQ, $0x0B, 1, 0
+    GATE     KIDTIRQ, $0x0C, 1, 0
+    GATE     KIDTIRQ, $0x0D, 1, 0
+    GATE     KIDTIRQ, $0x0E, 1, 0
+    GATE     KIDTIRQ, $0x0F, 1, 0
 
-;###############################################################################
-;#                             SERVICE GATES                                   #
-;###############################################################################
-
-    ;# template macro for all SVC gates
-    .macro   SvcGate  SvcNbr
-    .align   GATE_SIZE
-    PUSH     $0x00                      ;# PUSH a dummy error code
-    PUSH     \SvcNbr                    ;# PUSH CALL number
-    PUSH     %r15                       ;# PUSH a copy of R15
-    PUSH     %r14                       ;# PUSH a copy of R14
-    PUSH     %r13                       ;# PUSH a copy of R13
-    PUSH     %r12                       ;# PUSH a copy of R12
-    PUSH     %r11                       ;# PUSH a copy of R11
-    PUSH     %r10                       ;# PUSH a copy of R10
-    PUSH     %r9                        ;# PUSH a copy of R9
-    PUSH     %r8                        ;# PUSH a copy of R8
-    PUSH     %rbp                       ;# PUSH a copy of RBP
-    PUSH     %rdi                       ;# PUSH a copy of RDI
-    PUSH     %rsi                       ;# PUSH a copy of RSI
-    PUSH     %rdx                       ;# PUSH a copy of RDX
-    PUSH     %rcx                       ;# PUSH a copy of RCX
-    PUSH     %rbx                       ;# PUSH a copy of RBX
-    PUSH     %rax                       ;# PUSH a copy of RAX
-    SUB      $0x50, %rsp                ;# PUSH padding
-    MOV      %rsp, %rdi                 ;# address of register info
-    CALL     KernelIdtSvc               ;# handle service CALL
-    ADD      $0x50, %rsp                ;# POP padding
-    POP      %rax                       ;# POP a copy of RAX
-    POP      %rbx                       ;# POP a copy of RBX
-    POP      %rcx                       ;# POP a copy of RCX
-    POP      %rdx                       ;# POP a copy of RDX
-    POP      %rsi                       ;# POP a copy of RSI
-    POP      %rdi                       ;# POP a copy of RDI
-    POP      %rbp                       ;# POP a copy of RBP
-    POP      %r8                        ;# POP a copy of R8
-    POP      %r9                        ;# POP a copy of R9
-    POP      %r10                       ;# POP a copy of R10
-    POP      %r11                       ;# POP a copy of R11
-    POP      %r12                       ;# POP a copy of R12
-    POP      %r13                       ;# POP a copy of R13
-    POP      %r14                       ;# POP a copy of R14
-    POP      %r15                       ;# POP a copy of R15
-    ADD      $8, %rsp                   ;# POP exception number
-    ADD      $8, %rsp                   ;# POP dummy error code
-    IRET                                ;# RETurn from exception
-    .align   GATE_SIZE
-    .endm
-
-    ;# symbol defining the beginning of SVC gates
-    .align   GATE_SIZE
-    .set     SvcGates, .
-
+SvcGates:
     ;# 1 SVC gate for 1 SVC
-    SvcGate  $0x00
+    GATE     KIDTSVC, $0x00, 1, 0
 
 ;###############################################################################
-;#                              KernelIdtInit()                                #
+;#                                KIDTINIT()                                   #
 ;###############################################################################
 
     ;# declare a linker symbol
-    .set     KernelIdtInit, .
+    .set     KIDTINIT, .
 
     ;# print heading of line
     MOV      $0x0A, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
-    LEA      IdtModuleStr(%rip), %rdi
-    CALL     KernelLogString
+    CALL     KLOGATT
+    LEA      KIDTNAME(%rip), %rdi
+    CALL     KLOGSTR
     MOV      $0x0B, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
+    CALL     KLOGATT
 
     ;# print module info
-    LEA      IdtStartStr(%rip), %rdi
-    CALL     KernelLogString
+    LEA      KIDTMSG(%rip), %rdi
+    CALL     KLOGSTR
     MOV      $'\n', %rdi
-    CALL     KernelLogChar
+    CALL     KLOGCHR
 
     ;# initialize IDT exception entries
     ;# RDI: Address of first IDT descriptor to fill
@@ -435,11 +350,10 @@
     RET
 
 ;###############################################################################
-;#                              KernelIdtExp                                   #
+;#                                KIDTEXP                                      #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelIdtExp, .
+KIDTEXP:
 
     ;# TODO:
     ;# -----
@@ -451,15 +365,14 @@
     JMP      .
 
     ;# done
-1:  XOR      %rax, %rax
+    XOR      %rax, %rax
     RET
 
 ;###############################################################################
-;#                              KernelIdtIrq                                   #
+;#                                 KIDTIRQ                                     #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelIdtIrq, .
+KIDTIRQ:
 
     ;# TODO:
     ;# -----
@@ -471,15 +384,14 @@
     JMP      .
 
     ;# done
-1:  XOR      %rax, %rax
+    XOR      %rax, %rax
     RET
 
 ;###############################################################################
-;#                              KernelIdtSvc                                   #
+;#                                 KIDTSVC                                     #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelIdtSvc, .
+KIDTSVC:
 
     ;# TODO:
     ;# -----
@@ -491,7 +403,26 @@
     JMP      .
 
     ;# done
-1:  XOR      %rax, %rax
+    XOR      %rax, %rax
+    RET
+
+;###############################################################################
+;#                                 KIDTIPI                                     #
+;###############################################################################
+
+KIDTIPI:
+
+    ;# TODO:
+    ;# -----
+    ;# 1. acquire kernel lock
+    ;# 2. handle inter-process interrupt
+    ;# 3. reLEAse kernel lock
+
+    ;# infinte LOOP
+    JMP      .
+
+    ;# done
+    XOR      %rax, %rax
     RET
 
 ;###############################################################################
@@ -505,10 +436,6 @@
 ;#                            LOGGING STRINGS                                  #
 ;###############################################################################
 
-    ;# IDT heading
-    .set     IdtModuleStr, .
-    .string  " [KERNEL IDT] "
-
-    ;# IDT start ascii string
-    .set     IdtStartStr, .
-    .string  "Initializing IDT module..."
+            ;# IDT heading and ascii strings
+KIDTNAME:   .string  " [KERNEL IDT] "
+KIDTMSG:    .string  "Initializing IDT module..."

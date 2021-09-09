@@ -42,6 +42,8 @@ typedef struct {
   KernelInitProcT  ProcInfo;
 } KernelInitInfoT;
 
+#define KernelBootInit KSYSINIT
+
 /* boot module */
 uint64_t KernelBootInit(KernelInitInfoT *InitInfo);
 

@@ -1,6 +1,6 @@
 ;###############################################################################
-;# File name:    stack.S
-;# Description:  Kernel stacks
+;# File name:    vmm.S
+;# Description:  Kernel virtual memory module
 ;# Author:       Ramses A.
 ;###############################################################################
 ;#
@@ -34,14 +34,14 @@
 ;###############################################################################
 
     ;# common definitions used by kernel
-    .include "kernel/macro.inc"
+    .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
     ;# global symbols
-    .global KernelStackInit
+    .global KVMMINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -51,30 +51,44 @@
     .text
 
 ;###############################################################################
-;#                             KernelStackInit()                               #
+;#                               KVMMINIT()                                    #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelStackInit, .
+KVMMINIT:
 
     ;# print heading of line
     MOV      $0x0A, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
-    LEA      StackModuleStr(%rip), %rdi
-    CALL     KernelLogString
+    CALL     KLOGATT
+    LEA      KVMMNAME(%rip), %rdi
+    CALL     KLOGSTR
     MOV      $0x0B, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
+    CALL     KLOGATT
 
     ;# print module info
-    LEA      StackStartStr(%rip), %rdi
-    CALL     KernelLogString
+    LEA      KVMMMSG(%rip), %rdi
+    CALL     KLOGSTR
     MOV      $'\n', %rdi
-    CALL     KernelLogChar
+    CALL     KLOGCHR
+
+    ;# initialize PML4Table
+    MOV      %cr3, %rsi
+    MOV      $RootPageTableBase, %rdi
+    MOV      $RootPageTableSize, %rcx
+    ;# copy LOOP
+1:  MOV      (%rsi), %al
+    MOV      %al, (%rdi)
+    INC      %rsi
+    INC      %rdi
+    LOOP     1b
+
+    ;# load CR3 with PML4 table base
+    MOV      $RootPageTableBase, %rax
+    MOV      %rax, %cr3
 
     ;# done
-1:  XOR      %rax, %rax
+2:  XOR      %rax, %rax
     RET
 
 ;###############################################################################
@@ -88,10 +102,6 @@
 ;#                            LOGGING STRINGS                                  #
 ;###############################################################################
 
-    ;# Stack heading
-    .set     StackModuleStr, .
-    .string  " [KERNEL STACK] "
-
-    ;# Stack start ascii string
-    .set     StackStartStr, .
-    .string  "Initializing kernel stacks..."
+            ;# VMM heading and ascii strings
+KVMMNAME:   .string  " [KERNEL VMM] "
+KVMMMSG:    .string  "Initializing virtual memory manager..."

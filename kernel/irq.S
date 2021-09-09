@@ -34,7 +34,7 @@
 ;###############################################################################
 
     ;# common definitions used by kernel
-    .include "kernel/macro.inc"
+    .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                 MACROS                                     #
@@ -43,45 +43,45 @@
     ;# LAPIC REGISTERS
     ;# ---------------
     ;# (I) LAPIC ID AND VERSION
-    .equ     LapicIdReg,          0xFEE00020
-    .equ     LapicVersionReg,     0xFEE00030
+    .EQU     LapicIdReg,          0xFEE00020
+    .EQU     LapicVersionReg,     0xFEE00030
     ;# (II) LAPIC BUS PRIORITY REGISTERS
-    .equ     LapicTaskPriReg,     0xFEE00080
-    .equ     LapicArbiPriReg,     0xFEE00090
-    .equ     LapicProcPriReg,     0xFEE000A0
+    .EQU     LapicTaskPriReg,     0xFEE00080
+    .EQU     LapicArbiPriReg,     0xFEE00090
+    .EQU     LapicProcPriReg,     0xFEE000A0
     ;# (III) LAPIC OPERATION REGISTERS
-    .equ     LapicEndOfIntReg,    0xFEE000B0
-    .equ     LapicRemoteRdReg,    0xFEE000C0
-    .equ     LapicLogicalDestReg, 0xFEE000D0
-    .equ     LapicDestFormatReg,  0xFEE000E0
-    .equ     LapicSpuriousIvtReg, 0xFEE000F0
-    .equ     LapicInServiceReg,   0xFEE00100
-    .equ     LapicTriggModeReg,   0xFEE00180
-    .equ     LapicIntReqReg,      0xFEE00200
-    .equ     LapicErrStatusReg,   0xFEE00280
-    .equ     LapicIntCmdLoReg,    0xFEE00300
-    .equ     LapicIntCmdHiReg,    0xFEE00310
+    .EQU     LapicEndOfIntReg,    0xFEE000B0
+    .EQU     LapicRemoteRdReg,    0xFEE000C0
+    .EQU     LapicLogicalDestReg, 0xFEE000D0
+    .EQU     LapicDestFormatReg,  0xFEE000E0
+    .EQU     LapicSpuriousIvtReg, 0xFEE000F0
+    .EQU     LapicInServiceReg,   0xFEE00100
+    .EQU     LapicTriggModeReg,   0xFEE00180
+    .EQU     LapicIntReqReg,      0xFEE00200
+    .EQU     LapicErrStatusReg,   0xFEE00280
+    .EQU     LapicIntCmdLoReg,    0xFEE00300
+    .EQU     LapicIntCmdHiReg,    0xFEE00310
     ;# (IV) IVT REGISTERS
-    .equ     LapicTimerIvtReg,    0xFEE00320
-    .equ     LapicThermIvtReg,    0xFEE00330
-    .equ     LapicPerfcIvtReg,    0xFEE00340
-    .equ     LapicLint0IvtReg,    0xFEE00350
-    .equ     LapicLint1IvtReg,    0xFEE00360
-    .equ     LapicErrorIvtReg,    0xFEE00370
+    .EQU     LapicTimerIvtReg,    0xFEE00320
+    .EQU     LapicThermIvtReg,    0xFEE00330
+    .EQU     LapicPerfcIvtReg,    0xFEE00340
+    .EQU     LapicLint0IvtReg,    0xFEE00350
+    .EQU     LapicLint1IvtReg,    0xFEE00360
+    .EQU     LapicErrorIvtReg,    0xFEE00370
     ;# (V) TIMER REGISTERS
-    .equ     LapicTimerInitReg,   0xFEE00380
-    .equ     LapicTimerCurrReg,   0xFEE00390
-    .equ     LapicTimerConfReg,   0xFEE003E0
+    .EQU     LapicTimerInitReg,   0xFEE00380
+    .EQU     LapicTimerCurrReg,   0xFEE00390
+    .EQU     LapicTimerConfReg,   0xFEE003E0
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
     ;# global symbols
-    .global KernelIrqInit
-    .global KernelIrqEnable
-    .global KernelIrqIipi
-    .global KernelIrqSipi
+    .global KIRQINIT
+    .global KIRQEN
+    .global KIRQIIPI
+    .global KIRQSIPI
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -91,39 +91,36 @@
     .text
 
 ;###############################################################################
-;#                            KernelIrqInit()                                  #
+;#                               KIRQINIT()                                    #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelIrqInit, .
+KIRQINIT:
 
     ;# print heading of line
     MOV      $0x0A, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
-    LEA      IrqModuleStr(%rip), %rdi
-    CALL     KernelLogString
+    CALL     KLOGATT
+    LEA      KIRQNAME(%rip), %rdi
+    CALL     KLOGSTR
     MOV      $0x0B, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
+    CALL     KLOGATT
 
     ;# print irq module info
-    LEA      IrqStartStr(%rip), %rdi
-    CALL     KernelLogString
+    LEA      KIRQMSG(%rip), %rdi
+    CALL     KLOGSTR
     MOV      $'\n', %rdi
-    CALL     KernelLogChar
+    CALL     KLOGCHR
 
     ;# done
 1:  XOR      %rax, %rax
     RET
 
 ;###############################################################################
-;#                           KernelIrqEnable()                                 #
+;#                               KIRQEN()                                      #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .global  KernelIrqEnable
-    .set     KernelIrqEnable, .
+KIRQEN:
 
     ;# Initialize APIC address MSR
     XOR      %rax, %rax
@@ -140,11 +137,10 @@
     RET
 
 ;###############################################################################
-;#                             KernelIrqIipi()                                 #
+;#                               KIRQIIPI()                                    #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelIrqIipi, .
+KIRQIIPI:
 
     ;# broadcast the INIT IPI to all processors except self
     MOV      $LapicIntCmdLoReg, %rsi
@@ -161,11 +157,10 @@
     RET
 
 ;###############################################################################
-;#                             KernelIrqSipi()                                 #
+;#                                KIRQSIPI()                                   #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelIrqSipi, .
+KIRQSIPI:
 
     ;# broadcast the SIPI IPI to all processors except self
     MOV      $LapicIntCmdLoReg, %rsi
@@ -192,10 +187,6 @@
 ;#                            LOGGING STRINGS                                  #
 ;###############################################################################
 
-    ;# IRQ heading
-    .set     IrqModuleStr, .
-    .string  " [KERNEL IRQ SUBSYSTEM] "
-
-    ;# IRQ start ascii string
-    .set     IrqStartStr, .
-    .string  "Supported x86 interrupt controllers: LAPIC, I/O APIC"
+            ;# IRQ heading and ascii strings
+KIRQNAME:   .string  " [KERNEL IRQ] "
+KIRQMSG:    .string  "Supported x86 interrupt controllers: LAPIC, I/O APIC."

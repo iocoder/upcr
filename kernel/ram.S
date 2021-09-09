@@ -34,14 +34,14 @@
 ;###############################################################################
 
     ;# common definitions used by kernel
-    .include "kernel/macro.inc"
+    .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
     ;# global symbols
-    .global KernelRamInit
+    .global KRAMINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -51,88 +51,87 @@
     .text
 
 ;###############################################################################
-;#                            KernelRamInit()                                  #
+;#                              KRAMINIT()                                     #
 ;###############################################################################
 
-    ;# declare a linker symbol
-    .set     KernelRamInit, .
+KRAMINIT:
 
-    ;# read RamAvailable from init struct
+    ;# read KRAMAVL from init struct
     MOV      0x38(%rdi), %rax
-    MOV      %rax, RamAvailable(%rip)
+    MOV      %rax, KRAMAVL(%rip)
 
-    ;# read RamStart from init struct
+    ;# read KRAMSTART from init struct
     MOV      0x40(%rdi), %rax
-    MOV      %rax, RamStart(%rip)
+    MOV      %rax, KRAMSTART(%rip)
 
-    ;# read RamEnd from init struct
+    ;# read KRAMEND from init struct
     MOV      0x48(%rdi), %rax
-    MOV      %rax, RamEnd(%rip)
+    MOV      %rax, KRAMEND(%rip)
 
     ;# did the user provide RAM information anyways?
-    MOV      RamAvailable(%rip), %rax
+    MOV      KRAMAVL(%rip), %rax
     CMP      $0, %rax
     JZ       1f
 
     ;# print heading of line
     MOV      $0x0A, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
-    LEA      RamModuleStr(%rip), %rdi
-    CALL     KernelLogString
+    CALL     KLOGATT
+    LEA      KRAMNAME(%rip), %rdi
+    CALL     KLOGSTR
     MOV      $0x0B, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
+    CALL     KLOGATT
 
     ;# print ram start
-    LEA      RamStartStr(%rip), %rdi
-    CALL     KernelLogString
-    MOV      RamStart(%rip), %rdi
-    CALL     KernelLogHex
+    LEA      KRAMSTARTS(%rip), %rdi
+    CALL     KLOGSTR
+    MOV      KRAMSTART(%rip), %rdi
+    CALL     KLOGHEX
     MOV      $'\n', %rdi
-    CALL     KernelLogChar
+    CALL     KLOGCHR
 
     ;# print heading of line
     MOV      $0x0A, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
-    LEA      RamModuleStr(%rip), %rdi
-    CALL     KernelLogString
+    CALL     KLOGATT
+    LEA      KRAMNAME(%rip), %rdi
+    CALL     KLOGSTR
     MOV      $0x0B, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
+    CALL     KLOGATT
 
     ;# print ram end line
-    LEA      RamEndStr(%rip), %rdi
-    CALL     KernelLogString
-    MOV      RamEnd(%rip), %rdi
-    CALL     KernelLogHex
+    LEA      KRAMENDS(%rip), %rdi
+    CALL     KLOGSTR
+    MOV      KRAMEND(%rip), %rdi
+    CALL     KLOGHEX
     MOV      $'\n', %rdi
-    CALL     KernelLogChar
+    CALL     KLOGCHR
 
     ;# print heading of line
     MOV      $0x0A, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
-    LEA      RamModuleStr(%rip), %rdi
-    CALL     KernelLogString
+    CALL     KLOGATT
+    LEA      KRAMNAME(%rip), %rdi
+    CALL     KLOGSTR
     MOV      $0x0B, %rdi
     MOV      $-1, %rsi
-    CALL     KernelLogColour
+    CALL     KLOGATT
 
     ;# print ram size line
-    LEA      RamSizeStr(%rip), %rdi
-    CALL     KernelLogString
-    MOV      RamEnd(%rip), %rdi
-    SUB      RamStart(%rip), %rdi
+    LEA      KRAMESIZES(%rip), %rdi
+    CALL     KLOGSTR
+    MOV      KRAMEND(%rip), %rdi
+    SUB      KRAMSTART(%rip), %rdi
     SHR      $20, %rdi
-    CALL     KernelLogDecimal
+    CALL     KLOGDEC
     MOV      $'M', %rdi
-    CALL     KernelLogChar
+    CALL     KLOGCHR
     MOV      $'B', %rdi
-    CALL     KernelLogChar
+    CALL     KLOGCHR
     MOV      $'\n', %rdi
-    CALL     KernelLogChar
+    CALL     KLOGCHR
 
     ;# done
 1:  XOR      %rax, %rax
@@ -149,30 +148,17 @@
 ;#                              MODULE DATA                                    #
 ;###############################################################################
 
-    ;# RamInitInfo structure
-    .set     RamAvailable, .
-    .quad    0
-    .set     RamStart, .
-    .quad    0
-    .set     RamEnd, .
-    .quad    0
+            ;# RamInitInfo structure
+KRAMAVL:    DQ    0
+KRAMSTART:  DQ    0
+KRAMEND:    DQ    0
 
 ;###############################################################################
 ;#                            LOGGING STRINGS                                  #
 ;###############################################################################
 
-    ;# RAM heading
-    .set     RamModuleStr, .
-    .string  " [KERNEL MEMORY MGMT] "
-
-    ;# RAM start ascii string
-    .set     RamStartStr, .
-    .string  "Detected RAM Start: "
-
-    ;# RAM end ascii string
-    .set     RamEndStr, .
-    .string  "Detected RAM End:   "
-
-    ;# RAM size ascii string
-    .set     RamSizeStr, .
-    .string  "Detected RAM Size:  "
+            ;# RAM heading and messages
+KRAMNAME:   .string " [KERNEL RAM] "
+KRAMSTARTS: .string  "Detected RAM Start: "
+KRAMENDS:   .string  "Detected RAM End:   "
+KRAMESIZES: .string  "Detected RAM Size:  "

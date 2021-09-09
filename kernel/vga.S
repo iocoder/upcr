@@ -34,17 +34,17 @@
 ;###############################################################################
 
     ;# common definitions used by kernel
-    .include "kernel/macro.inc"
+    .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
     ;# global symbols
-    .global KernelVgaInit
-    .global KernelVgaCLEAr
-    .global KernelVgaPut
-    .global KernelVgaColour
+    .global KVGAINIT
+    .global KVGACLR
+    .global KVGAPUT
+    .global KVGAATT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -54,73 +54,73 @@
     .text
 
 ;###############################################################################
-;#                           KernelVgaInit()                                   #
+;#                               KVGAINIT()                                    #
 ;###############################################################################
 
     ;# declare a linker symbol
-    .set     KernelVgaInit, .
+    .set     KVGAINIT, .
 
-    ;# read VgaAvailable from init struct
+    ;# read KVGAAVL from init struct
     MOV      0x00(%rdi), %rax
-    MOV      %rax, VgaAvailable(%rip)
+    MOV      %rax, KVGAAVL(%rip)
 
-    ;# read VgaMemVirt from init struct
+    ;# read KVGAVMEM from init struct
     MOV      0x08(%rdi), %rax
-    MOV      %rax, VgaMemVirt(%rip)
+    MOV      %rax, KVGAVMEM(%rip)
 
-    ;# read VgaMemPhys from init struct
+    ;# read KVGAPMEM from init struct
     MOV      0x10(%rdi), %rax
-    MOV      %rax, VgaMemPhys(%rip)
+    MOV      %rax, KVGAPMEM(%rip)
 
-    ;# read VgaMemSize from init struct
+    ;# read KVGASIZE from init struct
     MOV      0x18(%rdi), %rax
-    MOV      %rax, VgaMemSize(%rip)
+    MOV      %rax, KVGASIZE(%rip)
 
-    ;# read VgaScreenWidth from init struct
+    ;# read KVGAWIDE from init struct
     MOV      0x20(%rdi), %rax
-    MOV      %rax, VgaScreenWidth(%rip)
+    MOV      %rax, KVGAWIDE(%rip)
 
-    ;# read VgaScreenHeight from init struct
+    ;# read KVGAHIGH from init struct
     MOV      0x28(%rdi), %rax
-    MOV      %rax, VgaScreenHeight(%rip)
+    MOV      %rax, KVGAHIGH(%rip)
 
-    ;# read VgaScreenLine from init struct
+    ;# read KVGALINE from init struct
     MOV      0x30(%rdi), %rax
-    MOV      %rax, VgaScreenLine(%rip)
+    MOV      %rax, KVGALINE(%rip)
 
     ;# did the user provide VGA information anyways?
-    MOV      VgaAvailable(%rip), %rax
+    MOV      KVGAAVL(%rip), %rax
     CMP      $0, %rax
     JZ       2f
 
     ;# compute number of text columns
-    MOV      VgaScreenWidth(%rip), %rax   ;# RAX = WidthInPixels
+    MOV      KVGAWIDE(%rip), %rax   ;# RAX = WidthInPixels
     SHR      $3, %rax                     ;# RAX = WidthInPixels/8
-    MOV      %rax, VgaOutputCols(%rip)    ;# i.e. number of glyphs per row
+    MOV      %rax, KVGACOLS(%rip)    ;# i.e. number of glyphs per row
 
     ;# compute number of text rows
-    MOV      VgaScreenHeight(%rip), %rax  ;# RAX = HeightInPixels
+    MOV      KVGAHIGH(%rip), %rax  ;# RAX = HeightInPixels
     SHR      $4, %rax                     ;# RAX = HeightInPixels/16
-    MOV      %rax, VgaOutputRows(%rip)    ;# i.e. number of glyphs per column
+    MOV      %rax, KVGAROWS(%rip)    ;# i.e. number of glyphs per column
 
     ;# done
 2:  XOR      %rax, %rax
     RET
 
 ;###############################################################################
-;#                           KernelVgaCLEAr()                                  #
+;#                               KVGACLR()                                     #
 ;###############################################################################
 
     ;# declare a linker symbol
-    .set     KernelVgaCLEAr, .
+    .set     KVGACLR, .
 
     ;# load buffer addresses AND size to registers
-    MOV      VgaMemVirt(%rip), %rsi
-    MOV      VgaMemPhys(%rip), %rdi
-    MOV      VgaMemSize(%rip), %rcx
+    MOV      KVGAVMEM(%rip), %rsi
+    MOV      KVGAPMEM(%rip), %rdi
+    MOV      KVGASIZE(%rip), %rcx
 
     ;# load default background colour
-    MOV      VgaColourBg(%rip), %eax
+    MOV      KVGABG(%rip), %eax
 
     ;# LOOP over all pixels AND cLEAr them
 1:  MOV      %eax, (%rsi)
@@ -132,19 +132,19 @@
 
     ;# set (X,Y) to (0,0)
     XOR      %rax, %rax
-    MOV      %rax, VgaCursorX(%rip)
-    MOV      %rax, VgaCursorY(%rip)
+    MOV      %rax, KVGAX(%rip)
+    MOV      %rax, KVGAY(%rip)
 
     ;# done
 2:  XOR      %rax, %rax
     RET
 
 ;###############################################################################
-;#                            KernelVgaPut()                                   #
+;#                               KVGAPUT()                                     #
 ;###############################################################################
 
     ;# declare a linker symbol
-    .set     KernelVgaPut, .
+    .set     KVGAPUT, .
 
     ########
     ;# (I) process control characters
@@ -159,35 +159,35 @@
     ########
 
     ;# convert Y to pixel offset from the beginning of the buffer
-    MOV      VgaCursorY(%rip), %rax    ;# RAX = Y
+    MOV      KVGAY(%rip), %rax    ;# RAX = Y
     SHL      $4, %rax                  ;# RAX = Y*16  (line height is 16 pixels)
-    MOV      VgaScreenLine(%rip), %rdx ;# RDX = PPL
+    MOV      KVGALINE(%rip), %rdx ;# RDX = PPL
     MUL      %rdx                      ;# RAX = Y*16*PPL (PPL=pixels per line)
 
     ;# add amount of horizontal pixels to the offset
-    MOV      VgaCursorX(%rip), %rdx    ;# RDX = X
+    MOV      KVGAX(%rip), %rdx    ;# RDX = X
     SHL      $3, %rdx                  ;# RDX = X*8 (char width is 8 pixels)
     ADD      %rdx, %rax                ;# RAX = Y*16*PPL + X*8
 
     ;# store memory address of the pixel in %rsi AND %rdi
-    MOV      VgaMemVirt(%rip), %rsi    ;# RSI = &buf[0]
-    MOV      VgaMemPhys(%rip), %rdi    ;# RDI = &vga[0]
+    MOV      KVGAVMEM(%rip), %rsi    ;# RSI = &buf[0]
+    MOV      KVGAPMEM(%rip), %rdi    ;# RDI = &vga[0]
     SHL      $2, %rax                  ;# RAX = (Y*16*PPL + X*8)*4 (4=bytes/pxl)
     ADD      %rax, %rsi                ;# RSI = &buf[pixel]
     ADD      %rax, %rdi                ;# RDI = &vga[pixel]
 
     ;# store scan line size in R9
-    MOV      VgaScreenLine(%rip), %r9
+    MOV      KVGALINE(%rip), %r9
     SHL      $2, %r9                   ;# R9  = PPL*4 (scan line size in bytes)
 
     ;# get offset of the character pixel image to draw
-    LEA      VgaFontData(%rip), %r8    ;# R8 = &font[0]
+    LEA      KVGAFONT(%rip), %r8    ;# R8 = &font[0]
     SHL      $4, %rcx                  ;# RCX = IDX*16 (each glyph is 16 bytes)
     ADD      %rcx, %r8                 ;# R8 = &font[IDX*16]
 
     ;# load colours
-    MOV      VgaColourFg(%rip), %rcx
-    MOV      VgaColourBg(%rip), %rdx
+    MOV      KVGAFG(%rip), %rcx
+    MOV      KVGABG(%rip), %rdx
 
     ;# load first byte in the bitmap
     MOV      (%r8), %al
@@ -245,44 +245,44 @@
     ;# (IV) increase cursor position
     ########
 
-5:  MOV      VgaCursorX(%rip), %rax
-    INC      %rax                      ;# VgaCursorX++
-    MOV      %rax, VgaCursorX(%rip)
-    CMP      VgaOutputCols(%rip), %rax ;# VgaCursorX == VgaOutputCols?
+5:  MOV      KVGAX(%rip), %rax
+    INC      %rax                      ;# KVGAX++
+    MOV      %rax, KVGAX(%rip)
+    CMP      KVGACOLS(%rip), %rax ;# KVGAX == KVGACOLS?
     JNE      90f                       ;# jump to done if no new line is needed
 
     ########
     ;# (V) new line processing
     ########
 
-    ;# reset VgaCursorX to 0
+    ;# reset KVGAX to 0
 10: XOR      %rax, %rax
-    MOV      %rax, VgaCursorX(%rip)
+    MOV      %rax, KVGAX(%rip)
 
     ;# do we need to scroll?
-    MOV      VgaOutputRows(%rip), %rax
+    MOV      KVGAROWS(%rip), %rax
     DEC      %rax
-    CMP      %rax, VgaCursorY(%rip)
+    CMP      %rax, KVGAY(%rip)
     JE       11f
 
-    ;# increase VgaCursorY AND skip scrolling
-    MOV      VgaCursorY(%rip), %rax
+    ;# increase KVGAY AND skip scrolling
+    MOV      KVGAY(%rip), %rax
     INC      %rax
-    MOV      %rax, VgaCursorY(%rip)
+    MOV      %rax, KVGAY(%rip)
     JMP      18f
 
 11: ;# load destination addresses for scrolling
-    MOV      VgaMemVirt(%rip), %rsi
-    MOV      VgaMemPhys(%rip), %rdi
+    MOV      KVGAVMEM(%rip), %rsi
+    MOV      KVGAPMEM(%rip), %rdi
 
     ;# set RBX to the base source address for scrolling
-    MOV      VgaScreenLine(%rip), %rax
+    MOV      KVGALINE(%rip), %rax
     SHL      $4, %rax                 ;# each glyph takes 16 lines
     SHL      $2, %rax                 ;# each pixel is 4 bytes
     LEA      (%rsi, %rax), %r8
 
     ;# obtain size of memory region to scroll up
-    MOV      VgaMemSize(%rip), %rcx
+    MOV      KVGASIZE(%rip), %rcx
     SUB      %rax, %rcx
 
     ;# we are all good, copy AND LOOP until rcx is 0
@@ -296,23 +296,23 @@
     JNZ      12b
 
     ;# compute address of the first pixel in the line
-18: MOV      VgaCursorY(%rip), %rax    ;# RAX = VgaCursorY
-    SHL      $4, %rax                  ;# RAX = VgaCursorY*16
-    MOV      VgaScreenLine(%rip), %rdx ;# RDX = PPL
-    MUL      %rdx                      ;# RAX = VgaCursorY*16*PPL
-    SHL      $2, %rax                  ;# RAX = (VgaCursorY*16*PPL)*4
-    MOV      VgaMemVirt(%rip), %rsi
-    MOV      VgaMemPhys(%rip), %rdi
+18: MOV      KVGAY(%rip), %rax    ;# RAX = KVGAY
+    SHL      $4, %rax                  ;# RAX = KVGAY*16
+    MOV      KVGALINE(%rip), %rdx ;# RDX = PPL
+    MUL      %rdx                      ;# RAX = KVGAY*16*PPL
+    SHL      $2, %rax                  ;# RAX = (KVGAY*16*PPL)*4
+    MOV      KVGAVMEM(%rip), %rsi
+    MOV      KVGAPMEM(%rip), %rdi
     ADD      %rax, %rsi                ;# RSI = &buf[first-pixel-in-new-line]
     ADD      %rax, %rdi                ;# RDI = &vga[first-pixel-in-new-line]
 
     ;# compute number of pixels to erase
-    MOV      VgaScreenLine(%rip), %rcx
+    MOV      KVGALINE(%rip), %rcx
     SHL      $4, %rcx                  ;# RCX = PPL*16 (glyph/line height)
     SHL      $2, %rcx                  ;# RCX = PPL*16*4 (4 bytes/pixel)
 
     ;# load colour
-    MOV      VgaColourBg(%rip), %eax
+    MOV      KVGABG(%rip), %eax
 
     ;# draw current pixel
 19: MOV      %eax, (%rsi)              ;# draw pixel in virtual buffer
@@ -333,14 +333,14 @@
     RET
 
 ;###############################################################################
-;#                             KernelVgaColour()                               #
+;#                                KVGAATT()                                    #
 ;###############################################################################
 
     ;# declare a linker symbol
-    .set     KernelVgaColour, .
+    .set     KVGAATT, .
 
-    ;# load VgaColourPalette address
-    LEA      VgaColourPalette(%rip), %r8
+    ;# load KVGAPAL address
+    LEA      KVGAPAL(%rip), %r8
 
     ;# foreground colour specified?
 1:  CMP      $0x10, %rdi
@@ -349,7 +349,7 @@
     ;# read the RGB value from palette AND store it
     SHL      $3, %rdi
     MOV      (%r8, %rdi), %eax
-    MOV      %eax, VgaColourFg(%rip)
+    MOV      %eax, KVGAFG(%rip)
 
     ;# background colour specified?
 2:  CMP      $0x10, %rsi
@@ -358,7 +358,7 @@
     ;# read the RGB value from palette AND store it
     SHL      $3, %rsi
     MOV      (%r8, %rsi), %eax
-    MOV      %eax, VgaColourBg(%rip)
+    MOV      %eax, KVGABG(%rip)
 
     ;# done
 3:  XOR      %rax, %rax
@@ -375,57 +375,44 @@
 ;#                              MODULE DATA                                    #
 ;###############################################################################
 
-    ;# VgaInitInfo structure
-    .set     VgaAvailable, .
-    .quad    0
-    .set     VgaMemVirt, .
-    .quad    0
-    .set     VgaMemPhys, .
-    .quad    0
-    .set     VgaMemSize, .
-    .quad    0
-    .set     VgaScreenWidth, .
-    .quad    0
-    .set     VgaScreenLine, .
-    .quad    0
-    .set     VgaScreenHeight, .
-    .quad    0
+            ;# VgaInitInfo structure
+KVGAAVL:    DQ    0
+KVGAVMEM:   DQ    0
+KVGAPMEM:   DQ    0
+KVGASIZE:   DQ    0
+KVGAWIDE:   DQ    0
+KVGALINE:   DQ    0
+KVGAHIGH:   DQ    0
 
-    ;# Cursor attributes
-    .set     VgaCursorX, .
-    .quad    0
-    .set     VgaCursorY, .
-    .quad    0
+            ;# Cursor location
+KVGAX:      DQ    0
+KVGAY:      DQ    0
 
-    ;# output window size (number of glyphs per row/col)
-    .set     VgaOutputCols, .
-    .quad    0
-    .set     VgaOutputRows, .
-    .quad    0
+            ;# output window size (number of glyphs per row/col)
+KVGACOLS:   DQ    0
+KVGAROWS:   DQ    0
 
-    ;# default colours AND colour palette
-    .set     VgaColourFg, .
-    .quad    0x00FFFF00  ;# DEFAULT FOREGROUND COLOUR
-    .set     VgaColourBg, .
-    .quad    0x00010410  ;# DEFAULT BACKGROUND COLOUR
-    .set     VgaColourPalette, .
-    .quad    0x00000000  ;# 00: BLACK
-    .quad    0x00800000  ;# 01: MAROON
-    .quad    0x00008000  ;# 02: GREEN
-    .quad    0x00808000  ;# 03: OLIVE
-    .quad    0x00000080  ;# 04: NAVY
-    .quad    0x00800080  ;# 05: PURBLE
-    .quad    0x00008080  ;# 06: TEAL
-    .quad    0x00808080  ;# 07: SILVER
-    .quad    0x00C0C0C0  ;# 08: GREY
-    .quad    0x00FF0000  ;# 09: RED
-    .quad    0x0000FF00  ;# 0A: LIME
-    .quad    0x00FFFF00  ;# 0B: YELLOW
-    .quad    0x000000FF  ;# 0C: BLUE
-    .quad    0x00FF00FF  ;# 0D: PURBLE
-    .quad    0x0000FFFF  ;# 0E: CYAN
-    .quad    0x00FFFFFF  ;# 0F: WHITE
+            ;# default colours
+KVGAFG:     DQ    0x00FFFF00  ;# DEFAULT FOREGROUND COLOUR
+KVGABG:     DQ    0x00010410  ;# DEFAULT BACKGROUND COLOUR
 
-    ;# font data
-    .set     VgaFontData, .
-    .incbin  "kernel/font.bin"
+            ;# colour palette
+KVGAPAL:    DQ    0x00000000  ;# 00: BLACK
+            DQ    0x00800000  ;# 01: MAROON
+            DQ    0x00008000  ;# 02: GREEN
+            DQ    0x00808000  ;# 03: OLIVE
+            DQ    0x00000080  ;# 04: NAVY
+            DQ    0x00800080  ;# 05: PURBLE
+            DQ    0x00008080  ;# 06: TEAL
+            DQ    0x00808080  ;# 07: SILVER
+            DQ    0x00C0C0C0  ;# 08: GREY
+            DQ    0x00FF0000  ;# 09: RED
+            DQ    0x0000FF00  ;# 0A: LIME
+            DQ    0x00FFFF00  ;# 0B: YELLOW
+            DQ    0x000000FF  ;# 0C: BLUE
+            DQ    0x00FF00FF  ;# 0D: PURBLE
+            DQ    0x0000FFFF  ;# 0E: CYAN
+            DQ    0x00FFFFFF  ;# 0F: WHITE
+
+            ;# font data
+KVGAFONT:   .incbin  "kernel/font.bin"
