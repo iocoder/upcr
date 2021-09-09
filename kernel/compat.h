@@ -2,6 +2,7 @@
 #define COMPAT_H
 
 #define INCLUDE     .include
+#define INCBIN      .incbin
 #define PUBLIC      .global
 #define EQU         .equ
 #define SEGMENT     .section

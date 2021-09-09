@@ -37,7 +37,7 @@
 # LOWER 1MB OF MEMORY
 # --------------------------------------
 
-            .EQU    TRUMP_ADDR,      0x00000000     ;# real-mode trampoline
+            .EQU    TRUMP_ADDR,      0x00000000     ;# SMP trampoline
             .EQU    GDTR_ADDR,       0x00001000     ;# GDTR Descriptor
             .EQU    IDTR_ADDR,       0x00001800     ;# IDTR Descriptor
             .EQU    GDT_ADDR,        0x00002000     ;# GDT Table
