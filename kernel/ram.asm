@@ -55,15 +55,15 @@
 ;#-----------------------------------------------------------------------------#
 
 KRAMINIT:   ;# read KRAMAVL from init struct
-            MOV      0x38(%rdi), %rax
+            MOV      0x38(%r15), %rax
             MOV      %rax, KRAMAVL(%rip)
 
             ;# read KRAMSTART from init struct
-            MOV      0x40(%rdi), %rax
+            MOV      0x40(%r15), %rax
             MOV      %rax, KRAMSTART(%rip)
 
             ;# read KRAMEND from init struct
-            MOV      0x48(%rdi), %rax
+            MOV      0x48(%r15), %rax
             MOV      %rax, KRAMEND(%rip)
 
             ;# did the user provide RAM information anyways?

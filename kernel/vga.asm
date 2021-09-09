@@ -58,31 +58,31 @@
 ;#-----------------------------------------------------------------------------#
 
 KVGAINIT:   ;# read KVGAAVL from init struct
-            MOV      0x00(%rdi), %rax
+            MOV      0x00(%r15), %rax
             MOV      %rax, KVGAAVL(%rip)
 
             ;# read KVGAVMEM from init struct
-            MOV      0x08(%rdi), %rax
+            MOV      0x08(%r15), %rax
             MOV      %rax, KVGAVMEM(%rip)
 
             ;# read KVGAPMEM from init struct
-            MOV      0x10(%rdi), %rax
+            MOV      0x10(%r15), %rax
             MOV      %rax, KVGAPMEM(%rip)
 
             ;# read KVGASIZE from init struct
-            MOV      0x18(%rdi), %rax
+            MOV      0x18(%r15), %rax
             MOV      %rax, KVGASIZE(%rip)
 
             ;# read KVGAWIDE from init struct
-            MOV      0x20(%rdi), %rax
+            MOV      0x20(%r15), %rax
             MOV      %rax, KVGAWIDE(%rip)
 
             ;# read KVGAHIGH from init struct
-            MOV      0x28(%rdi), %rax
+            MOV      0x28(%r15), %rax
             MOV      %rax, KVGAHIGH(%rip)
 
             ;# read KVGALINE from init struct
-            MOV      0x30(%rdi), %rax
+            MOV      0x30(%r15), %rax
             MOV      %rax, KVGALINE(%rip)
 
             ;# did the user provide VGA information anyways?

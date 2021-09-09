@@ -54,51 +54,22 @@
 ;#                              KSYSINIT()                                     #
 ;#-----------------------------------------------------------------------------#
 
-KSYSINIT:   ;# initialize vga module
-            PUSH     %rdi
+KSYSINIT:   ;# take a copy of boot info ptr
+            MOV      %rdi, %r15
+
+            ;# initialize kernel modules
             CALL     KVGAINIT
-            POP      %rdi
-
-            ;# initialize log module
-            PUSH     %rdi
             CALL     KLOGINIT
-            POP      %rdi
-
-            ;# initialize ram module
-            PUSH     %rdi
             CALL     KRAMINIT
-            POP      %rdi
-
-            ;# initialize page module
-            PUSH     %rdi
             CALL     KVMMINIT
-            POP      %rdi
-
-            ;# initialize gdt module
-            PUSH     %rdi
             CALL     KGDTINIT
-            POP      %rdi
-
-            ;# initialize idt module
-            PUSH     %rdi
             CALL     KIDTINIT
-            POP      %rdi
-
-            ;# initialize tss module
-            PUSH     %rdi
             CALL     KTSSINIT
-            POP      %rdi
-
-            ;# initialize irq module
-            PUSH     %rdi
             CALL     KIRQINIT
-            POP      %rdi
-
-            ;# initialize smp module
-            PUSH     %rdi
             CALL     KSMPINIT
-            POP      %rdi
 
-            ;# done
+            ;# store success code in RAX
             XOR      %rax, %rax
+
+            ;# return to boot loader
             RET
