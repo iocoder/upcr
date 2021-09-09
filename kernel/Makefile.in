@@ -209,8 +209,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 TARGET = kernel
-SFILES_IN = $(shell ls ${srcdir}/*.S)
-SFILES_OUT = $(shell cd ${srcdir}; ls *.S | sed 's/\.S/\.o/g')
+SFILES_IN = $(shell ls ${srcdir}/*.asm)
+SFILES_OUT = $(shell cd ${srcdir}; ls *.asm | sed 's/\.asm/\.o/g')
 all: all-am
 
 .SUFFIXES:
@@ -404,6 +404,9 @@ clean:
 
 ${TARGET}.o: ${SFILES_OUT}
 	${LD} -r ${LDFLAGS} -o $@ $^
+
+%.S:%.asm
+	cp $< $@
 
 %.o:%.S
 	${CC} -c ${CCASFLAGS} -o $@ ${ASFLAGS} $<

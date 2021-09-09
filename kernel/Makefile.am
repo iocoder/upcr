@@ -3,8 +3,8 @@ TARGET=kernel
 CCASFLAGS=-I${top_srcdir}
 LDFLAGS=
 
-SFILES_IN=$(shell ls ${srcdir}/*.S)
-SFILES_OUT=$(shell cd ${srcdir}; ls *.S | sed 's/\.S/\.o/g')
+SFILES_IN=$(shell ls ${srcdir}/*.asm)
+SFILES_OUT=$(shell cd ${srcdir}; ls *.asm | sed 's/\.asm/\.o/g')
 
 all: ${TARGET}.o
 
@@ -13,6 +13,9 @@ clean:
 
 ${TARGET}.o: ${SFILES_OUT}
 	${LD} -r ${LDFLAGS} -o $@ $^
+
+%.S:%.asm
+	cp $< $@
 
 %.o:%.S
 	${CC} -c ${CCASFLAGS} -o $@ ${ASFLAGS} $<
