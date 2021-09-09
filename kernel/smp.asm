@@ -34,29 +34,29 @@
 ;###############################################################################
 
             ;# common definitions used by kernel
-            .INCLUDE "kernel/macro.inc"
+            INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
             ;# global symbols
-            .global  KSMPINIT
-            .global  KSMPEN
+            PUBLIC   KSMPINIT
+            PUBLIC   KSMPEN
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
             ;# text section
-            .text
+            SEGMENT  ".text"
 
 ;###############################################################################
 ;#                          REAL MODE TRAMPOLINE                               #
 ;###############################################################################
 
 KSMP16:     ;# 16-bit code
-            .code16
+            CODE16
 
             ;# first instruction executed by CPU core!!!
             MOV      $0x55AA, %ax
@@ -82,7 +82,7 @@ KSMP16:     ;# 16-bit code
             LJMP     $0x10, $(KSMP32-KSMP16)
 
 KSMP32:     ;# 32-bit code
-            .code32
+            CODE32
 
             ;# initialize segment registers
             MOV      $0x18, %ax
@@ -116,7 +116,7 @@ KSMP32:     ;# 32-bit code
             LJMP     $0x0020, $(KSMP64-KSMP16)
 
 KSMP64:     ;# 64-bit code
-            .code64
+            CODE64
 
             ;# initialize segment registers
             MOV      $0x0028, %ax
@@ -168,11 +168,11 @@ KSMP64:     ;# 64-bit code
             JMP      .
 
             ;# alignment for data
-            .align   8
+            ALIGN    8
 
             ;# SmpFunAddress
-            .set     SmpFunAddress, .
-            .quad    0
+            EQU      SmpFunAddress, .
+            DQ       0
 
 ;###############################################################################
 ;#                              KSMPINIT()                                     #
@@ -278,13 +278,13 @@ KSMPEN:     ;# acquire kernel lock to avoid race conditions with other CPUS
 ;###############################################################################
 
             ;# data section
-            .data
+            SEGMENT  ".data"
 
 ;###############################################################################
 ;#                            LOGGING STRINGS                                  #
 ;###############################################################################
 
             ;# SMP module name and messages
-KSMPNAME:   .ascii   " [KERNEL SMP] \0"
-KSMPMSG:    .ascii   "Detecting CPU cores available in the system...\0"
-KSMPID:     .ascii   "Successfully initialized CPU core with LAPIC ID: \0"
+KSMPNAME:   DB       " [KERNEL SMP] \0"
+KSMPMSG:    DB       "Detecting CPU cores available in the system...\0"
+KSMPID:     DB       "Successfully initialized CPU core with LAPIC ID: \0"

@@ -34,21 +34,21 @@
 ;###############################################################################
 
             ;# common definitions used by kernel
-            .INCLUDE "kernel/macro.inc"
+            INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
             ;# global symbols
-            .global  KRAMINIT
+            PUBLIC   KRAMINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
             ;# text section
-            .text
+            SEGMENT  ".text"
 
 ;###############################################################################
 ;#                              KRAMINIT()                                     #
@@ -140,7 +140,7 @@ KRAMINIT:   ;# read KRAMAVL from init struct
 ;###############################################################################
 
             ;# data section
-            .data
+            SEGMENT  ".data"
 
 ;###############################################################################
 ;#                              MODULE DATA                                    #
@@ -156,7 +156,7 @@ KRAMEND:    DQ       0
 ;###############################################################################
 
             ;# RAM heading and messages
-KRAMNAME:   .ascii   " [KERNEL RAM] \0"
-KRAMSTARTS: .ascii   "Detected RAM Start: \0"
-KRAMENDS:   .ascii   "Detected RAM End:   \0"
-KRAMESIZES: .ascii   "Detected RAM Size:  \0"
+KRAMNAME:   DB       " [KERNEL RAM] \0"
+KRAMSTARTS: DB       "Detected RAM Start: \0"
+KRAMENDS:   DB       "Detected RAM End:   \0"
+KRAMESIZES: DB       "Detected RAM Size:  \0"

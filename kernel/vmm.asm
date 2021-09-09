@@ -34,21 +34,21 @@
 ;###############################################################################
 
             ;# common definitions used by kernel
-            .INCLUDE "kernel/macro.inc"
+            INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
             ;# global symbols
-            .global  KVMMINIT
+            PUBLIC   KVMMINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
             ;# text section
-            .text
+            SEGMENT  ".text"
 
 ;###############################################################################
 ;#                               KVMMINIT()                                    #
@@ -94,12 +94,12 @@ KVMMINIT:   ;# print heading of line
 ;###############################################################################
 
             ;# data section
-            .data
+            SEGMENT  ".data"
 
 ;###############################################################################
 ;#                            LOGGING STRINGS                                  #
 ;###############################################################################
 
             ;# VMM heading and ascii strings
-KVMMNAME:   .ascii   " [KERNEL VMM] \0"
-KVMMMSG:    .ascii   "Initializing virtual memory manager...\0"
+KVMMNAME:   DB       " [KERNEL VMM] \0"
+KVMMMSG:    DB       "Initializing virtual memory manager...\0"

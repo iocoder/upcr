@@ -1,6 +1,6 @@
 TARGET=kernel
 
-CCASFLAGS=-I${top_srcdir}
+CCASFLAGS=-I${top_srcdir} -include "kernel/compat.h"
 LDFLAGS=
 
 SFILES_IN=$(shell ls ${srcdir}/*.asm)

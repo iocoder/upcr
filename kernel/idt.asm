@@ -34,7 +34,7 @@
 ;###############################################################################
 
             ;# common definitions used by kernel
-            .INCLUDE "kernel/macro.inc"
+            INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                 MACROS                                      #
@@ -70,48 +70,51 @@
 ;###############################################################################
 
             ;# global symbols
-            .global  KIDTINIT
+            PUBLIC   KIDTINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
             ;# text section
-            .text
+            SEGMENT  ".text"
 
 ;###############################################################################
 ;#                            EXCEPTION GATES                                  #
 ;###############################################################################
 
-            .MACRO   PUSHE   DummyErr
-            .IF      \DummyErr
-            PUSH     $0x00                      ;# PUSH a dummy error code
-            .ENDIF
-            .ENDM
+            ;# macro to push a dummy error code if needed
+            MACRO    PUSHE   DummyErr
+            IF       \DummyErr
+            PUSH     $0x00                      
+            ENDIF
+            ENDM
 
-            .MACRO   POPE   DummyErr
-            .IF      \DummyErr
-            ADD      $8, %rsp                   ;# POP dummy error code
-            .ENDIF
-            .ENDM
+            ;# macro to pop a dummy error code if needed
+            MACRO    POPE   DummyErr
+            IF       \DummyErr
+            ADD      $8, %rsp
+            ENDIF
+            ENDM
 
-            .MACRO   CHKDPL   CheckDPL
-            .IF      \CheckDPL
-            MOV      SFRAME_CS(%rsp), %rax   ;# load origin's CS
+            ;# macro to halt the kernel in case of DPL error
+            MACRO    CHKDPL   CheckDPL
+            IF       \CheckDPL
+            MOV      SFRAME_CS(%rsp), %rax      ;# load origin's CS
             AND      $3, %rax                   ;# test if origin is DPL3
             JNZ      1f                         ;# skip next lines if DPL3
-            CALL     KIRQIIPI              ;# DPL0: disable all other CPUs
+            CALL     KIRQIIPI                   ;# DPL0: disable all other CPUs
             MOV      %rsp, %rdi                 ;# DPL0: load stack frame address
-            CALL     KERRPANIC          ;# DPL0: kernel panic
+            CALL     KERRPANIC                  ;# DPL0: kernel panic
             HLT                                 ;# DPL0: halt here
             JMP      .                          ;# DPL0: LOOP forever
 1:          NOP
-            .ENDIF
-            .ENDM
+            ENDIF
+            ENDM
 
-            ;# template macro for all exception gates
-            .MACRO   GATE  Handler, ExpNbr, DummyErr, CheckDPL
-            .ALIGN   GATE_SIZE
+            ;# template macro for all IDT gates
+            MACRO    GATE  Handler, ExpNbr, DummyErr, CheckDPL
+            ALIGN    GATE_SIZE
             PUSHE    \DummyErr                  ;# PUSH dummy error if needed
             PUSH     \ExpNbr                    ;# PUSH exception number
             PUSH     %r15                       ;# PUSH a copy of R15
@@ -150,16 +153,16 @@
             POP      %r15                       ;# POP a copy of R15
             ADD      $8, %rsp                   ;# POP exception number
             POPE     \DummyErr                  ;# POP dummy error if needed
-            IRETQ                               ;# RETurn from exception
-            .ALIGN   GATE_SIZE
-            .ENDM
+            IRETQ                               ;# return from exception
+            ALIGN    GATE_SIZE
+            ENDM
 
 ;###############################################################################
 ;#                               IDT GATES                                     #
 ;###############################################################################
 
-            ;# align
-            .ALIGN   GATE_SIZE
+            ;# align to 256-byte border
+            ALIGN    GATE_SIZE
 
 ExpGates:   ;# 32 exception gates for 32 exceptions
             GATE     KIDTEXP, $0x00, 1, 1
@@ -349,9 +352,7 @@ KIDTINIT:   ;# print heading of line
 ;#                                KIDTEXP                                      #
 ;###############################################################################
 
-KIDTEXP:
-
-            ;# TODO:
+KIDTEXP:    ;# TODO:
             ;# -----
             ;# 1. acquire kernel lock
             ;# 2. handle exception by terminating the bad task
@@ -368,9 +369,7 @@ KIDTEXP:
 ;#                                 KIDTIRQ                                     #
 ;###############################################################################
 
-KIDTIRQ:
-
-            ;# TODO:
+KIDTIRQ:    ;# TODO:
             ;# -----
             ;# 1. acquire kernel lock
             ;# 2. handle irq
@@ -387,9 +386,7 @@ KIDTIRQ:
 ;#                                 KIDTSVC                                     #
 ;###############################################################################
 
-KIDTSVC:
-
-            ;# TODO:
+KIDTSVC:    ;# TODO:
             ;# -----
             ;# 1. acquire kernel lock
             ;# 2. handle system CALL
@@ -406,9 +403,7 @@ KIDTSVC:
 ;#                                 KIDTIPI                                     #
 ;###############################################################################
 
-KIDTIPI:
-
-            ;# TODO:
+KIDTIPI:    ;# TODO:
             ;# -----
             ;# 1. acquire kernel lock
             ;# 2. handle inter-process interrupt
@@ -426,12 +421,12 @@ KIDTIPI:
 ;###############################################################################
 
             ;# data section
-            .data
+            SEGMENT  ".data"
 
 ;###############################################################################
 ;#                            LOGGING STRINGS                                  #
 ;###############################################################################
 
             ;# IDT heading and ascii strings
-KIDTNAME:   .ascii   " [KERNEL IDT] \0"
-KIDTMSG:    .ascii   "Initializing IDT module...\0"
+KIDTNAME:   DB       " [KERNEL IDT] \0"
+KIDTMSG:    DB       "Initializing IDT module...\0"

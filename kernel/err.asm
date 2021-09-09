@@ -34,21 +34,21 @@
 ;###############################################################################
 
             ;# common definitions used by kernel
-            .INCLUDE "kernel/macro.inc"
+            INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
             ;# global symbols
-            .global  KERRPANIC
+            PUBLIC   KERRPANIC
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
             ;# text section
-            .text
+            SEGMENT  ".text"
 
 ;###############################################################################
 ;#                              KERRPANIC()                                    #
@@ -399,88 +399,95 @@ KERRPANIC:  ;# set panic colour
 ;###############################################################################
 
             ;# data section
-            .data
+            SEGMENT  ".data"
 
 ;###############################################################################
 ;#                            LOGGING STRINGS                                  #
 ;###############################################################################
 
             ;# Panic header
-KERRHDR:    .ascii   "\n"
-            .ascii   "\n"
-            .ascii   "  =========================================="
-            .ascii   "=========================================\n"
-            .ascii   "                                   KERNEL PANIC !!!\n"
-            .ascii   "  =========================================="
-            .ascii   "=========================================\n"
-            .ascii   "\n"
-            .ascii   "\0"
+KERRHDR:    DB       "\n"
+            DB       "\n"
+            DB       "  "
+            DB       "=========================================="
+            DB       "=========================================="
+            DB       "\n"
+            DB       "                                   "
+            DB       "KERNEL PANIC !!!"
+            DB       "\n"
+            DB       "=========================================="
+            DB       "=========================================="
+            DB       "\n"
+            DB       "\n"
+            DB       "\0"
 
             ;# panic horizontal line
-KERRHR:     .ascii   "\n"
-            .ascii   "\n"
-            .ascii   "  ------------------------------------------"
-            .ascii   "-----------------------------------------\n"
-            .ascii   "\n"
-            .ascii   "\0"
+KERRHR:     DB       "\n"
+            DB       "\n"
+            DB       "  "
+            DB       "------------------------------------------"
+            DB       "------------------------------------------"
+            DB       "\n"
+            DB       "\n"
+            DB       "\0"
 
             ;# registers
-KERREXPN:   .ascii   "  EXCEPTION NAME: \0"
-KERREXPC:   .ascii   "  EXCEPTION CODE: \0"
-KERRCODE:   .ascii   "  ERROR CODE:     \0"
-KERRCORE:   .ascii   "  CPU CORE:       \0"
-KERRCS:     .ascii   "  CS:  \0"
-KERRRIP:    .ascii   "  RIP: \0"
-KERRFLG:    .ascii   "  RFLAGS: \0"
-KERRSS:     .ascii   "  SS:  \0"
-KERRRSP:    .ascii   "  RSP: \0"
-KERRRAX:    .ascii   "  RAX: \0"
-KERRRBX:    .ascii   "  RBX: \0"
-KERRRCX:    .ascii   "  RCX: \0"
-KERRRDX:    .ascii   "  RDX: \0"
-KERRRSI:    .ascii   "  RSI: \0"
-KERRRDI:    .ascii   "  RDI: \0"
-KERRRBP:    .ascii   "  RBP: \0"
-KERRR8:     .ascii   "  R8:  \0"
-KERRR9:     .ascii   "  R9:  \0"
-KERRR10:    .ascii   "  R10: \0"
-KERRR11:    .ascii   "  R11: \0"
-KERRR12:    .ascii   "  R12: \0"
-KERRR13:    .ascii   "  R13: \0"
-KERRR14:    .ascii   "  R14: \0"
-KERRR15:    .ascii   "  R15: \0"
+KERREXPN:   DB       "  EXCEPTION NAME: \0"
+KERREXPC:   DB       "  EXCEPTION CODE: \0"
+KERRCODE:   DB       "  ERROR CODE:     \0"
+KERRCORE:   DB       "  CPU CORE:       \0"
+KERRCS:     DB       "  CS:  \0"
+KERRRIP:    DB       "  RIP: \0"
+KERRFLG:    DB       "  RFLAGS: \0"
+KERRSS:     DB       "  SS:  \0"
+KERRRSP:    DB       "  RSP: \0"
+KERRRAX:    DB       "  RAX: \0"
+KERRRBX:    DB       "  RBX: \0"
+KERRRCX:    DB       "  RCX: \0"
+KERRRDX:    DB       "  RDX: \0"
+KERRRSI:    DB       "  RSI: \0"
+KERRRDI:    DB       "  RDI: \0"
+KERRRBP:    DB       "  RBP: \0"
+KERRR8:     DB       "  R8:  \0"
+KERRR9:     DB       "  R9:  \0"
+KERRR10:    DB       "  R10: \0"
+KERRR11:    DB       "  R11: \0"
+KERRR12:    DB       "  R12: \0"
+KERRR13:    DB       "  R13: \0"
+KERRR14:    DB       "  R14: \0"
+KERRR15:    DB       "  R15: \0"
 
             ;# exception names
-KERRSTR:    .ascii   "DIVISION BY ZERO EXCEPTION     \0"  ;# 0x00
-            .ascii   "DEBUG EXCEPTION                \0"  ;# 0x01
-            .ascii   "NON MASKABLE INTERRUPT         \0"  ;# 0x02
-            .ascii   "BREAKPOINT EXCEPTION           \0"  ;# 0x03
-            .ascii   "OVERFLOW EXCEPTION             \0"  ;# 0x04
-            .ascii   "BOUND RANGE                    \0"  ;# 0x05
-            .ascii   "INVALID OPCODE                 \0"  ;# 0x06
-            .ascii   "DEVICE NOT AVAILABLE           \0"  ;# 0x07
-            .ascii   "DOUBLE FAULT                   \0"  ;# 0x08
-            .ascii   "UNSUPPORTED                    \0"  ;# 0x09
-            .ascii   "INVALID TSS                    \0"  ;# 0x0A
-            .ascii   "SEGMENT NOT PRESENT            \0"  ;# 0x0B
-            .ascii   "STACK EXCEPTION                \0"  ;# 0x0C
-            .ascii   "GENERAL PROTECTION ERROR       \0"  ;# 0x0D
-            .ascii   "PAGE FAULT                     \0"  ;# 0x0E
-            .ascii   "RESERVED                       \0"  ;# 0x0F
-            .ascii   "X87 FLOATING POINT EXCEPTION   \0"  ;# 0x10
-            .ascii   "ALIGNMENT CHECK                \0"  ;# 0x11
-            .ascii   "MACHINE CHECK                  \0"  ;# 0x12
-            .ascii   "SIMD FLOATING POINT EXCEPTION  \0"  ;# 0x13
-            .ascii   "RESERVED                       \0"  ;# 0x14
-            .ascii   "CONTROL PROTECTION EXCEPTION   \0"  ;# 0x15
-            .ascii   "RESERVED                       \0"  ;# 0x16
-            .ascii   "RESERVED                       \0"  ;# 0x17
-            .ascii   "RESERVED                       \0"  ;# 0x18
-            .ascii   "RESERVED                       \0"  ;# 0x19
-            .ascii   "RESERVED                       \0"  ;# 0x1A
-            .ascii   "RESERVED                       \0"  ;# 0x1B
-            .ascii   "HYPERVISOR INJECTION EXCEPTION \0"  ;# 0x1C
-            .ascii   "VMM COMMUNICATION EXCEPTION    \0"  ;# 0x1D
-            .ascii   "SECURITY EXCEPTION             \0"  ;# 0x1E
-            .ascii   "RESERVED                       \0"  ;# 0x1F
+KERRSTR:    DB       "DIVISION BY ZERO EXCEPTION     \0"  ;# 0x00
+            DB       "DEBUG EXCEPTION                \0"  ;# 0x01
+            DB       "NON MASKABLE INTERRUPT         \0"  ;# 0x02
+            DB       "BREAKPOINT EXCEPTION           \0"  ;# 0x03
+            DB       "OVERFLOW EXCEPTION             \0"  ;# 0x04
+            DB       "BOUND RANGE                    \0"  ;# 0x05
+            DB       "INVALID OPCODE                 \0"  ;# 0x06
+            DB       "DEVICE NOT AVAILABLE           \0"  ;# 0x07
+            DB       "DOUBLE FAULT                   \0"  ;# 0x08
+            DB       "UNSUPPORTED                    \0"  ;# 0x09
+            DB       "INVALID TSS                    \0"  ;# 0x0A
+            DB       "SEGMENT NOT PRESENT            \0"  ;# 0x0B
+            DB       "STACK EXCEPTION                \0"  ;# 0x0C
+            DB       "GENERAL PROTECTION ERROR       \0"  ;# 0x0D
+            DB       "PAGE FAULT                     \0"  ;# 0x0E
+            DB       "RESERVED                       \0"  ;# 0x0F
+            DB       "X87 FLOATING POINT EXCEPTION   \0"  ;# 0x10
+            DB       "ALIGNMENT CHECK                \0"  ;# 0x11
+            DB       "MACHINE CHECK                  \0"  ;# 0x12
+            DB       "SIMD FLOATING POINT EXCEPTION  \0"  ;# 0x13
+            DB       "RESERVED                       \0"  ;# 0x14
+            DB       "CONTROL PROTECTION EXCEPTION   \0"  ;# 0x15
+            DB       "RESERVED                       \0"  ;# 0x16
+            DB       "RESERVED                       \0"  ;# 0x17
+            DB       "RESERVED                       \0"  ;# 0x18
+            DB       "RESERVED                       \0"  ;# 0x19
+            DB       "RESERVED                       \0"  ;# 0x1A
+            DB       "RESERVED                       \0"  ;# 0x1B
+            DB       "HYPERVISOR INJECTION EXCEPTION \0"  ;# 0x1C
+            DB       "VMM COMMUNICATION EXCEPTION    \0"  ;# 0x1D
+            DB       "SECURITY EXCEPTION             \0"  ;# 0x1E
+            DB       "RESERVED                       \0"  ;# 0x1F
             ;#       "0123456789ABCDEF0123456789ABCDEF"

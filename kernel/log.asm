@@ -34,27 +34,27 @@
 ;###############################################################################
 
             ;# common definitions used by kernel
-            .INCLUDE "kernel/macro.inc"
+            INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
             ;# global symbols
-            .global  KLOGINIT
-            .global  KLOGCHR
-            .global  KLOGDEC
-            .global  KLOGHEX
-            .global  KLOGSTR
-            .global  KLOGATT
-            .global  KLOGCLR
+            PUBLIC   KLOGINIT
+            PUBLIC   KLOGCHR
+            PUBLIC   KLOGDEC
+            PUBLIC   KLOGHEX
+            PUBLIC   KLOGSTR
+            PUBLIC   KLOGATT
+            PUBLIC   KLOGCLR
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
             ;# text section
-            .text
+            SEGMENT  ".text"
 
 ;###############################################################################
 ;#                               KLOGINIT()                                    #
@@ -256,14 +256,14 @@ KLOGCLR:    ;# clear vga screen
 ;###############################################################################
 
             ;# data section
-            .data
+            SEGMENT  ".data"
 
 ;###############################################################################
 ;#                              MODULE DATA                                    #
 ;###############################################################################
 
             ;# digits to print
-KLOGDIGS:   .ascii   "0123456789ABCDEF"
+KLOGDIGS:   DB       "0123456789ABCDEF"
 
 ;###############################################################################
 ;#                            LOGGING STRINGS                                  #
@@ -271,12 +271,12 @@ KLOGDIGS:   .ascii   "0123456789ABCDEF"
 
             ;# header text
 KLOGHDR:    .INCBIN  "kernel/header.txt"
-            .ascii   "\0"
+            DB       "\0"
 
             ;# welcome text
 KLOGWEL:    .INCBIN  "kernel/welcome.txt"
-            .ascii   "\0"
+            DB       "\0"
 
             ;# license text
 KLOGLIC:    .INCBIN  "kernel/license.txt"
-            .ascii   "\0"
+            DB       "\0"

@@ -34,21 +34,21 @@
 ;###############################################################################
 
             ;# common definitions used by kernel
-            .INCLUDE "kernel/macro.inc"
+            INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
             ;# global symbols
-            .global  KGDTINIT
+            PUBLIC   KGDTINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
             ;# text section
-            .text
+            SEGMENT  ".text"
 
 ;###############################################################################
 ;#                                KGDTINIT()                                   #
@@ -115,7 +115,7 @@ KGDTINIT:   ;# print heading of line
 ;###############################################################################
 
             ;# data section
-            .data
+            SEGMENT  ".data"
 
 ;###############################################################################
 ;#                              MODULE DATA                                    #
@@ -133,7 +133,7 @@ KGDTSTART:  DQ       0x0000000000000000  ;# 0x00
 
             ;# GDTR descriptor
 KGDTDESC:   DW       0xFFF
-            DL       GDT_ADDR
+            DD       GDT_ADDR
             DW       0
 
 ;###############################################################################
@@ -141,5 +141,5 @@ KGDTDESC:   DW       0xFFF
 ;###############################################################################
 
             ;# GDT heading and ascii strings
-KGDTNAME:   .ascii   " [KERNEL GDT] \0"
-KGDTMSG:    .ascii   "Initializing GDT module...\0"
+KGDTNAME:   DB       " [KERNEL GDT] \0"
+KGDTMSG:    DB       "Initializing GDT module...\0"
