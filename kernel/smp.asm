@@ -186,17 +186,9 @@ KSMP64:     ;# 64-bit code
 ;#                              KSMPINIT()                                     #
 ;#-----------------------------------------------------------------------------#
 
-KSMPINIT:   ;# print heading of line
-            MOV      $0x0A, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
+KSMPINIT:   ;# print init msg
             LEA      KSMPNAME(%rip), %rdi
-            CALL     KLOGSTR
-            MOV      $0x0B, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
-
-            ;# print module info
+            CALL     KLOGMOD
             LEA      KSMPMSG(%rip), %rdi
             CALL     KLOGSTR
             MOV      $'\n', %rdi
@@ -243,19 +235,9 @@ KSMPEN:     ;# acquire kernel lock to avoid race conditions with other CPUS
             ;# initialize LAPIC AND enable IRQs
             CALL     KIRQEN
 
-            ;# set heading colour
-            MOV      $0x0A, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
-
             ;# print module name
             LEA      KSMPNAME(%rip), %rdi
-            CALL     KLOGSTR
-
-            ;# reset colour
-            MOV      $0x0B, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
+            CALL     KLOGMOD
 
             ;# print lapic detection string
             LEA      KSMPID(%rip), %rdi
@@ -293,6 +275,6 @@ KSMPEN:     ;# acquire kernel lock to avoid race conditions with other CPUS
 ;#-----------------------------------------------------------------------------#
 
             ;# SMP module name and messages
-KSMPNAME:   DB       " [KERNEL SMP] \0"
+KSMPNAME:   DB       "KERNEL SMP\0"
 KSMPMSG:    DB       "Detecting CPU cores available in the system...\0"
 KSMPID:     DB       "Successfully initialized CPU core with LAPIC ID: \0"

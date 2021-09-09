@@ -54,17 +54,9 @@
 ;#                                KGDTINIT()                                   #
 ;#-----------------------------------------------------------------------------#
 
-KGDTINIT:   ;# print heading of line
-            MOV      $0x0A, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
+KGDTINIT:   ;# print init msg
             LEA      KGDTNAME(%rip), %rdi
-            CALL     KLOGSTR
-            MOV      $0x0B, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
-
-            ;# print module info
+            CALL     KLOGMOD
             LEA      KGDTMSG(%rip), %rdi
             CALL     KLOGSTR
             MOV      $'\n', %rdi
@@ -141,5 +133,5 @@ KGDTDESC:   DW       0xFFF
 ;###############################################################################
 
             ;# GDT heading and ascii strings
-KGDTNAME:   DB       " [KERNEL GDT] \0"
+KGDTNAME:   DB       "KERNEL GDT\0"
 KGDTMSG:    DB       "Initializing GDT module...\0"

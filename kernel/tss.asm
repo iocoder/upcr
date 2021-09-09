@@ -54,17 +54,9 @@
 ;#                               KTSSINIT()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KTSSINIT:   ;# print heading of line
-            MOV      $0x0A, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
+KTSSINIT:   ;# print init msg
             LEA      KTSSNAME(%rip), %rdi
-            CALL     KLOGSTR
-            MOV      $0x0B, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
-
-            ;# print module info
+            CALL     KLOGMOD
             LEA      KTSSMSG(%rip), %rdi
             CALL     KLOGSTR
             MOV      $'\n', %rdi
@@ -86,5 +78,5 @@ KTSSINIT:   ;# print heading of line
 ;#-----------------------------------------------------------------------------#
 
             ;# TSS module name and messages
-KTSSNAME:   DB       " [KERNEL TSS] \0"
+KTSSNAME:   DB       "KERNEL TSS\0"
 KTSSMSG:    DB       "Initializing TSS module...\0"

@@ -48,6 +48,7 @@
             PUBLIC   KLOGSTR
             PUBLIC   KLOGATT
             PUBLIC   KLOGCLR
+            PUBLIC   KLOGMOD
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -233,7 +234,6 @@ KLOGATT:    ;# set vga colours
             XOR      %rax, %rax
             RET
 
-
 ;#-----------------------------------------------------------------------------#
 ;#                                KLOGCLR()                                   #
 ;#-----------------------------------------------------------------------------#
@@ -246,6 +246,45 @@ KLOGCLR:    ;# clear vga screen
             POP      %rsi
             POP      %rdi
             POP      %rcx
+
+            ;# done
+            XOR      %rax, %rax
+            RET
+
+;#-----------------------------------------------------------------------------#
+;#                                KLOGMOD()                                    #
+;#-----------------------------------------------------------------------------#
+
+KLOGMOD:    ;# save a copy of RDI
+            PUSH     %rdi
+
+            ;# change colour to yellow
+            MOV      $0x0A, %rdi
+            MOV      $-1, %rsi
+            CALL     KLOGATT
+
+            ;# print " ["
+            MOV      $' ', %rdi
+            CALL     KLOGCHR
+            MOV      $'[', %rdi
+            CALL     KLOGCHR
+
+            ;# restore RDI
+            POP      %rdi
+
+            ;# print the name of the module
+            CALL     KLOGSTR
+
+            ;# print "] "
+            MOV      $']', %rdi
+            CALL     KLOGCHR
+            MOV      $' ', %rdi
+            CALL     KLOGCHR
+
+            ;# reset colour to white
+            MOV      $0x0B, %rdi
+            MOV      $-1, %rsi
+            CALL     KLOGATT
 
             ;# done
             XOR      %rax, %rax

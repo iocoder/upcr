@@ -54,17 +54,9 @@
 ;#                               KVMMINIT()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KVMMINIT:   ;# print heading of line
-            MOV      $0x0A, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
+KVMMINIT:   ;# print init msg
             LEA      KVMMNAME(%rip), %rdi
-            CALL     KLOGSTR
-            MOV      $0x0B, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
-
-            ;# print module info
+            CALL     KLOGMOD
             LEA      KVMMMSG(%rip), %rdi
             CALL     KLOGSTR
             MOV      $'\n', %rdi
@@ -101,5 +93,5 @@ KVMMINIT:   ;# print heading of line
 ;#-----------------------------------------------------------------------------#
 
             ;# VMM heading and ascii strings
-KVMMNAME:   DB       " [KERNEL VMM] \0"
+KVMMNAME:   DB       "KERNEL VMM\0"
 KVMMMSG:    DB       "Initializing virtual memory manager...\0"

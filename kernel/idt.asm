@@ -223,17 +223,9 @@ SvcGates:   ;# 1 SVC gate for 1 SVC
 ;#                                KIDTINIT()                                   #
 ;#-----------------------------------------------------------------------------#
 
-KIDTINIT:   ;# print heading of line
-            MOV      $0x0A, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
+KIDTINIT:   ;# print init msg
             LEA      KIDTNAME(%rip), %rdi
-            CALL     KLOGSTR
-            MOV      $0x0B, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
-
-            ;# print module info
+            CALL     KLOGMOD
             LEA      KIDTMSG(%rip), %rdi
             CALL     KLOGSTR
             MOV      $'\n', %rdi
@@ -428,5 +420,5 @@ KIDTIPI:    ;# TODO:
 ;#-----------------------------------------------------------------------------#
 
             ;# IDT heading and ascii strings
-KIDTNAME:   DB       " [KERNEL IDT] \0"
+KIDTNAME:   DB       "KERNEL IDT\0"
 KIDTMSG:    DB       "Initializing IDT module...\0"

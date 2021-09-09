@@ -66,22 +66,9 @@ KRAMINIT:   ;# read KRAMAVL from init struct
             MOV      0x48(%r15), %rax
             MOV      %rax, KRAMEND(%rip)
 
-            ;# did the user provide RAM information anyways?
-            MOV      KRAMAVL(%rip), %rax
-            CMP      $0, %rax
-            JZ       1f
-
-            ;# print heading of line
-            MOV      $0x0A, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
-            LEA      KRAMNAME(%rip), %rdi
-            CALL     KLOGSTR
-            MOV      $0x0B, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
-
             ;# print ram start
+            LEA      KRAMNAME(%rip), %rdi
+            CALL     KLOGMOD
             LEA      KRAMSTARTS(%rip), %rdi
             CALL     KLOGSTR
             MOV      KRAMSTART(%rip), %rdi
@@ -89,17 +76,9 @@ KRAMINIT:   ;# read KRAMAVL from init struct
             MOV      $'\n', %rdi
             CALL     KLOGCHR
 
-            ;# print heading of line
-            MOV      $0x0A, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
+            ;# print ram end
             LEA      KRAMNAME(%rip), %rdi
-            CALL     KLOGSTR
-            MOV      $0x0B, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
-
-            ;# print ram end line
+            CALL     KLOGMOD
             LEA      KRAMENDS(%rip), %rdi
             CALL     KLOGSTR
             MOV      KRAMEND(%rip), %rdi
@@ -107,17 +86,9 @@ KRAMINIT:   ;# read KRAMAVL from init struct
             MOV      $'\n', %rdi
             CALL     KLOGCHR
 
-            ;# print heading of line
-            MOV      $0x0A, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
+            ;# print ram size
             LEA      KRAMNAME(%rip), %rdi
-            CALL     KLOGSTR
-            MOV      $0x0B, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
-
-            ;# print ram size line
+            CALL     KLOGMOD
             LEA      KRAMESIZES(%rip), %rdi
             CALL     KLOGSTR
             MOV      KRAMEND(%rip), %rdi
@@ -132,7 +103,7 @@ KRAMINIT:   ;# read KRAMAVL from init struct
             CALL     KLOGCHR
 
             ;# done
-1:          XOR      %rax, %rax
+            XOR      %rax, %rax
             RET
 
 ;###############################################################################
@@ -156,7 +127,7 @@ KRAMEND:    DQ       0
 ;#-----------------------------------------------------------------------------#
 
             ;# RAM heading and messages
-KRAMNAME:   DB       " [KERNEL RAM] \0"
+KRAMNAME:   DB       "KERNEL RAM\0"
 KRAMSTARTS: DB       "Detected RAM Start: \0"
 KRAMENDS:   DB       "Detected RAM End:   \0"
 KRAMESIZES: DB       "Detected RAM Size:  \0"

@@ -57,17 +57,9 @@
 ;#                               KIRQINIT()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KIRQINIT:   ;# print heading of line
-            MOV      $0x0A, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
+KIRQINIT:   ;# print init msg
             LEA      KIRQNAME(%rip), %rdi
-            CALL     KLOGSTR
-            MOV      $0x0B, %rdi
-            MOV      $-1, %rsi
-            CALL     KLOGATT
-
-            ;# print irq module info
+            CALL     KLOGMOD
             LEA      KIRQMSG(%rip), %rdi
             CALL     KLOGSTR
             MOV      $'\n', %rdi
@@ -143,5 +135,5 @@ KIRQSIPI:   ;# broadcast the SIPI IPI to all processors except self
 ;#-----------------------------------------------------------------------------#
 
             ;# IRQ heading and ascii strings
-KIRQNAME:   DB       " [KERNEL IRQ] \0"
+KIRQNAME:   DB       "KERNEL IRQ\0"
 KIRQMSG:    DB       "Supported x86 interrupt controllers: LAPIC, I/O APIC.\0"
