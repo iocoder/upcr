@@ -8,13 +8,13 @@
 # Copyright (c) 2021 Ramses A.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
+# of this software AND associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# to use, copy, modify, merge, publish, distribute, sublicense, AND/or sell
+# copies of the Software, AND to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
+# The above copyright notice AND this permission notice shall be included in all
 # copies or substantial portions of the Software.
 #
 ###############################################################################
@@ -80,55 +80,55 @@
     .macro   ExpGate  ExpNbr, DummyErr
     .align   GATE_SIZE
     .if      \DummyErr
-    pushq    $0x00               # push a dummy error code
+    PUSH     $0x00               # PUSH a dummy error code
     .endif
-    pushq    \ExpNbr                    # push exception number
-    pushq    %r15                       # push a copy of R15
-    pushq    %r14                       # push a copy of R14
-    pushq    %r13                       # push a copy of R13
-    pushq    %r12                       # push a copy of R12
-    pushq    %r11                       # push a copy of R11
-    pushq    %r10                       # push a copy of R10
-    pushq    %r9                        # push a copy of R9
-    pushq    %r8                        # push a copy of R8
-    pushq    %rbp                       # push a copy of RBP
-    pushq    %rdi                       # push a copy of RDI
-    pushq    %rsi                       # push a copy of RSI
-    pushq    %rdx                       # push a copy of RDX
-    pushq    %rcx                       # push a copy of RCX
-    pushq    %rbx                       # push a copy of RBX
-    pushq    %rax                       # push a copy of RAX
-    subq     $0x50, %rsp                # push padding
-    movq     StackFrameCS(%rsp), %rax   # load origin's CS
-    andq     $3, %rax                   # test if origin is DPL3
-    jnz      1f                         # skip next lines if DPL3
-    call     KernelIrqIipi              # DPL0: disable all other CPUs
-    movq     %rsp, %rdi                 # DPL0: load stack frame address
-    call     KernelPanicHandle          # DPL0: kernel panic
-    hlt                                 # DPL0: halt here
-    jmp      .                          # DPL0: loop forever
-1:  call     KernelIdtExp               # DPL3: handle current task exception
-    addq     $0x50, %rsp                # pop padding
-    popq     %rax                       # pop a copy of RAX
-    popq     %rbx                       # pop a copy of RBX
-    popq     %rcx                       # pop a copy of RCX
-    popq     %rdx                       # pop a copy of RDX
-    popq     %rsi                       # pop a copy of RSI
-    popq     %rdi                       # pop a copy of RDI
-    popq     %rbp                       # pop a copy of RBP
-    popq     %r8                        # pop a copy of R8
-    popq     %r9                        # pop a copy of R9
-    popq     %r10                       # pop a copy of R10
-    popq     %r11                       # pop a copy of R11
-    popq     %r12                       # pop a copy of R12
-    popq     %r13                       # pop a copy of R13
-    popq     %r14                       # pop a copy of R14
-    popq     %r15                       # pop a copy of R15
-    addq     $8, %rsp                   # pop exception number
+    PUSH     \ExpNbr                    # PUSH exception number
+    PUSH     %r15                       # PUSH a copy of R15
+    PUSH     %r14                       # PUSH a copy of R14
+    PUSH     %r13                       # PUSH a copy of R13
+    PUSH     %r12                       # PUSH a copy of R12
+    PUSH     %r11                       # PUSH a copy of R11
+    PUSH     %r10                       # PUSH a copy of R10
+    PUSH     %r9                        # PUSH a copy of R9
+    PUSH     %r8                        # PUSH a copy of R8
+    PUSH     %rbp                       # PUSH a copy of RBP
+    PUSH     %rdi                       # PUSH a copy of RDI
+    PUSH     %rsi                       # PUSH a copy of RSI
+    PUSH     %rdx                       # PUSH a copy of RDX
+    PUSH     %rcx                       # PUSH a copy of RCX
+    PUSH     %rbx                       # PUSH a copy of RBX
+    PUSH     %rax                       # PUSH a copy of RAX
+    SUB      $0x50, %rsp                # PUSH padding
+    MOV      StackFrameCS(%rsp), %rax   # load origin's CS
+    AND      $3, %rax                   # test if origin is DPL3
+    JNZ      1f                         # skip next lines if DPL3
+    CALL     KernelIrqIipi              # DPL0: disable all other CPUs
+    MOV      %rsp, %rdi                 # DPL0: load stack frame address
+    CALL     KernelPanicHandle          # DPL0: kernel panic
+    HLT                                 # DPL0: halt here
+    JMP      .                          # DPL0: LOOP forever
+1:  CALL     KernelIdtExp               # DPL3: handle current task exception
+    ADD      $0x50, %rsp                # POP padding
+    POP      %rax                       # POP a copy of RAX
+    POP      %rbx                       # POP a copy of RBX
+    POP      %rcx                       # POP a copy of RCX
+    POP      %rdx                       # POP a copy of RDX
+    POP      %rsi                       # POP a copy of RSI
+    POP      %rdi                       # POP a copy of RDI
+    POP      %rbp                       # POP a copy of RBP
+    POP      %r8                        # POP a copy of R8
+    POP      %r9                        # POP a copy of R9
+    POP      %r10                       # POP a copy of R10
+    POP      %r11                       # POP a copy of R11
+    POP      %r12                       # POP a copy of R12
+    POP      %r13                       # POP a copy of R13
+    POP      %r14                       # POP a copy of R14
+    POP      %r15                       # POP a copy of R15
+    ADD      $8, %rsp                   # POP exception number
     .if      \DummyErr
-    addq     $8, %rsp                   # pop dummy error code
+    ADD      $8, %rsp                   # POP dummy error code
     .endif
-    iretq                               # return from exception
+    iRETq                               # RETurn from exception
     .align   GATE_SIZE
     .endm
 
@@ -177,45 +177,45 @@
     # template macro for all IRQ gates
     .macro   IrqGate  IrqNbr
     .align   GATE_SIZE
-    pushq    $0x00                      # push a dummy error code
-    pushq    \IrqNbr                    # push IRQ number
-    pushq    %r15                       # push a copy of R15
-    pushq    %r14                       # push a copy of R14
-    pushq    %r13                       # push a copy of R13
-    pushq    %r12                       # push a copy of R12
-    pushq    %r11                       # push a copy of R11
-    pushq    %r10                       # push a copy of R10
-    pushq    %r9                        # push a copy of R9
-    pushq    %r8                        # push a copy of R8
-    pushq    %rbp                       # push a copy of RBP
-    pushq    %rdi                       # push a copy of RDI
-    pushq    %rsi                       # push a copy of RSI
-    pushq    %rdx                       # push a copy of RDX
-    pushq    %rcx                       # push a copy of RCX
-    pushq    %rbx                       # push a copy of RBX
-    pushq    %rax                       # push a copy of RAX
-    subq     $0x50, %rsp                # push padding
-    movq     %rsp, %rdi                 # address of register info
-    call     KernelIdtIrq               # handle external IRQ
-    addq     $0x50, %rsp                # pop padding
-    popq     %rax                       # pop a copy of RAX
-    popq     %rbx                       # pop a copy of RBX
-    popq     %rcx                       # pop a copy of RCX
-    popq     %rdx                       # pop a copy of RDX
-    popq     %rsi                       # pop a copy of RSI
-    popq     %rdi                       # pop a copy of RDI
-    popq     %rbp                       # pop a copy of RBP
-    popq     %r8                        # pop a copy of R8
-    popq     %r9                        # pop a copy of R9
-    popq     %r10                       # pop a copy of R10
-    popq     %r11                       # pop a copy of R11
-    popq     %r12                       # pop a copy of R12
-    popq     %r13                       # pop a copy of R13
-    popq     %r14                       # pop a copy of R14
-    popq     %r15                       # pop a copy of R15
-    addq     $8, %rsp                   # pop exception number
-    addq     $8, %rsp                   # pop dummy error code
-    iretq                               # return from exception
+    PUSH     $0x00                      # PUSH a dummy error code
+    PUSH     \IrqNbr                    # PUSH IRQ number
+    PUSH     %r15                       # PUSH a copy of R15
+    PUSH     %r14                       # PUSH a copy of R14
+    PUSH     %r13                       # PUSH a copy of R13
+    PUSH     %r12                       # PUSH a copy of R12
+    PUSH     %r11                       # PUSH a copy of R11
+    PUSH     %r10                       # PUSH a copy of R10
+    PUSH     %r9                        # PUSH a copy of R9
+    PUSH     %r8                        # PUSH a copy of R8
+    PUSH     %rbp                       # PUSH a copy of RBP
+    PUSH     %rdi                       # PUSH a copy of RDI
+    PUSH     %rsi                       # PUSH a copy of RSI
+    PUSH     %rdx                       # PUSH a copy of RDX
+    PUSH     %rcx                       # PUSH a copy of RCX
+    PUSH     %rbx                       # PUSH a copy of RBX
+    PUSH     %rax                       # PUSH a copy of RAX
+    SUB      $0x50, %rsp                # PUSH padding
+    MOV      %rsp, %rdi                 # address of register info
+    CALL     KernelIdtIrq               # handle external IRQ
+    ADD      $0x50, %rsp                # POP padding
+    POP      %rax                       # POP a copy of RAX
+    POP      %rbx                       # POP a copy of RBX
+    POP      %rcx                       # POP a copy of RCX
+    POP      %rdx                       # POP a copy of RDX
+    POP      %rsi                       # POP a copy of RSI
+    POP      %rdi                       # POP a copy of RDI
+    POP      %rbp                       # POP a copy of RBP
+    POP      %r8                        # POP a copy of R8
+    POP      %r9                        # POP a copy of R9
+    POP      %r10                       # POP a copy of R10
+    POP      %r11                       # POP a copy of R11
+    POP      %r12                       # POP a copy of R12
+    POP      %r13                       # POP a copy of R13
+    POP      %r14                       # POP a copy of R14
+    POP      %r15                       # POP a copy of R15
+    ADD      $8, %rsp                   # POP exception number
+    ADD      $8, %rsp                   # POP dummy error code
+    IRET                                # RETurn from exception
     .align   GATE_SIZE
     .endm
 
@@ -248,45 +248,45 @@
     # template macro for all SVC gates
     .macro   SvcGate  SvcNbr
     .align   GATE_SIZE
-    pushq    $0x00                      # push a dummy error code
-    pushq    \SvcNbr                    # push call number
-    pushq    %r15                       # push a copy of R15
-    pushq    %r14                       # push a copy of R14
-    pushq    %r13                       # push a copy of R13
-    pushq    %r12                       # push a copy of R12
-    pushq    %r11                       # push a copy of R11
-    pushq    %r10                       # push a copy of R10
-    pushq    %r9                        # push a copy of R9
-    pushq    %r8                        # push a copy of R8
-    pushq    %rbp                       # push a copy of RBP
-    pushq    %rdi                       # push a copy of RDI
-    pushq    %rsi                       # push a copy of RSI
-    pushq    %rdx                       # push a copy of RDX
-    pushq    %rcx                       # push a copy of RCX
-    pushq    %rbx                       # push a copy of RBX
-    pushq    %rax                       # push a copy of RAX
-    subq     $0x50, %rsp                # push padding
-    movq     %rsp, %rdi                 # address of register info
-    call     KernelIdtSvc               # handle service call
-    addq     $0x50, %rsp                # pop padding
-    popq     %rax                       # pop a copy of RAX
-    popq     %rbx                       # pop a copy of RBX
-    popq     %rcx                       # pop a copy of RCX
-    popq     %rdx                       # pop a copy of RDX
-    popq     %rsi                       # pop a copy of RSI
-    popq     %rdi                       # pop a copy of RDI
-    popq     %rbp                       # pop a copy of RBP
-    popq     %r8                        # pop a copy of R8
-    popq     %r9                        # pop a copy of R9
-    popq     %r10                       # pop a copy of R10
-    popq     %r11                       # pop a copy of R11
-    popq     %r12                       # pop a copy of R12
-    popq     %r13                       # pop a copy of R13
-    popq     %r14                       # pop a copy of R14
-    popq     %r15                       # pop a copy of R15
-    addq     $8, %rsp                   # pop exception number
-    addq     $8, %rsp                   # pop dummy error code
-    iretq                               # return from exception
+    PUSH     $0x00                      # PUSH a dummy error code
+    PUSH     \SvcNbr                    # PUSH CALL number
+    PUSH     %r15                       # PUSH a copy of R15
+    PUSH     %r14                       # PUSH a copy of R14
+    PUSH     %r13                       # PUSH a copy of R13
+    PUSH     %r12                       # PUSH a copy of R12
+    PUSH     %r11                       # PUSH a copy of R11
+    PUSH     %r10                       # PUSH a copy of R10
+    PUSH     %r9                        # PUSH a copy of R9
+    PUSH     %r8                        # PUSH a copy of R8
+    PUSH     %rbp                       # PUSH a copy of RBP
+    PUSH     %rdi                       # PUSH a copy of RDI
+    PUSH     %rsi                       # PUSH a copy of RSI
+    PUSH     %rdx                       # PUSH a copy of RDX
+    PUSH     %rcx                       # PUSH a copy of RCX
+    PUSH     %rbx                       # PUSH a copy of RBX
+    PUSH     %rax                       # PUSH a copy of RAX
+    SUB      $0x50, %rsp                # PUSH padding
+    MOV      %rsp, %rdi                 # address of register info
+    CALL     KernelIdtSvc               # handle service CALL
+    ADD      $0x50, %rsp                # POP padding
+    POP      %rax                       # POP a copy of RAX
+    POP      %rbx                       # POP a copy of RBX
+    POP      %rcx                       # POP a copy of RCX
+    POP      %rdx                       # POP a copy of RDX
+    POP      %rsi                       # POP a copy of RSI
+    POP      %rdi                       # POP a copy of RDI
+    POP      %rbp                       # POP a copy of RBP
+    POP      %r8                        # POP a copy of R8
+    POP      %r9                        # POP a copy of R9
+    POP      %r10                       # POP a copy of R10
+    POP      %r11                       # POP a copy of R11
+    POP      %r12                       # POP a copy of R12
+    POP      %r13                       # POP a copy of R13
+    POP      %r14                       # POP a copy of R14
+    POP      %r15                       # POP a copy of R15
+    ADD      $8, %rsp                   # POP exception number
+    ADD      $8, %rsp                   # POP dummy error code
+    IRET                                # RETurn from exception
     .align   GATE_SIZE
     .endm
 
@@ -306,118 +306,127 @@
     .set     KernelIdtInit, .
 
     # print heading of line
-    mov      $0x0A, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
-    leaq     IdtModuleStr(%rip), %rdi
-    call     KernelLogString
-    mov      $0x0B, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
+    MOV      $0x0A, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
+    LEA      IdtModuleStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $0x0B, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
 
     # print module info
-    leaq     IdtStartStr(%rip), %rdi
-    call     KernelLogString
-    mov      $'\n', %rdi
-    call     KernelLogChar
+    LEA      IdtStartStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
 
     # initialize IDT exception entries
     # RDI: Address of first IDT descriptor to fill
     # RCX: Address of the IDT descriptor to stop at
     # RSI: Address of ExpGates
-    movq     $IdtTableBase, %rdi
-    movq     $IdtTableBase, %rcx
-    addq     $(IDT_EXP_START*16), %rdi
-    addq     $(IDT_EXP_START*16+IDT_EXP_COUNT*16), %rcx
-    leaq     ExpGates(%rip), %rsi
+    MOV      $IdtTableBase, %rdi
+    MOV      $IdtTableBase, %rcx
+    ADD      $(IDT_EXP_START*16), %rdi
+    ADD      $(IDT_EXP_START*16+IDT_EXP_COUNT*16), %rcx
+    LEA      ExpGates(%rip), %rsi
 
     # store an IDT descriptor using gate address in RAX
-1:  movq     %rsi, %rax
-    movw     %ax, 0(%rdi)
-    shrq     $16, %rax
-    movw     $0x20, 2(%rdi)
-    movw     $(GATE_INTR|PRESENT|DPL0), 4(%rdi)
-    movw     %ax, 6(%rdi)
-    shrq     $16, %rax
-    movl     %eax, 8(%rdi)
-    movl     $0, 12(%rdi)
+1:  MOV      %rsi, %rax
+    MOV      %ax, 0(%rdi)
+    MOV      $0x20, %ax
+    MOV      %ax, 2(%rdi)
+    MOV      $(GATE_INTR|PRESENT|DPL0), %ax
+    MOV      %ax, 4(%rdi)
+    SHR      $16, %rax
+    MOV      %ax, 6(%rdi)
+    SHR      $16, %rax
+    MOV      %eax, 8(%rdi)
+    MOV      $0, %eax
+    MOV      %eax, 12(%rdi)
 
     # update RAX to next gate address, RDI to next descriptor
-    addq     $GATE_SIZE, %rsi
-    addq     $16, %rdi
+    ADD      $GATE_SIZE, %rsi
+    ADD      $16, %rdi
 
     # done yet?
-    cmp      %rdi, %rcx
-    jnz      1b
+    CMP      %rdi, %rcx
+    JNZ      1b
 
     # initialize IDT IRQ entries
     # RDI: Address of first IDT descriptor to fill
     # RCX: Address of the IDT descriptor to stop at
     # RSI: Address of IrqGates
-    movq     $IdtTableBase, %rdi
-    movq     $IdtTableBase, %rcx
-    addq     $(IDT_IRQ_START*16), %rdi
-    addq     $(IDT_IRQ_START*16+IDT_IRQ_COUNT*16), %rcx
-    leaq     IrqGates(%rip), %rsi
+    MOV      $IdtTableBase, %rdi
+    MOV      $IdtTableBase, %rcx
+    ADD      $(IDT_IRQ_START*16), %rdi
+    ADD      $(IDT_IRQ_START*16+IDT_IRQ_COUNT*16), %rcx
+    LEA      IrqGates(%rip), %rsi
 
     # store an IDT descriptor using gate address in RAX
-1:  movq     %rsi, %rax
-    movw     %ax, 0(%rdi)
-    shrq     $16, %rax
-    movw     $0x20, 2(%rdi)
-    movw     $(GATE_INTR|PRESENT|DPL0), 4(%rdi)
-    movw     %ax, 6(%rdi)
-    shrq     $16, %rax
-    movl     %eax, 8(%rdi)
-    movl     $0, 12(%rdi)
+1:  MOV      %rsi, %rax
+    MOV      %ax, 0(%rdi)
+    MOV      $0x20, %ax
+    MOV      %ax, 2(%rdi)
+    MOV      $(GATE_INTR|PRESENT|DPL0), %ax
+    MOV      %ax, 4(%rdi)
+    SHR      $16, %rax
+    MOV      %ax, 6(%rdi)
+    SHR      $16, %rax
+    MOV      %eax, 8(%rdi)
+    MOV      $0, %eax
+    MOV      %eax, 12(%rdi)
 
     # update RAX to next gate address, RDI to next descriptor
-    addq     $GATE_SIZE, %rsi
-    addq     $16, %rdi
+    ADD      $GATE_SIZE, %rsi
+    ADD      $16, %rdi
 
     # done yet?
-    cmp      %rdi, %rcx
-    jnz      1b
+    CMP      %rdi, %rcx
+    JNZ      1b
 
     # initialize IDT SVC entries
     # RDI: Address of first IDT descriptor to fill
     # RCX: Address of the IDT descriptor to stop at
     # RSI: Address of SvcGates
-    movq     $IdtTableBase, %rdi
-    movq     $IdtTableBase, %rcx
-    addq     $(IDT_SVC_START*16), %rdi
-    addq     $(IDT_SVC_START*16+IDT_SVC_COUNT*16), %rcx
-    leaq     SvcGates(%rip), %rsi
+    MOV      $IdtTableBase, %rdi
+    MOV      $IdtTableBase, %rcx
+    ADD      $(IDT_SVC_START*16), %rdi
+    ADD      $(IDT_SVC_START*16+IDT_SVC_COUNT*16), %rcx
+    LEA      SvcGates(%rip), %rsi
 
     # store an IDT descriptor using gate address in RAX
-1:  movq     %rsi, %rax
-    movw     %ax, 0(%rdi)
-    shrq     $16, %rax
-    movw     $0x20, 2(%rdi)
-    movw     $(GATE_INTR|PRESENT|DPL3), 4(%rdi)
-    movw     %ax, 6(%rdi)
-    shrq     $16, %rax
-    movl     %eax, 8(%rdi)
-    movl     $0, 12(%rdi)
+1:  MOV      %rsi, %rax
+    MOV      %ax, 0(%rdi)
+    MOV      $0x20, %ax
+    MOV      %ax, 2(%rdi)
+    MOV      $(GATE_INTR|PRESENT|DPL3), %ax
+    MOV      %ax, 4(%rdi)
+    SHR      $16, %rax
+    MOV      %ax, 6(%rdi)
+    SHR      $16, %rax
+    MOV      %eax, 8(%rdi)
+    MOV      $0, %eax
+    MOV      %eax, 12(%rdi)
 
     # update RAX to next gate address, RDI to next descriptor
-    addq     $GATE_SIZE, %rsi
-    addq     $16, %rdi
+    ADD      $GATE_SIZE, %rsi
+    ADD      $16, %rdi
 
     # done yet?
-    cmp      %rdi, %rcx
-    jnz      1b
+    CMP      %rdi, %rcx
+    JNZ      1b
 
     # initialize IDTR descriptor
-    movw     $(IdtTableSize-1), IdtrDescBase+0
-    movl     $(IdtTableBase  ), IdtrDescBase+2
+    MOV      $(IdtTableSize-1), IdtrDescBase+0
+    MOV      $(IdtTableBase  ), IdtrDescBase+2
 
     # load IDT table
-    lidt     IdtrDescBase
+    LIDT     IdtrDescBase
 
     # done
-3:  xor      %rax, %rax
-    ret
+3:  XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                              KernelIdtExp                                   #
@@ -431,14 +440,14 @@
     # -----
     # 1. acquire kernel lock
     # 2. handle exception by terminating the bad task
-    # 3. release kernel lock
+    # 3. reLEAse kernel lock
 
-    # infinte loop
-    jmp      .
+    # infinte LOOP
+    JMP      .
 
     # done
-1:  xor      %rax, %rax
-    ret
+1:  XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                              KernelIdtIrq                                   #
@@ -452,14 +461,14 @@
     # -----
     # 1. acquire kernel lock
     # 2. handle irq
-    # 3. release kernel lock
+    # 3. reLEAse kernel lock
 
-    # infinte loop
-    jmp      .
+    # infinte LOOP
+    JMP      .
 
     # done
-1:  xor      %rax, %rax
-    ret
+1:  XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                              KernelIdtSvc                                   #
@@ -472,15 +481,15 @@
     # TODO:
     # -----
     # 1. acquire kernel lock
-    # 2. handle system call
-    # 3. release kernel lock
+    # 2. handle system CALL
+    # 3. reLEAse kernel lock
 
-    # infinte loop
-    jmp      .
+    # infinte LOOP
+    JMP      .
 
     # done
-1:  xor      %rax, %rax
-    ret
+1:  XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                              DATA SECTION                                   #

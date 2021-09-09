@@ -8,13 +8,13 @@
 # Copyright (c) 2021 Ramses A.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
+# of this software AND associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# to use, copy, modify, merge, publish, distribute, sublicense, AND/or sell
+# copies of the Software, AND to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
+# The above copyright notice AND this permission notice shall be included in all
 # copies or substantial portions of the Software.
 #
 ###############################################################################
@@ -52,39 +52,39 @@
     .set     KernelPageInit, .
 
     # print heading of line
-    mov      $0x0A, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
-    leaq     PageModuleStr(%rip), %rdi
-    call     KernelLogString
-    mov      $0x0B, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
+    MOV      $0x0A, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
+    LEA      PageModuleStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $0x0B, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
 
     # print module info
-    leaq     PageStartStr(%rip), %rdi
-    call     KernelLogString
-    mov      $'\n', %rdi
-    call     KernelLogChar
+    LEA      PageStartStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
 
     # initialize PML4Table
-    movq     %cr3, %rsi
-    movq     $RootPageTableBase, %rdi
-    movq     $RootPageTableSize, %rcx
-    # copy loop
-1:  movb     (%rsi), %al
-    movb     %al, (%rdi)
-    inc      %rsi
-    inc      %rdi
-    loop     1b
+    MOV      %cr3, %rsi
+    MOV      $RootPageTableBase, %rdi
+    MOV      $RootPageTableSize, %rcx
+    # copy LOOP
+1:  MOV      (%rsi), %al
+    MOV      %al, (%rdi)
+    INC      %rsi
+    INC      %rdi
+    LOOP     1b
 
     # load CR3 with PML4 table base
-    movq     $RootPageTableBase, %rax
-    movq     %rax, %cr3
+    MOV      $RootPageTableBase, %rax
+    MOV      %rax, %cr3
 
     # done
-2:  xor      %rax, %rax
-    ret
+2:  XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                              DATA SECTION                                   #

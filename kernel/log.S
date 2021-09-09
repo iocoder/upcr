@@ -8,13 +8,13 @@
 # Copyright (c) 2021 Ramses A.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
+# of this software AND associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# to use, copy, modify, merge, publish, distribute, sublicense, AND/or sell
+# copies of the Software, AND to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
+# The above copyright notice AND this permission notice shall be included in all
 # copies or substantial portions of the Software.
 #
 ###############################################################################
@@ -51,44 +51,44 @@
     .global  KernelLogInit
     .set     KernelLogInit, .
 
-    # clear screen
-    call     KernelLogClear
+    # cLEAr screen
+    CALL     KernelLogCLEAr
 
     # header colour
-    mov      $0x0A, %rdi
-    mov      $-1,   %rsi
-    call     KernelLogColour
+    MOV      $0x0A, %rdi
+    MOV      $-1,   %rsi
+    CALL     KernelLogColour
 
     # print header
-    lea      LogHeader(%rip), %rdi
-    call     KernelLogString
+    LEA      LogHeader(%rip), %rdi
+    CALL     KernelLogString
 
     # welcome msg colour
-    mov      $0x0E, %rdi
-    mov      $-1,   %rsi
-    call     KernelLogColour
+    MOV      $0x0E, %rdi
+    MOV      $-1,   %rsi
+    CALL     KernelLogColour
 
     # print welcome msg
-    lea      LogWelcome(%rip), %rdi
-    call     KernelLogString
+    LEA      LogWelcome(%rip), %rdi
+    CALL     KernelLogString
 
     # license colour
-    mov      $0x0F, %rdi
-    mov      $-1,   %rsi
-    call     KernelLogColour
+    MOV      $0x0F, %rdi
+    MOV      $-1,   %rsi
+    CALL     KernelLogColour
 
     # print license
-    lea      LogLicense(%rip), %rdi
-    call     KernelLogString
+    LEA      LogLicense(%rip), %rdi
+    CALL     KernelLogString
 
     # set printing colour to yellow
-    mov      $0x0B, %rdi
-    mov      $-1,   %rsi
-    call     KernelLogColour
+    MOV      $0x0B, %rdi
+    MOV      $-1,   %rsi
+    CALL     KernelLogColour
 
     # done
-    xor      %rax, %rax
-    ret
+    XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                            KernelLogChar()                                  #
@@ -99,13 +99,13 @@
     .set     KernelLogChar, .
 
     # print character to VGA
-    push     %rdi
-    call     KernelVgaPut
-    pop      %rdi
+    PUSH     %rdi
+    CALL     KernelVgaPut
+    POP      %rdi
 
     # done
-    xor      %rax, %rax
-    ret
+    XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                          KernelLogDecimal()                                 #
@@ -116,37 +116,38 @@
     .set     KernelLogDecimal, .
 
     # we will keep dividing RDX:RAX by 10
-    mov      %rdi, %rax
-    xor      %ecx, %ecx
-    mov      $10,  %r8
+    MOV      %rdi, %rax
+    XOR      %ecx, %ecx
+    MOV      $10,  %r8
 
     # divide by 10
-1:  xor      %rdx, %rdx
-    div      %r8
+1:  XOR      %rdx, %rdx
+    DIV      %r8
 
-    # use CPU stack as a push-down automaton
-    push     %dx
-    inc      %ecx
+    # use CPU stack as a PUSH-down automaton
+    PUSH     %rdx
+    INC      %ecx
 
     # done?
-    and      %rax, %rax
-    jnz      1b
+    AND      %rax, %rax
+    JNZ      1b
 
     # now print all the digits
-2:  pop      %dx
-    add      $'0', %dx
-    movzwq   %dx, %rdi
-    push     %rcx
-    call     KernelLogChar
-    pop      %rcx
+2:  POP      %rdx
+    add      $'0', %rdx
+    AND      $0xFF, %rdx
+    MOV      %rdx, %rdi
+    PUSH     %rcx
+    CALL     KernelLogChar
+    POP      %rcx
 
     # all digits printed?
-    dec      %ecx
-    jnz      2b
+    DEC      %ecx
+    JNZ      2b
 
     # done
-    xor      %rax, %rax
-    ret
+    XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                            KernelLogHex()                                   #
@@ -157,39 +158,42 @@
     .set     KernelLogHex, .
 
     # print 0x
-    push     %rdi
-    mov      $'0', %rdi
-    call     KernelVgaPut
-    mov      $'x', %rdi
-    call     KernelVgaPut
-    pop      %rdi
+    PUSH     %rdi
+    MOV      $'0', %rdi
+    CALL     KernelVgaPut
+    MOV      $'x', %rdi
+    CALL     KernelVgaPut
+    POP      %rdi
 
     # print hexadecimal number (8 bytes - 16 hexdigits)
-    mov      $16, %cl
+    MOV      $16, %cl
 
     # put next byte in RDI[3:0] (ROL unrolled to prevent stall)
-1:  rol      %rdi
-    rol      %rdi
-    rol      %rdi
-    rol      %rdi
+1:  ROL      %rdi
+    ROL      %rdi
+    ROL      %rdi
+    ROL      %rdi
 
     # print DL[0:3]
-    push     %rcx
-    push     %rdi
-    leaq     Digits(%rip), %rsi
-    and      $0x0F, %rdi
-    movzbq   (%rsi, %rdi), %rdi
-    call     KernelLogChar
-    pop      %rdi
-    pop      %rcx
+    PUSH     %rcx
+    PUSH     %rdi
+    LEA      Digits(%rip), %rsi
+    AND      $0x0F, %rdi
+    ADD      %rdi, %rsi
+    XOR      %rax, %rax
+    MOV      (%rsi), %al
+    MOV      %rax, %rdi
+    CALL     KernelLogChar
+    POP      %rdi
+    POP      %rcx
 
     # next digit
-    dec      %cl
-    jnz      1b
+    DEC      %cl
+    JNZ      1b
 
     # done
-    xor      %rax, %rax
-    ret
+    XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                             KernelLogString()                               #
@@ -200,29 +204,26 @@
     .set     KernelLogString, .
 
     # fetch next character
-1:  xor      %rax, %rax
-    mov      (%rdi), %al
+1:  XOR      %rax, %rax
+    MOV      (%rdi), %al
 
     # terminate if zero
-    and      %al, %al
-    jz       2f
+    AND      %al, %al
+    JZ       2f
 
     # print character
-    push     %rdi
-    mov      %rax, %rdi
-    call     KernelVgaPut
-    pop      %rdi
+    PUSH     %rdi
+    MOV      %rax, %rdi
+    CALL     KernelVgaPut
+    POP      %rdi
 
-    # loop again
-    inc      %rdi
-    jmp      1b
-
-    # next character
-    cmpb     $0, (%rdi)
+    # LOOP again
+    INC      %rdi
+    JMP      1b
 
     # done
-2:  xor      %rax, %rax
-    ret
+2:  XOR      %rax, %rax
+    RET
 
 ##############################################################################
 #                             KernelLogColour()                              #
@@ -233,37 +234,37 @@
     .set     KernelLogColour, .
 
     # set vga colours
-    push     %rdi
-    push     %rsi
-    call     KernelVgaColour
-    pop      %rsi
-    pop      %rdi
+    PUSH     %rdi
+    PUSH     %rsi
+    CALL     KernelVgaColour
+    POP      %rsi
+    POP      %rdi
 
     # done
-    xor      %rax, %rax
-    ret
+    XOR      %rax, %rax
+    RET
 
 
 ##############################################################################
-#                             KernelLogClear()                               #
+#                             KernelLogCLEAr()                               #
 ##############################################################################
 
     # declare a linker symbol
-    .global  KernelLogClear
-    .set     KernelLogClear, .
+    .global  KernelLogCLEAr
+    .set     KernelLogCLEAr, .
 
-    # clear vga screen
-    push     %rdi
-    push     %rsi
-    push     %rcx
-    call     KernelVgaClear
-    pop      %rsi
-    pop      %rdi
-    pop      %rcx
+    # cLEAr vga screen
+    PUSH     %rdi
+    PUSH     %rsi
+    PUSH     %rcx
+    CALL     KernelVgaCLEAr
+    POP      %rsi
+    POP      %rdi
+    POP      %rcx
 
     # done
-    xor      %rax, %rax
-    ret
+    XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                              DATA SECTION                                   #

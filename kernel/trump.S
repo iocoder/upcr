@@ -8,13 +8,13 @@
 # Copyright (c) 2021 Ramses A.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
+# of this software AND associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# to use, copy, modify, merge, publish, distribute, sublicense, AND/or sell
+# copies of the Software, AND to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
+# The above copyright notice AND this permission notice shall be included in all
 # copies or substantial portions of the Software.
 #
 ###############################################################################
@@ -55,124 +55,114 @@
     .code16
 
     # first instruction executed by CPU core!!!
-    mov      $0x55AA, %ax
+    MOV      $0x55AA, %ax
 
     # make sure interrupts are disabled
     cli
 
     # initialize segment registers
-    ljmp     $0x0000, $(1f-TrampolineStart)
-1:  xor      %bx, %bx
-    mov      %bx, %ds
-    mov      %bx, %es
-    mov      %bx, %ss
-
-    # initialize GPRs
-    mov      $0x11111111, %eax
-    mov      $0x22222222, %ebx
-    mov      $0x33333333, %ecx
-    mov      $0x44444444, %edx
-    mov      $0xAAAAAAAA, %esi
-    mov      $0xBBBBBBBB, %edi
-    mov      $0xCCCCCCCC, %ebp
-    mov      $0xDDDDDDDD, %esp
+    LJMP     $0x0000, $(1f-TrampolineStart)
+1:  XOR      %bx, %bx
+    MOV      %bx, %ds
+    MOV      %bx, %es
+    MOV      %bx, %ss
 
     # load GDTR register
-    lgdt     GdtrDescBase
+    LGDT     GdtrDescBase
 
     # enter protected mode
-    mov      %cr0, %eax
-    orl      $1, %eax
-    mov      %eax, %cr0
+    MOV      %cr0, %eax
+    OR       $1, %eax
+    MOV      %eax, %cr0
 
     # jump into 32-bit mode
-    ljmp     $0x10, $(2f-TrampolineStart)
+    LJMP     $0x10, $(2f-TrampolineStart)
 
     # 32-bit code
     .code32
 
     # initialize segment registers
-2:  mov      $0x18, %ax
-    mov      %ax, %ds
-    mov      %ax, %es
-    mov      %ax, %fs
-    mov      %ax, %gs
-    mov      %ax, %ss
+2:  MOV      $0x18, %ax
+    MOV      %ax, %ds
+    MOV      %ax, %es
+    MOV      %ax, %fs
+    MOV      %ax, %gs
+    MOV      %ax, %ss
 
     # enable physical address extension
-    mov      %cr4, %eax
-    orl      $0x00000020, %eax
-    mov      %eax, %cr4
+    MOV      %cr4, %eax
+    OR       $0x00000020, %eax
+    MOV      %eax, %cr4
 
     # enable long-mode in EFER
-    mov      $EferMsr, %ecx
-    rdmsr
-    orl      $0x00000100, %eax
-    wrmsr
+    MOV      $EferMsr, %ecx
+    RDMSR
+    OR       $0x00000100, %eax
+    WRMSR
 
     # load CR3 with PML4 table base
-    mov      $RootPageTableBase, %eax
-    mov      %eax, %cr3
+    MOV      $RootPageTableBase, %eax
+    MOV      %eax, %cr3
 
     # enable paging; this activates long mode
-    mov      %cr0, %eax
-    orl      $0x80000000, %eax
-    mov      %eax, %cr0
+    MOV      %cr0, %eax
+    OR       $0x80000000, %eax
+    MOV      %eax, %cr0
 
     # we are in compatibility mode now! jump to code64
-    ljmp     $0x0020, $(3f-TrampolineStart)
+    LJMP     $0x0020, $(3f-TrampolineStart)
 
     # 64-bit code
     .code64
 
     # initialize segment registers
-3:  mov      $0x0028, %ax
-    mov      %ax, %ds
-    mov      %ax, %es
-    mov      %ax, %fs
-    mov      %ax, %gs
-    mov      %ax, %ss
+3:  MOV      $0x0028, %ax
+    MOV      %ax, %ds
+    MOV      %ax, %es
+    MOV      %ax, %fs
+    MOV      %ax, %gs
+    MOV      %ax, %ss
 
     # initialize all 64-bit GPRs
-    mov      $0x1111111111111111, %rax
-    mov      $0x2222222222222222, %rbx
-    mov      $0x3333333333333333, %rcx
-    mov      $0x4444444444444444, %rdx
-    mov      $0xAAAAAAAAAAAAAAAA, %rsi
-    mov      $0xBBBBBBBBBBBBBBBB, %rdi
-    mov      $0xCCCCCCCCCCCCCCCC, %rbp
-    mov      $0xDDDDDDDDDDDDDDDD, %rsp
-    mov      $0x1111111111111111, %r8
-    mov      $0x2222222222222222, %r9
-    mov      $0x3333333333333333, %r10
-    mov      $0x4444444444444444, %r11
-    mov      $0xAAAAAAAAAAAAAAAA, %r12
-    mov      $0xBBBBBBBBBBBBBBBB, %r13
-    mov      $0xCCCCCCCCCCCCCCCC, %r14
-    mov      $0xDDDDDDDDDDDDDDDD, %r15
+    MOV      $0x1111111111111111, %rax
+    MOV      $0x2222222222222222, %rbx
+    MOV      $0x3333333333333333, %rcx
+    MOV      $0x4444444444444444, %rdx
+    MOV      $0xAAAAAAAAAAAAAAAA, %rsi
+    MOV      $0xBBBBBBBBBBBBBBBB, %rdi
+    MOV      $0xCCCCCCCCCCCCCCCC, %rbp
+    MOV      $0xDDDDDDDDDDDDDDDD, %rsp
+    MOV      $0x1111111111111111, %r8
+    MOV      $0x2222222222222222, %r9
+    MOV      $0x3333333333333333, %r10
+    MOV      $0x4444444444444444, %r11
+    MOV      $0xAAAAAAAAAAAAAAAA, %r12
+    MOV      $0xBBBBBBBBBBBBBBBB, %r13
+    MOV      $0xCCCCCCCCCCCCCCCC, %r14
+    MOV      $0xDDDDDDDDDDDDDDDD, %r15
 
     # read local APIC ID
-    xor      %rax, %rax
-    movl     0xFEE00020, %eax
-    shr      $24, %eax
+    XOR      %rax, %rax
+    MOV      0xFEE00020, %eax
+    SHR      $24, %eax
 
     # use this particular CPU stack
-    mov      %rax, %rsp
-    shl      $12, %rsp
-    addq     $(KernelStacksBase), %rsp
-    addq     $0x1000, %rsp
-    mov      %rsp, %rbp
-    nop
+    MOV      %rax, %rsp
+    SHL      $12, %rsp
+    ADD      $(KernelStacksBase), %rsp
+    ADD      $0x1000, %rsp
+    MOV      %rsp, %rbp
+    NOP
 
     # initialize IDT
-    lidt     IdtrDescBase
+    LIDT     IdtrDescBase
 
     # jump to KernelSmpEnable
-    mov      SmpFunAddress-TrampolineStart, %rax
-    call     *%rax
+    MOV      SmpFunAddress-TrampolineStart, %rax
+    CALL     *%rax
 
-    # loop forever
-    jmp      .
+    # LOOP forever
+    JMP      .
 
     # alignment for data
     .align   8
@@ -193,41 +183,41 @@
     .set     KernelTrumpInit, .
 
     # print heading of line
-    mov      $0x0A, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
-    leaq     TrumpModuleStr(%rip), %rdi
-    call     KernelLogString
-    mov      $0x0B, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
+    MOV      $0x0A, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
+    LEA      TrumpModuleStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $0x0B, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
 
     # print module info
-    leaq     TrumpStartStr(%rip), %rdi
-    call     KernelLogString
-    mov      $'\n', %rdi
-    call     KernelLogChar
+    LEA      TrumpStartStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
 
     # store the address of KernelSmpEnable() to be fetched by trampoline
-    leaq     KernelSmpEnable(%rip), %rax
-    movq     %rax, SmpFunAddress(%rip)
+    LEA      KernelSmpEnable(%rip), %rax
+    MOV      %rax, SmpFunAddress(%rip)
 
     # copy the real-mode trampoline to lower memory
-    movq     $TrampolineCodeBase, %rdi
-    leaq     TrampolineStart(%rip), %rsi
-    leaq     TrampolineEnd(%rip), %rcx
-    subq     %rsi, %rcx
+    MOV      $TrampolineCodeBase, %rdi
+    LEA      TrampolineStart(%rip), %rsi
+    LEA      TrampolineEnd(%rip), %rcx
+    SUB      %rsi, %rcx
 
-    # copy loop
-1:  movb     (%rsi), %al
-    movb     %al, (%rdi)
-    inc      %rsi
-    inc      %rdi
-    loop     1b
+    # copy LOOP
+1:  MOV      (%rsi), %al
+    MOV      %al, (%rdi)
+    INC      %rsi
+    INC      %rdi
+    LOOP     1b
 
     # done
-1:  xor      %rax, %rax
-    ret
+1:  XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                              DATA SECTION                                   #

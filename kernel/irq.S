@@ -1,6 +1,6 @@
 ###############################################################################
 # File name:    irq.S
-# Description:  Kernel I/O APIC and LAPIC driver
+# Description:  Kernel I/O APIC AND LAPIC driver
 # Author:       Ramses A.
 ###############################################################################
 #
@@ -8,13 +8,13 @@
 # Copyright (c) 2021 Ramses A.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
+# of this software AND associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# to use, copy, modify, merge, publish, distribute, sublicense, AND/or sell
+# copies of the Software, AND to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
+# The above copyright notice AND this permission notice shall be included in all
 # copies or substantial portions of the Software.
 #
 ###############################################################################
@@ -42,7 +42,7 @@
 
     # LAPIC REGISTERS
     # ---------------
-    # (I) LAPIC ID and VERSION
+    # (I) LAPIC ID AND VERSION
     .equ     LapicIdReg,          0xFEE00020
     .equ     LapicVersionReg,     0xFEE00030
     # (II) LAPIC BUS PRIORITY REGISTERS
@@ -89,24 +89,24 @@
     .set     KernelIrqInit, .
 
     # print heading of line
-    mov      $0x0A, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
-    leaq     IrqModuleStr(%rip), %rdi
-    call     KernelLogString
-    mov      $0x0B, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
+    MOV      $0x0A, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
+    LEA      IrqModuleStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $0x0B, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
 
     # print irq module info
-    leaq     IrqStartStr(%rip), %rdi
-    call     KernelLogString
-    mov      $'\n', %rdi
-    call     KernelLogChar
+    LEA      IrqStartStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
 
     # done
-1:  xor      %rax, %rax
-    ret
+1:  XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                           KernelIrqEnable()                                 #
@@ -117,18 +117,18 @@
     .set     KernelIrqEnable, .
 
     # Initialize APIC address MSR
-    xor      %rax, %rax
-    xor      %rcx, %rcx
-    xor      %rdx, %rdx
-    mov      $0xFEE00800, %eax
-    mov      $ApicBaseAddrMsr, %ecx
-    wrmsr
-    nop
-    nop
+    XOR      %rax, %rax
+    XOR      %rcx, %rcx
+    XOR      %rdx, %rdx
+    MOV      $0xFEE00800, %eax
+    MOV      $ApicBaseAddrMsr, %ecx
+    WRMSR
+    NOP
+    NOP
 
     # done
-1:  xor      %rax, %rax
-    ret
+1:  XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                             KernelIrqIipi()                                 #
@@ -139,18 +139,18 @@
     .set     KernelIrqIipi, .
 
     # broadcast the INIT IPI to all processors except self
-    mov      $LapicIntCmdLoReg, %rsi
-    mov      $0x000C4500, %eax
-    mov      %eax, (%rsi)
+    MOV      $LapicIntCmdLoReg, %rsi
+    MOV      $0x000C4500, %eax
+    MOV      %eax, (%rsi)
 
-    # 10-millisecond delay loop.
+    # 10-millisecond delay LOOP.
     # TBD
-    mov      $0x1000000, %rcx
-    loop     .
+    MOV      $0x1000000, %rcx
+    LOOP     .
 
     # done
-    xor      %rax, %rax
-    ret
+    XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                             KernelIrqSipi()                                 #
@@ -161,18 +161,18 @@
     .set     KernelIrqSipi, .
 
     # broadcast the SIPI IPI to all processors except self
-    mov      $LapicIntCmdLoReg, %rsi
-    mov      $0x000C4600, %eax  # vector 0x0000:0x0000
-    mov      %eax, (%rsi)
+    MOV      $LapicIntCmdLoReg, %rsi
+    MOV      $0x000C4600, %eax  # vector 0x0000:0x0000
+    MOV      %eax, (%rsi)
 
-    # 200-microsecond delay loop
+    # 200-microsecond delay LOOP
     # TBD
-    mov      $0x1000000, %rcx
-    loop     .
+    MOV      $0x1000000, %rcx
+    LOOP     .
 
     # done
-    xor      %rax, %rax
-    ret
+    XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                              DATA SECTION                                   #

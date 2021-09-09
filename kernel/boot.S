@@ -8,13 +8,13 @@
 # Copyright (c) 2021 Ramses A.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
+# of this software AND associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# to use, copy, modify, merge, publish, distribute, sublicense, AND/or sell
+# copies of the Software, AND to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
+# The above copyright notice AND this permission notice shall be included in all
 # copies or substantial portions of the Software.
 #
 ###############################################################################
@@ -35,6 +35,7 @@
 
     # common definitions used by kernel
     .include "kernel/macro.inc"
+    .intel_syntax noprefix
 
 ###############################################################################
 #                              TEXT SECTION                                   #
@@ -52,70 +53,70 @@
     .set     KernelBootInit, .
 
     # initialize vga module
-    push     %rdi
-    call     KernelVgaInit
-    pop      %rdi
+    PUSH     RDI
+    CALL     KernelVgaInit
+    POP      RDI
 
     # initialize log module
-    push     %rdi
-    call     KernelLogInit
-    pop      %rdi
+    PUSH     %rdi
+    CALL     KernelLogInit
+    POP      %rdi
 
     # initialize panic module
-    push     %rdi
-    call     KernelPanicInit
-    pop      %rdi
+    PUSH     %rdi
+    CALL     KernelPanicInit
+    POP      %rdi
 
     # initialize ram module
-    push     %rdi
-    call     KernelRamInit
-    pop      %rdi
+    PUSH     %rdi
+    CALL     KernelRamInit
+    POP      %rdi
 
     # initialize page module
-    push     %rdi
-    call     KernelPageInit
-    pop      %rdi
+    PUSH     %rdi
+    CALL     KernelPageInit
+    POP      %rdi
 
     # initialize gop module
-    push     %rdi
-    call     KernelTrumpInit
-    pop      %rdi
+    PUSH     %rdi
+    CALL     KernelTrumpInit
+    POP      %rdi
 
     # initialize gdt module
-    push     %rdi
-    call     KernelGdtInit
-    pop      %rdi
+    PUSH     %rdi
+    CALL     KernelGdtInit
+    POP      %rdi
 
     # initialize idt module
-    push     %rdi
-    call     KernelIdtInit
-    pop      %rdi
+    PUSH     %rdi
+    CALL     KernelIdtInit
+    POP      %rdi
 
     # initialize tss module
-    push     %rdi
-    call     KernelTssInit
-    pop      %rdi
+    PUSH     %rdi
+    CALL     KernelTssInit
+    POP      %rdi
 
     # initialize stack module
-    push     %rdi
-    call     KernelStackInit
-    pop      %rdi
+    PUSH     %rdi
+    CALL     KernelStackInit
+    POP      %rdi
 
     # initialize irq module
-    push     %rdi
-    call     KernelIrqInit
-    pop      %rdi
+    PUSH     %rdi
+    CALL     KernelIrqInit
+    POP      %rdi
 
     # initialize smp module
-    push     %rdi
-    call     KernelSmpInit
-    pop      %rdi
+    PUSH     %rdi
+    CALL     KernelSmpInit
+    POP      %rdi
 
     # initialize system module
-    push     %rdi
-    call     KernelSystemInit
-    pop      %rdi
+    PUSH     %rdi
+    CALL     KernelSystemInit
+    POP      %rdi
 
     # done
-    xor      %rax, %rax
-    ret
+    XOR      %rax, %rax
+    RET

@@ -8,13 +8,13 @@
 # Copyright (c) 2021 Ramses A.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
+# of this software AND associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# to use, copy, modify, merge, publish, distribute, sublicense, AND/or sell
+# copies of the Software, AND to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
+# The above copyright notice AND this permission notice shall be included in all
 # copies or substantial portions of the Software.
 #
 ###############################################################################
@@ -52,84 +52,85 @@
     .set     KernelRamInit, .
 
     # read RamAvailable from init struct
-    mov      0x38(%rdi), %rax
-    mov      %rax, RamAvailable(%rip)
+    MOV      0x38(%rdi), %rax
+    MOV      %rax, RamAvailable(%rip)
 
     # read RamStart from init struct
-    mov      0x40(%rdi), %rax
-    mov      %rax, RamStart(%rip)
+    MOV      0x40(%rdi), %rax
+    MOV      %rax, RamStart(%rip)
 
     # read RamEnd from init struct
-    mov      0x48(%rdi), %rax
-    mov      %rax, RamEnd(%rip)
+    MOV      0x48(%rdi), %rax
+    MOV      %rax, RamEnd(%rip)
 
     # did the user provide RAM information anyways?
-    cmpb     $0, RamAvailable(%rip)
-    jz       1f
+    MOV      RamAvailable(%rip), %rax
+    CMP      $0, %rax
+    JZ       1f
 
     # print heading of line
-    mov      $0x0A, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
-    leaq     RamModuleStr(%rip), %rdi
-    call     KernelLogString
-    mov      $0x0B, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
+    MOV      $0x0A, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
+    LEA      RamModuleStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $0x0B, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
 
     # print ram start
-    leaq     RamStartStr(%rip), %rdi
-    call     KernelLogString
-    movq     RamStart(%rip), %rdi
-    call     KernelLogHex
-    mov      $'\n', %rdi
-    call     KernelLogChar
+    LEA      RamStartStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      RamStart(%rip), %rdi
+    CALL     KernelLogHex
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
 
     # print heading of line
-    mov      $0x0A, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
-    leaq     RamModuleStr(%rip), %rdi
-    call     KernelLogString
-    mov      $0x0B, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
+    MOV      $0x0A, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
+    LEA      RamModuleStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $0x0B, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
 
     # print ram end line
-    leaq     RamEndStr(%rip), %rdi
-    call     KernelLogString
-    movq     RamEnd(%rip), %rdi
-    call     KernelLogHex
-    mov      $'\n', %rdi
-    call     KernelLogChar
+    LEA      RamEndStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      RamEnd(%rip), %rdi
+    CALL     KernelLogHex
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
 
     # print heading of line
-    mov      $0x0A, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
-    leaq     RamModuleStr(%rip), %rdi
-    call     KernelLogString
-    mov      $0x0B, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
+    MOV      $0x0A, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
+    LEA      RamModuleStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $0x0B, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
 
     # print ram size line
-    leaq     RamSizeStr(%rip), %rdi
-    call     KernelLogString
-    movq     RamEnd(%rip), %rdi
-    subq     RamStart(%rip), %rdi
-    shr      $20, %rdi
-    call     KernelLogDecimal
-    mov      $'M', %rdi
-    call     KernelLogChar
-    mov      $'B', %rdi
-    call     KernelLogChar
-    mov      $'\n', %rdi
-    call     KernelLogChar
+    LEA      RamSizeStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      RamEnd(%rip), %rdi
+    SUB      RamStart(%rip), %rdi
+    SHR      $20, %rdi
+    CALL     KernelLogDecimal
+    MOV      $'M', %rdi
+    CALL     KernelLogChar
+    MOV      $'B', %rdi
+    CALL     KernelLogChar
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
 
     # done
-1:  xor      %rax, %rax
-    ret
+1:  XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                              DATA SECTION                                   #

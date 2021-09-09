@@ -40,7 +40,7 @@ OptHeader:
                             // :: Windows-specific fields
 .long   0                   // ImageBase
 .long   0x1000              // SectionAlignment
-.long   0x2000              // FileAlignment
+.long   0x2000              // FiLEAlignment
 .short  0                   // MajorOperatingSystemVersion
 .short  0                   // MinorOperatingSystemVersion
 .short  0                   // MajorImageVersion
@@ -59,7 +59,7 @@ OptHeader:
 .quad   0                   // SizeOfHeapCommit
 .long   0                   // LoaderFlags
 .long   0x06                // NumberOfRvaAndSizes
-                            // :: RVA and sizes
+                            // :: RVA AND sizes
 .quad   0                   // ExportTable
 .quad   0                   // ImportTable
 .quad   0                   // ResourceTable

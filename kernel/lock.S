@@ -8,13 +8,13 @@
 # Copyright (c) 2021 Ramses A.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
+# of this software AND associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# to use, copy, modify, merge, publish, distribute, sublicense, AND/or sell
+# copies of the Software, AND to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
+# The above copyright notice AND this permission notice shall be included in all
 # copies or substantial portions of the Software.
 #
 ###############################################################################
@@ -52,27 +52,28 @@
     .set     KernelLockInit, .
 
     # print heading of line
-    mov      $0x0A, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
-    leaq     LockModuleStr(%rip), %rdi
-    call     KernelLogString
-    mov      $0x0B, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
+    MOV      $0x0A, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
+    LEA      LockModuleStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $0x0B, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
 
     # print module info
-    leaq     LockStartStr(%rip), %rdi
-    call     KernelLogString
-    mov      $'\n', %rdi
-    call     KernelLogChar
+    LEA      LockStartStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
 
     # initialize the semaphore with 0
-    movq     $0, AccessSemaphore(%rip)
+    XOR      %rax, %rax
+    MOV      %rax, AccessSemaphore(%rip)
 
     # done
-1:  xor      %rax, %rax
-    ret
+1:  XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                            KernelLockAcquire()                              #
@@ -82,32 +83,32 @@
     .global  KernelLockAcquire
     .set     KernelLockAcquire, .
 
-    # cmpxchg loop to acquire the semaphore
-1:  xor      %eax, %eax
-    mov      $1, %ebx
-    lock
-    cmpxchg  %ebx, AccessSemaphore(%rip)
-    jne      1b
+    # cmpxchg LOOP to acquire the semaphore
+1:  XOR      %eax, %eax
+    MOV      $1, %ebx
+    LOCK
+    CMPXCHG  %ebx, AccessSemaphore(%rip)
+    JNE      1b
 
     # done
-2:  xor      %rax, %rax
-    ret
+2:  XOR      %rax, %rax
+    RET
 
 ###############################################################################
-#                            KernelLockRelease()                              #
+#                            KernelLockReLEAse()                              #
 ###############################################################################
 
     # declare a linker symbol
-    .global  KernelLockRelease
-    .set     KernelLockRelease, .
+    .global  KernelLockReLEAse
+    .set     KernelLockReLEAse, .
 
-    # release the kernel access semaphore
-    xor      %eax, %eax
-    mov      %eax, AccessSemaphore(%rip)
+    # reLEAse the kernel access semaphore
+    XOR      %eax, %eax
+    MOV      %eax, AccessSemaphore(%rip)
 
     # done
-2:  xor      %rax, %rax
-    ret
+2:  XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                              DATA SECTION                                   #

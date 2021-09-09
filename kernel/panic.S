@@ -8,13 +8,13 @@
 # Copyright (c) 2021 Ramses A.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
+# of this software AND associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# to use, copy, modify, merge, publish, distribute, sublicense, AND/or sell
+# copies of the Software, AND to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
+# The above copyright notice AND this permission notice shall be included in all
 # copies or substantial portions of the Software.
 #
 ###############################################################################
@@ -52,24 +52,24 @@
     .set     KernelPanicInit, .
 
     # print heading of line
-    mov      $0x0A, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
-    leaq     PanicModuleStr(%rip), %rdi
-    call     KernelLogString
-    mov      $0x0B, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
+    MOV      $0x0A, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
+    LEA      PanicModuleStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $0x0B, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
 
     # print module info
-    leaq     PanicStartStr(%rip), %rdi
-    call     KernelLogString
-    mov      $'\n', %rdi
-    call     KernelLogChar
+    LEA      PanicStartStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
 
     # done
-1:  xor      %rax, %rax
-    ret
+1:  XOR      %rax, %rax
+    RET
 
 
 ###############################################################################
@@ -81,344 +81,344 @@
     .set     KernelPanicHandle, .
 
     # set panic colour
-    push     %rdi
-    mov      $0x0A, %rdi
-    mov      $0x01, %rsi
-    call     KernelLogColour
-    pop      %rdi 
+    PUSH     %rdi
+    MOV      $0x0A, %rdi
+    MOV      $0x01, %rsi
+    CALL     KernelLogColour
+    POP      %rdi 
 
-    # clear screen
-    push     %rdi
-    call     KernelLogClear
-    pop      %rdi
+    # cLEAr screen
+    PUSH     %rdi
+    CALL     KernelLogCLEAr
+    POP      %rdi
 
     # print panic heading
-    push     %rdi
-    leaq     PanicHeaderStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicHeaderStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
 
     # print exception name
-    push     %rdi
-    lea      PanicExpNameStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameNbr(%rdi), %rax
-    shlq     $5, %rax
-    leaq     PanicExpNamesStr(%rip), %rdi
-    addq     %rax, %rdi
-    call     KernelLogString
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicExpNameStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameNbr(%rdi), %rax
+    SHL      $5, %rax
+    LEA      PanicExpNamesStr(%rip), %rdi
+    ADD      %rax, %rdi
+    CALL     KernelLogString
+    POP      %rdi
 
     # new line
-    push     %rdi
-    movq     $'\n', %rdi
-    call     KernelLogChar
-    pop      %rdi
+    PUSH     %rdi
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
+    POP      %rdi
 
     # print exception code
-    push     %rdi
-    lea      PanicExpCodeStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameNbr(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicExpCodeStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameNbr(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
 
     # new line
-    push     %rdi
-    movq     $'\n', %rdi
-    call     KernelLogChar
-    pop      %rdi
+    PUSH     %rdi
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
+    POP      %rdi
 
     # print err code
-    push     %rdi
-    lea      PanicErrCodeStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameErr(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicErrCodeStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameErr(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
 
     # new line
-    push     %rdi
-    movq     $'\n', %rdi
-    call     KernelLogChar
-    pop      %rdi
+    PUSH     %rdi
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
+    POP      %rdi
 
     # print cpu core number
-    push     %rdi
-    lea      PanicCoreNumStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    xorq     %rax, %rax
-    movl     0xFEE00020, %eax
-    shrl     $24, %eax
-    movq     %rax, %rdi
-    call     KernelLogDecimal
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicCoreNumStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    XOR      %rax, %rax
+    MOV      0xFEE00020, %eax
+    SHR      $24, %eax
+    MOV      %rax, %rdi
+    CALL     KernelLogDecimal
+    POP      %rdi
 
     # horizontal line
-    push     %rdi
-    lea      PanicLineStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicLineStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
     
     # print CS
-    push     %rdi
-    lea      PanicRegCsStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameCS(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegCsStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameCS(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
     
     # print RIP
-    push     %rdi
-    lea      PanicRegRipStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameRIP(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegRipStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameRIP(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
     
     # print RFLAGS
-    push     %rdi
-    lea      PanicRegRflagsStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameRFLAGS(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegRflagsStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameRFLAGS(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
 
     # new line
-    push     %rdi
-    movq     $'\n', %rdi
-    call     KernelLogChar
-    pop      %rdi
+    PUSH     %rdi
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
+    POP      %rdi
     
     # print SS
-    push     %rdi
-    lea      PanicRegSsStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameSS(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegSsStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameSS(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
     
     # print RSP
-    push     %rdi
-    lea      PanicRegRspStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameRSP(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegRspStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameRSP(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
 
     # horizontal line
-    push     %rdi
-    lea      PanicLineStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicLineStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
     
     # print RAX
-    push     %rdi
-    lea      PanicRegRaxStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameRAX(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegRaxStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameRAX(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
     
     # print RBX
-    push     %rdi
-    lea      PanicRegRbxStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameRBX(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegRbxStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameRBX(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
     
     # print RCX
-    push     %rdi
-    lea      PanicRegRcxStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameRCX(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegRcxStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameRCX(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
 
     # new line
-    push     %rdi
-    movq     $'\n', %rdi
-    call     KernelLogChar
-    pop      %rdi
+    PUSH     %rdi
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
+    POP      %rdi
 
     # print RDX
-    push     %rdi
-    lea      PanicRegRdxStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameRDX(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegRdxStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameRDX(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
 
     # print RSI
-    push     %rdi
-    lea      PanicRegRsiStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameRSI(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegRsiStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameRSI(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
 
     # print RDI
-    push     %rdi
-    lea      PanicRegRdiStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameRDI(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegRdiStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameRDI(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
 
     # new line
-    push     %rdi
-    movq     $'\n', %rdi
-    call     KernelLogChar
-    pop      %rdi
+    PUSH     %rdi
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
+    POP      %rdi
     
     # print RBP
-    push     %rdi
-    lea      PanicRegRbpStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameRBP(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegRbpStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameRBP(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
 
     # horizontal line
-    push     %rdi
-    lea      PanicLineStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicLineStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
     
     # print R8
-    push     %rdi
-    lea      PanicRegR8Str(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameR8(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegR8Str(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameR8(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
     
     # print R9
-    push     %rdi
-    lea      PanicRegR9Str(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameR9(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegR9Str(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameR9(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
     
     # print R10
-    push     %rdi
-    lea      PanicRegR10Str(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameR10(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegR10Str(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameR10(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
 
     # new line
-    push     %rdi
-    movq     $'\n', %rdi
-    call     KernelLogChar
-    pop      %rdi
+    PUSH     %rdi
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
+    POP      %rdi
     
     # print R11
-    push     %rdi
-    lea      PanicRegR11Str(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameR11(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegR11Str(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameR11(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
     
     # print R12
-    push     %rdi
-    lea      PanicRegR12Str(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameR12(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegR12Str(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameR12(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
     
     # print R13
-    push     %rdi
-    lea      PanicRegR13Str(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameR13(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegR13Str(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameR13(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
 
     # new line
-    push     %rdi
-    movq     $'\n', %rdi
-    call     KernelLogChar
-    pop      %rdi
+    PUSH     %rdi
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
+    POP      %rdi
     
     # print R14
-    push     %rdi
-    lea      PanicRegR14Str(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameR14(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegR14Str(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameR14(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
     
     # print R15
-    push     %rdi
-    lea      PanicRegR15Str(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
-    push     %rdi
-    movq     StackFrameR15(%rdi), %rdi
-    call     KernelLogHex
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicRegR15Str(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
+    PUSH     %rdi
+    MOV      StackFrameR15(%rdi), %rdi
+    CALL     KernelLogHex
+    POP      %rdi
 
     # horizontal line
-    push     %rdi
-    lea      PanicLineStr(%rip), %rdi
-    call     KernelLogString
-    pop      %rdi
+    PUSH     %rdi
+    LEA      PanicLineStr(%rip), %rdi
+    CALL     KernelLogString
+    POP      %rdi
 
     # done
-1:  xor      %rax, %rax
-    ret
+1:  XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                              DATA SECTION                                   #

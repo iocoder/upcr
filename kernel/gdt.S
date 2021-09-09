@@ -8,13 +8,13 @@
 # Copyright (c) 2021 Ramses A.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
+# of this software AND associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# to use, copy, modify, merge, publish, distribute, sublicense, AND/or sell
+# copies of the Software, AND to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
+# The above copyright notice AND this permission notice shall be included in all
 # copies or substantial portions of the Software.
 #
 ###############################################################################
@@ -52,60 +52,60 @@
     .set     KernelGdtInit, .
 
     # print heading of line
-    mov      $0x0A, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
-    leaq     GdtModuleStr(%rip), %rdi
-    call     KernelLogString
-    mov      $0x0B, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
+    MOV      $0x0A, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
+    LEA      GdtModuleStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $0x0B, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
 
     # print module info
-    leaq     GdtStartStr(%rip), %rdi
-    call     KernelLogString
-    mov      $'\n', %rdi
-    call     KernelLogChar
+    LEA      GdtStartStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
 
     # copy the GDTR descriptor to lower memory
-    movq     $GdtrDescBase, %rdi
-    movq     GdtrDesc(%rip), %rax
-    movq     %rax, (%rdi)
+    MOV      $GdtrDescBase, %rdi
+    MOV      GdtrDesc(%rip), %rax
+    MOV      %rax, (%rdi)
 
     # copy the GDT table to lower memory
-    movq     $GdtTableBase, %rdi
-    leaq     GdtStart(%rip), %rsi
-    leaq     GdtEnd(%rip), %rcx
-    subq     %rsi, %rcx
+    MOV      $GdtTableBase, %rdi
+    LEA      GdtStart(%rip), %rsi
+    LEA      GdtEnd(%rip), %rcx
+    SUB      %rsi, %rcx
 
-    # copy loop
-1:  movb     (%rsi), %al
-    movb     %al, (%rdi)
-    inc      %rsi
-    inc      %rdi
-    loop     1b
+    # copy LOOP
+1:  MOV      (%rsi), %al
+    MOV      %al, (%rdi)
+    INC      %rsi
+    INC      %rdi
+    LOOP     1b
 
     # load GDTR descriptor
-    lgdt     GdtrDescBase
+    LGDT     GdtrDescBase
 
-    # make a far jump to reload CS using long-mode lretq
-    movq     $0x20, %rax
-    pushq    %rax
-    leaq     2f(%rip), %rax
-    pushq    %rax
-    lretq
+    # make a far jump to reload CS using long-mode lRETq
+    MOV      $0x20, %rax
+    PUSH     %rax
+    LEA      2f(%rip), %rax
+    PUSH     %rax
+    LRETQ
 
     # reload other segment registers
-2:  mov      $0x28, %ax
-    mov      %ax, %ds
-    mov      %ax, %es
-    mov      %ax, %fs
-    mov      %ax, %gs
-    mov      %ax, %ss
+2:  MOV      $0x28, %ax
+    MOV      %ax, %ds
+    MOV      %ax, %es
+    MOV      %ax, %fs
+    MOV      %ax, %gs
+    MOV      %ax, %ss
 
     # done
-3:  xor      %rax, %rax
-    ret
+3:  XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                              DATA SECTION                                   #

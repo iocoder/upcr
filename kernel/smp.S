@@ -8,13 +8,13 @@
 # Copyright (c) 2021 Ramses A.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
+# of this software AND associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# to use, copy, modify, merge, publish, distribute, sublicense, AND/or sell
+# copies of the Software, AND to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
+# The above copyright notice AND this permission notice shall be included in all
 # copies or substantial portions of the Software.
 #
 ###############################################################################
@@ -52,32 +52,32 @@
     .set     KernelSmpInit, .
 
     # print heading of line
-    mov      $0x0A, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
-    leaq     SmpModuleStr(%rip), %rdi
-    call     KernelLogString
-    mov      $0x0B, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
+    MOV      $0x0A, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
+    LEA      SmpModuleStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $0x0B, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
 
     # print module info
-    leaq     SmpStartStr(%rip), %rdi
-    call     KernelLogString
-    mov      $'\n', %rdi
-    call     KernelLogChar
+    LEA      SmpStartStr(%rip), %rdi
+    CALL     KernelLogString
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
 
     # first we need to initialize core 0
-    call     KernelSmpEnable
+    CALL     KernelSmpEnable
 
     # send INIT-SIPI-SIPI sequence to other CPUs
-    call     KernelIrqIipi
-    call     KernelIrqSipi
-    call     KernelIrqSipi
+    CALL     KernelIrqIipi
+    CALL     KernelIrqSipi
+    CALL     KernelIrqSipi
 
     # done
-1:  xor      %rax, %rax
-    ret
+1:  XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                            KernelSmpEnable()                                #
@@ -88,48 +88,48 @@
     .set     KernelSmpEnable, .
 
     # acquire kernel lock to avoid race conditions with other CPUS
-    call     KernelLockAcquire
+    CALL     KernelLockAcquire
 
-    # initialize LAPIC and enable IRQs
-    call     KernelIrqEnable
+    # initialize LAPIC AND enable IRQs
+    CALL     KernelIrqEnable
 
     # set heading colour
-    mov      $0x0A, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
+    MOV      $0x0A, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
 
     # print module name
-    leaq     SmpModuleStr(%rip), %rdi
-    call     KernelLogString
+    LEA      SmpModuleStr(%rip), %rdi
+    CALL     KernelLogString
 
     # reset colour
-    mov      $0x0B, %rdi
-    mov      $-1, %rsi
-    call     KernelLogColour
+    MOV      $0x0B, %rdi
+    MOV      $-1, %rsi
+    CALL     KernelLogColour
 
     # print lapic detection string
-    leaq     SmpLapicStr(%rip), %rdi
-    call     KernelLogString
+    LEA      SmpLapicStr(%rip), %rdi
+    CALL     KernelLogString
 
     # print LAPIC ID
-    xorq     %rax, %rax
-    movl     0xFEE00020, %eax
-    shrl     $24, %eax
-    movq     %rax, %rdi
-    call     KernelLogDecimal
+    XOR      %rax, %rax
+    MOV      0xFEE00020, %eax
+    SHR      $24, %eax
+    MOV      %rax, %rdi
+    CALL     KernelLogDecimal
 
     # print new line
-    mov      $'\n', %rdi
-    call     KernelLogChar
+    MOV      $'\n', %rdi
+    CALL     KernelLogChar
 
-    # release the lock
-    push     %rdi
-    call     KernelLockRelease
-    pop      %rdi
+    # reLEAse the lock
+    PUSH     %rdi
+    CALL     KernelLockReLEAse
+    POP      %rdi
 
     # done
-    xor      %rax, %rax
-    ret
+    XOR      %rax, %rax
+    RET
 
 ###############################################################################
 #                              DATA SECTION                                   #
