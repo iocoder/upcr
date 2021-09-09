@@ -33,132 +33,130 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-    ;# common definitions used by kernel
-    .INCLUDE "kernel/macro.inc"
+            ;# common definitions used by kernel
+            .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-    ;# global symbols
-    .global KRAMINIT
+            ;# global symbols
+            .global  KRAMINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-    ;# text section
-    .text
+            ;# text section
+            .text
 
 ;###############################################################################
 ;#                              KRAMINIT()                                     #
 ;###############################################################################
 
-KRAMINIT:
+KRAMINIT:   ;# read KRAMAVL from init struct
+            MOV      0x38(%rdi), %rax
+            MOV      %rax, KRAMAVL(%rip)
 
-    ;# read KRAMAVL from init struct
-    MOV      0x38(%rdi), %rax
-    MOV      %rax, KRAMAVL(%rip)
+            ;# read KRAMSTART from init struct
+            MOV      0x40(%rdi), %rax
+            MOV      %rax, KRAMSTART(%rip)
 
-    ;# read KRAMSTART from init struct
-    MOV      0x40(%rdi), %rax
-    MOV      %rax, KRAMSTART(%rip)
+            ;# read KRAMEND from init struct
+            MOV      0x48(%rdi), %rax
+            MOV      %rax, KRAMEND(%rip)
 
-    ;# read KRAMEND from init struct
-    MOV      0x48(%rdi), %rax
-    MOV      %rax, KRAMEND(%rip)
+            ;# did the user provide RAM information anyways?
+            MOV      KRAMAVL(%rip), %rax
+            CMP      $0, %rax
+            JZ       1f
 
-    ;# did the user provide RAM information anyways?
-    MOV      KRAMAVL(%rip), %rax
-    CMP      $0, %rax
-    JZ       1f
+            ;# print heading of line
+            MOV      $0x0A, %rdi
+            MOV      $-1, %rsi
+            CALL     KLOGATT
+            LEA      KRAMNAME(%rip), %rdi
+            CALL     KLOGSTR
+            MOV      $0x0B, %rdi
+            MOV      $-1, %rsi
+            CALL     KLOGATT
 
-    ;# print heading of line
-    MOV      $0x0A, %rdi
-    MOV      $-1, %rsi
-    CALL     KLOGATT
-    LEA      KRAMNAME(%rip), %rdi
-    CALL     KLOGSTR
-    MOV      $0x0B, %rdi
-    MOV      $-1, %rsi
-    CALL     KLOGATT
+            ;# print ram start
+            LEA      KRAMSTARTS(%rip), %rdi
+            CALL     KLOGSTR
+            MOV      KRAMSTART(%rip), %rdi
+            CALL     KLOGHEX
+            MOV      $'\n', %rdi
+            CALL     KLOGCHR
 
-    ;# print ram start
-    LEA      KRAMSTARTS(%rip), %rdi
-    CALL     KLOGSTR
-    MOV      KRAMSTART(%rip), %rdi
-    CALL     KLOGHEX
-    MOV      $'\n', %rdi
-    CALL     KLOGCHR
+            ;# print heading of line
+            MOV      $0x0A, %rdi
+            MOV      $-1, %rsi
+            CALL     KLOGATT
+            LEA      KRAMNAME(%rip), %rdi
+            CALL     KLOGSTR
+            MOV      $0x0B, %rdi
+            MOV      $-1, %rsi
+            CALL     KLOGATT
 
-    ;# print heading of line
-    MOV      $0x0A, %rdi
-    MOV      $-1, %rsi
-    CALL     KLOGATT
-    LEA      KRAMNAME(%rip), %rdi
-    CALL     KLOGSTR
-    MOV      $0x0B, %rdi
-    MOV      $-1, %rsi
-    CALL     KLOGATT
+            ;# print ram end line
+            LEA      KRAMENDS(%rip), %rdi
+            CALL     KLOGSTR
+            MOV      KRAMEND(%rip), %rdi
+            CALL     KLOGHEX
+            MOV      $'\n', %rdi
+            CALL     KLOGCHR
 
-    ;# print ram end line
-    LEA      KRAMENDS(%rip), %rdi
-    CALL     KLOGSTR
-    MOV      KRAMEND(%rip), %rdi
-    CALL     KLOGHEX
-    MOV      $'\n', %rdi
-    CALL     KLOGCHR
+            ;# print heading of line
+            MOV      $0x0A, %rdi
+            MOV      $-1, %rsi
+            CALL     KLOGATT
+            LEA      KRAMNAME(%rip), %rdi
+            CALL     KLOGSTR
+            MOV      $0x0B, %rdi
+            MOV      $-1, %rsi
+            CALL     KLOGATT
 
-    ;# print heading of line
-    MOV      $0x0A, %rdi
-    MOV      $-1, %rsi
-    CALL     KLOGATT
-    LEA      KRAMNAME(%rip), %rdi
-    CALL     KLOGSTR
-    MOV      $0x0B, %rdi
-    MOV      $-1, %rsi
-    CALL     KLOGATT
+            ;# print ram size line
+            LEA      KRAMESIZES(%rip), %rdi
+            CALL     KLOGSTR
+            MOV      KRAMEND(%rip), %rdi
+            SUB      KRAMSTART(%rip), %rdi
+            SHR      $20, %rdi
+            CALL     KLOGDEC
+            MOV      $'M', %rdi
+            CALL     KLOGCHR
+            MOV      $'B', %rdi
+            CALL     KLOGCHR
+            MOV      $'\n', %rdi
+            CALL     KLOGCHR
 
-    ;# print ram size line
-    LEA      KRAMESIZES(%rip), %rdi
-    CALL     KLOGSTR
-    MOV      KRAMEND(%rip), %rdi
-    SUB      KRAMSTART(%rip), %rdi
-    SHR      $20, %rdi
-    CALL     KLOGDEC
-    MOV      $'M', %rdi
-    CALL     KLOGCHR
-    MOV      $'B', %rdi
-    CALL     KLOGCHR
-    MOV      $'\n', %rdi
-    CALL     KLOGCHR
-
-    ;# done
-1:  XOR      %rax, %rax
-    RET
+            ;# done
+1:          XOR      %rax, %rax
+            RET
 
 ;###############################################################################
 ;#                              DATA SECTION                                   #
 ;###############################################################################
 
-    ;# data section
-    .data
+            ;# data section
+            .data
 
 ;###############################################################################
 ;#                              MODULE DATA                                    #
 ;###############################################################################
 
             ;# RamInitInfo structure
-KRAMAVL:    DQ    0
-KRAMSTART:  DQ    0
-KRAMEND:    DQ    0
+KRAMAVL:    DQ       0
+KRAMSTART:  DQ       0
+KRAMEND:    DQ       0
 
 ;###############################################################################
 ;#                            LOGGING STRINGS                                  #
 ;###############################################################################
 
             ;# RAM heading and messages
-KRAMNAME:   .string " [KERNEL RAM] "
-KRAMSTARTS: .string  "Detected RAM Start: "
-KRAMENDS:   .string  "Detected RAM End:   "
-KRAMESIZES: .string  "Detected RAM Size:  "
+KRAMNAME:   .ascii   " [KERNEL RAM] \0"
+KRAMSTARTS: .ascii   "Detected RAM Start: \0"
+KRAMENDS:   .ascii   "Detected RAM End:   \0"
+KRAMESIZES: .ascii   "Detected RAM Size:  \0"

@@ -33,375 +33,373 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-    ;# common definitions used by kernel
-    .INCLUDE "kernel/macro.inc"
+            ;# common definitions used by kernel
+            .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-    ;# global symbols
-    .global KERRPANIC
+            ;# global symbols
+            .global  KERRPANIC
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-    ;# text section
-    .text
+            ;# text section
+            .text
 
 ;###############################################################################
 ;#                              KERRPANIC()                                    #
 ;###############################################################################
 
-KERRPANIC:
+KERRPANIC:  ;# set panic colour
+            PUSH     %rdi
+            MOV      $0x0A, %rdi
+            MOV      $0x01, %rsi
+            CALL     KLOGATT
+            POP      %rdi 
 
-    ;# set panic colour
-    PUSH     %rdi
-    MOV      $0x0A, %rdi
-    MOV      $0x01, %rsi
-    CALL     KLOGATT
-    POP      %rdi 
+            ;# clear screen
+            PUSH     %rdi
+            CALL     KLOGCLR
+            POP      %rdi
 
-    ;# cLEAr screen
-    PUSH     %rdi
-    CALL     KLOGCLR
-    POP      %rdi
+            ;# print panic heading
+            PUSH     %rdi
+            LEA      KERRHDR(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
 
-    ;# print panic heading
-    PUSH     %rdi
-    LEA      KERRHDR(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
+            ;# print exception name
+            PUSH     %rdi
+            LEA      KERREXPN(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_NBR(%rdi), %rax
+            SHL      $5, %rax
+            LEA      KERRSTR(%rip), %rdi
+            ADD      %rax, %rdi
+            CALL     KLOGSTR
+            POP      %rdi
 
-    ;# print exception name
-    PUSH     %rdi
-    LEA      KERREXPN(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameNbr(%rdi), %rax
-    SHL      $5, %rax
-    LEA      KERRSTR(%rip), %rdi
-    ADD      %rax, %rdi
-    CALL     KLOGSTR
-    POP      %rdi
+            ;# new line
+            PUSH     %rdi
+            MOV      $'\n', %rdi
+            CALL     KLOGCHR
+            POP      %rdi
 
-    ;# new line
-    PUSH     %rdi
-    MOV      $'\n', %rdi
-    CALL     KLOGCHR
-    POP      %rdi
+            ;# print exception code
+            PUSH     %rdi
+            LEA      KERREXPC(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_NBR(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
 
-    ;# print exception code
-    PUSH     %rdi
-    LEA      KERREXPC(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameNbr(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
+            ;# new line
+            PUSH     %rdi
+            MOV      $'\n', %rdi
+            CALL     KLOGCHR
+            POP      %rdi
 
-    ;# new line
-    PUSH     %rdi
-    MOV      $'\n', %rdi
-    CALL     KLOGCHR
-    POP      %rdi
+            ;# print err code
+            PUSH     %rdi
+            LEA      KERRCODE(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_ERR(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
 
-    ;# print err code
-    PUSH     %rdi
-    LEA      KERRCODE(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameErr(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
+            ;# new line
+            PUSH     %rdi
+            MOV      $'\n', %rdi
+            CALL     KLOGCHR
+            POP      %rdi
 
-    ;# new line
-    PUSH     %rdi
-    MOV      $'\n', %rdi
-    CALL     KLOGCHR
-    POP      %rdi
+            ;# print cpu core number
+            PUSH     %rdi
+            LEA      KERRCORE(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            XOR      %rax, %rax
+            MOV      0xFEE00020, %eax
+            SHR      $24, %eax
+            MOV      %rax, %rdi
+            CALL     KLOGDEC
+            POP      %rdi
 
-    ;# print cpu core number
-    PUSH     %rdi
-    LEA      KERRCORE(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    XOR      %rax, %rax
-    MOV      0xFEE00020, %eax
-    SHR      $24, %eax
-    MOV      %rax, %rdi
-    CALL     KLOGDEC
-    POP      %rdi
+            ;# horizontal line
+            PUSH     %rdi
+            LEA      KERRHR(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            
+            ;# print CS
+            PUSH     %rdi
+            LEA      KERRCS(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_CS(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
+            
+            ;# print RIP
+            PUSH     %rdi
+            LEA      KERRRIP(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_RIP(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
+            
+            ;# print RFLAGS
+            PUSH     %rdi
+            LEA      KERRFLG(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_RFLAGS(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
 
-    ;# horizontal line
-    PUSH     %rdi
-    LEA      KERRHR(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    
-    ;# print CS
-    PUSH     %rdi
-    LEA      KERRCS(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameCS(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
-    
-    ;# print RIP
-    PUSH     %rdi
-    LEA      KERRRIP(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameRIP(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
-    
-    ;# print RFLAGS
-    PUSH     %rdi
-    LEA      KERRFLG(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameRFLAGS(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
+            ;# new line
+            PUSH     %rdi
+            MOV      $'\n', %rdi
+            CALL     KLOGCHR
+            POP      %rdi
+            
+            ;# print SS
+            PUSH     %rdi
+            LEA      KERRSS(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_SS(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
+            
+            ;# print RSP
+            PUSH     %rdi
+            LEA      KERRRSP(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_RSP(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
 
-    ;# new line
-    PUSH     %rdi
-    MOV      $'\n', %rdi
-    CALL     KLOGCHR
-    POP      %rdi
-    
-    ;# print SS
-    PUSH     %rdi
-    LEA      KERRSS(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameSS(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
-    
-    ;# print RSP
-    PUSH     %rdi
-    LEA      KERRRSP(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameRSP(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
+            ;# horizontal line
+            PUSH     %rdi
+            LEA      KERRHR(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            
+            ;# print RAX
+            PUSH     %rdi
+            LEA      KERRRAX(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_RAX(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
+            
+            ;# print RBX
+            PUSH     %rdi
+            LEA      KERRRBX(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_RBX(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
+            
+            ;# print RCX
+            PUSH     %rdi
+            LEA      KERRRCX(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_RCX(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
 
-    ;# horizontal line
-    PUSH     %rdi
-    LEA      KERRHR(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    
-    ;# print RAX
-    PUSH     %rdi
-    LEA      KERRRAX(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameRAX(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
-    
-    ;# print RBX
-    PUSH     %rdi
-    LEA      KERRRBX(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameRBX(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
-    
-    ;# print RCX
-    PUSH     %rdi
-    LEA      KERRRCX(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameRCX(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
+            ;# new line
+            PUSH     %rdi
+            MOV      $'\n', %rdi
+            CALL     KLOGCHR
+            POP      %rdi
 
-    ;# new line
-    PUSH     %rdi
-    MOV      $'\n', %rdi
-    CALL     KLOGCHR
-    POP      %rdi
+            ;# print RDX
+            PUSH     %rdi
+            LEA      KERRRDX(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_RDX(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
 
-    ;# print RDX
-    PUSH     %rdi
-    LEA      KERRRDX(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameRDX(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
+            ;# print RSI
+            PUSH     %rdi
+            LEA      KERRRSI(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_RSI(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
 
-    ;# print RSI
-    PUSH     %rdi
-    LEA      KERRRSI(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameRSI(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
+            ;# print RDI
+            PUSH     %rdi
+            LEA      KERRRDI(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_RDI(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
 
-    ;# print RDI
-    PUSH     %rdi
-    LEA      KERRRDI(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameRDI(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
+            ;# new line
+            PUSH     %rdi
+            MOV      $'\n', %rdi
+            CALL     KLOGCHR
+            POP      %rdi
+            
+            ;# print RBP
+            PUSH     %rdi
+            LEA      KERRRBP(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_RBP(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
 
-    ;# new line
-    PUSH     %rdi
-    MOV      $'\n', %rdi
-    CALL     KLOGCHR
-    POP      %rdi
-    
-    ;# print RBP
-    PUSH     %rdi
-    LEA      KERRRBP(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameRBP(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
+            ;# horizontal line
+            PUSH     %rdi
+            LEA      KERRHR(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            
+            ;# print R8
+            PUSH     %rdi
+            LEA      KERRR8(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_R8(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
+            
+            ;# print R9
+            PUSH     %rdi
+            LEA      KERRR9(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_R9(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
+            
+            ;# print R10
+            PUSH     %rdi
+            LEA      KERRR10(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_R10(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
 
-    ;# horizontal line
-    PUSH     %rdi
-    LEA      KERRHR(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    
-    ;# print R8
-    PUSH     %rdi
-    LEA      KERRR8(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameR8(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
-    
-    ;# print R9
-    PUSH     %rdi
-    LEA      KERRR9(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameR9(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
-    
-    ;# print R10
-    PUSH     %rdi
-    LEA      KERRR10(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameR10(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
+            ;# new line
+            PUSH     %rdi
+            MOV      $'\n', %rdi
+            CALL     KLOGCHR
+            POP      %rdi
+            
+            ;# print R11
+            PUSH     %rdi
+            LEA      KERRR11(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_R11(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
+            
+            ;# print R12
+            PUSH     %rdi
+            LEA      KERRR12(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_R12(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
+            
+            ;# print R13
+            PUSH     %rdi
+            LEA      KERRR13(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_R13(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
 
-    ;# new line
-    PUSH     %rdi
-    MOV      $'\n', %rdi
-    CALL     KLOGCHR
-    POP      %rdi
-    
-    ;# print R11
-    PUSH     %rdi
-    LEA      KERRR11(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameR11(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
-    
-    ;# print R12
-    PUSH     %rdi
-    LEA      KERRR12(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameR12(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
-    
-    ;# print R13
-    PUSH     %rdi
-    LEA      KERRR13(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameR13(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
+            ;# new line
+            PUSH     %rdi
+            MOV      $'\n', %rdi
+            CALL     KLOGCHR
+            POP      %rdi
+            
+            ;# print R14
+            PUSH     %rdi
+            LEA      KERRR14(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_R14(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
+            
+            ;# print R15
+            PUSH     %rdi
+            LEA      KERRR15(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
+            PUSH     %rdi
+            MOV      SFRAME_R15(%rdi), %rdi
+            CALL     KLOGHEX
+            POP      %rdi
 
-    ;# new line
-    PUSH     %rdi
-    MOV      $'\n', %rdi
-    CALL     KLOGCHR
-    POP      %rdi
-    
-    ;# print R14
-    PUSH     %rdi
-    LEA      KERRR14(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameR14(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
-    
-    ;# print R15
-    PUSH     %rdi
-    LEA      KERRR15(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-    PUSH     %rdi
-    MOV      StackFrameR15(%rdi), %rdi
-    CALL     KLOGHEX
-    POP      %rdi
+            ;# horizontal line
+            PUSH     %rdi
+            LEA      KERRHR(%rip), %rdi
+            CALL     KLOGSTR
+            POP      %rdi
 
-    ;# horizontal line
-    PUSH     %rdi
-    LEA      KERRHR(%rip), %rdi
-    CALL     KLOGSTR
-    POP      %rdi
-
-    ;# done
-    XOR      %rax, %rax
-    RET
+            ;# done
+            XOR      %rax, %rax
+            RET
 
 ;###############################################################################
 ;#                              DATA SECTION                                   #
 ;###############################################################################
 
-    ;# data section
-    .data
+            ;# data section
+            .data
 
 ;###############################################################################
 ;#                            LOGGING STRINGS                                  #
@@ -426,7 +424,7 @@ KERRHR:     .ascii   "\n"
             .ascii   "\n"
             .ascii   "\0"
 
-    ;# registers
+            ;# registers
 KERREXPN:   .ascii   "  EXCEPTION NAME: \0"
 KERREXPC:   .ascii   "  EXCEPTION CODE: \0"
 KERRCODE:   .ascii   "  ERROR CODE:     \0"

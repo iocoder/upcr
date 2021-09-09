@@ -33,74 +33,72 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-    ;# common definitions used by kernel
-    .INCLUDE "kernel/macro.inc"
+            ;# common definitions used by kernel
+            .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-    ;# global symbols
-    .global KSYSINIT
+            ;# global symbols
+            .global  KSYSINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-    ;# text section
-    .text
+            ;# text section
+            .text
 
 ;###############################################################################
 ;#                               KSYSINIT()                                    #
 ;###############################################################################
 
-KSYSINIT:
+KSYSINIT:   ;# initialize vga module
+            PUSH     %rdi
+            CALL     KVGAINIT
+            POP      %rdi
 
-    ;# initialize vga module
-    PUSH     %rdi
-    CALL     KVGAINIT
-    POP      %rdi
+            ;# initialize log module
+            PUSH     %rdi
+            CALL     KLOGINIT
+            POP      %rdi
 
-    ;# initialize log module
-    PUSH     %rdi
-    CALL     KLOGINIT
-    POP      %rdi
+            ;# initialize ram module
+            PUSH     %rdi
+            CALL     KRAMINIT
+            POP      %rdi
 
-    ;# initialize ram module
-    PUSH     %rdi
-    CALL     KRAMINIT
-    POP      %rdi
+            ;# initialize page module
+            PUSH     %rdi
+            CALL     KVMMINIT
+            POP      %rdi
 
-    ;# initialize page module
-    PUSH     %rdi
-    CALL     KVMMINIT
-    POP      %rdi
+            ;# initialize gdt module
+            PUSH     %rdi
+            CALL     KGDTINIT
+            POP      %rdi
 
-    ;# initialize gdt module
-    PUSH     %rdi
-    CALL     KGDTINIT
-    POP      %rdi
+            ;# initialize idt module
+            PUSH     %rdi
+            CALL     KIDTINIT
+            POP      %rdi
 
-    ;# initialize idt module
-    PUSH     %rdi
-    CALL     KIDTINIT
-    POP      %rdi
+            ;# initialize tss module
+            PUSH     %rdi
+            CALL     KTSSINIT
+            POP      %rdi
 
-    ;# initialize tss module
-    PUSH     %rdi
-    CALL     KTSSINIT
-    POP      %rdi
+            ;# initialize irq module
+            PUSH     %rdi
+            CALL     KIRQINIT
+            POP      %rdi
 
-    ;# initialize irq module
-    PUSH     %rdi
-    CALL     KIRQINIT
-    POP      %rdi
+            ;# initialize smp module
+            PUSH     %rdi
+            CALL     KSMPINIT
+            POP      %rdi
 
-    ;# initialize smp module
-    PUSH     %rdi
-    CALL     KSMPINIT
-    POP      %rdi
-
-    ;# done
-    XOR      %rax, %rax
-    RET
+            ;# done
+            XOR      %rax, %rax
+            RET

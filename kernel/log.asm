@@ -33,244 +33,230 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-    ;# common definitions used by kernel
-    .INCLUDE "kernel/macro.inc"
+            ;# common definitions used by kernel
+            .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-    ;# global symbols
-    .global KLOGINIT
-    .global KLOGCHR
-    .global KLOGDEC
-    .global KLOGHEX
-    .global KLOGSTR
-    .global KLOGATT
-    .global KLOGCLR
+            ;# global symbols
+            .global  KLOGINIT
+            .global  KLOGCHR
+            .global  KLOGDEC
+            .global  KLOGHEX
+            .global  KLOGSTR
+            .global  KLOGATT
+            .global  KLOGCLR
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-    ;# text section
-    .text
+            ;# text section
+            .text
 
 ;###############################################################################
 ;#                               KLOGINIT()                                    #
 ;###############################################################################
 
-KLOGINIT:
+KLOGINIT:   ;# clear screen
+            CALL     KLOGCLR
 
-    ;# clear screen
-    CALL     KLOGCLR
+            ;# header colour
+            MOV      $0x0A, %rdi
+            MOV      $-1,   %rsi
+            CALL     KLOGATT
 
-    ;# header colour
-    MOV      $0x0A, %rdi
-    MOV      $-1,   %rsi
-    CALL     KLOGATT
+            ;# print header
+            LEA      KLOGHDR(%rip), %rdi
+            CALL     KLOGSTR
 
-    ;# print header
-    LEA      KLOGHDR(%rip), %rdi
-    CALL     KLOGSTR
+            ;# welcome msg colour
+            MOV      $0x0E, %rdi
+            MOV      $-1,   %rsi
+            CALL     KLOGATT
 
-    ;# welcome msg colour
-    MOV      $0x0E, %rdi
-    MOV      $-1,   %rsi
-    CALL     KLOGATT
+            ;# print welcome msg
+            LEA      KLOGWEL(%rip), %rdi
+            CALL     KLOGSTR
 
-    ;# print welcome msg
-    LEA      KLOGWEL(%rip), %rdi
-    CALL     KLOGSTR
+            ;# license colour
+            MOV      $0x0F, %rdi
+            MOV      $-1,   %rsi
+            CALL     KLOGATT
 
-    ;# license colour
-    MOV      $0x0F, %rdi
-    MOV      $-1,   %rsi
-    CALL     KLOGATT
+            ;# print license
+            LEA      KLOGLIC(%rip), %rdi
+            CALL     KLOGSTR
 
-    ;# print license
-    LEA      KLOGLIC(%rip), %rdi
-    CALL     KLOGSTR
+            ;# set printing colour to yellow
+            MOV      $0x0B, %rdi
+            MOV      $-1,   %rsi
+            CALL     KLOGATT
 
-    ;# set printing colour to yellow
-    MOV      $0x0B, %rdi
-    MOV      $-1,   %rsi
-    CALL     KLOGATT
-
-    ;# done
-    XOR      %rax, %rax
-    RET
+            ;# done
+            XOR      %rax, %rax
+            RET
 
 ;###############################################################################
 ;#                               KLOGCHR()                                     #
 ;###############################################################################
 
-KLOGCHR:
+KLOGCHR:    # print character to VGA
+            PUSH     %rdi
+            CALL     KVGAPUT
+            POP      %rdi
 
-    ;# print character to VGA
-    PUSH     %rdi
-    CALL     KVGAPUT
-    POP      %rdi
-
-    ;# done
-    XOR      %rax, %rax
-    RET
+            ;# done
+            XOR      %rax, %rax
+            RET
 
 ;###############################################################################
 ;#                              KLOGDEC()                                      #
 ;###############################################################################
 
-KLOGDEC:
+KLOGDEC:    ;# we will keep dividing RDX:RAX by 10
+            MOV      %rdi, %rax
+            XOR      %ecx, %ecx
+            MOV      $10,  %r8
 
-    ;# we will keep dividing RDX:RAX by 10
-    MOV      %rdi, %rax
-    XOR      %ecx, %ecx
-    MOV      $10,  %r8
+            ;# divide by 10
+1:          XOR      %rdx, %rdx
+            DIV      %r8
 
-    ;# divide by 10
-1:  XOR      %rdx, %rdx
-    DIV      %r8
+            ;# use CPU stack as a PUSH-down automaton
+            PUSH     %rdx
+            INC      %ecx
 
-    ;# use CPU stack as a PUSH-down automaton
-    PUSH     %rdx
-    INC      %ecx
+            ;# done?
+            AND      %rax, %rax
+            JNZ      1b
 
-    ;# done?
-    AND      %rax, %rax
-    JNZ      1b
+            ;# now print all the digits
+2:          POP      %rdx
+            add      $'0', %rdx
+            AND      $0xFF, %rdx
+            MOV      %rdx, %rdi
+            PUSH     %rcx
+            CALL     KLOGCHR
+            POP      %rcx
 
-    ;# now print all the digits
-2:  POP      %rdx
-    add      $'0', %rdx
-    AND      $0xFF, %rdx
-    MOV      %rdx, %rdi
-    PUSH     %rcx
-    CALL     KLOGCHR
-    POP      %rcx
+            ;# all digits printed?
+            DEC      %ecx
+            JNZ      2b
 
-    ;# all digits printed?
-    DEC      %ecx
-    JNZ      2b
-
-    ;# done
-    XOR      %rax, %rax
-    RET
+            ;# done
+            XOR      %rax, %rax
+            RET
 
 ;###############################################################################
 ;#                               KLOGHEX()                                     #
 ;###############################################################################
 
-KLOGHEX:
+KLOGHEX:    ;# print 0x
+            PUSH     %rdi
+            MOV      $'0', %rdi
+            CALL     KVGAPUT
+            MOV      $'x', %rdi
+            CALL     KVGAPUT
+            POP      %rdi
 
-    ;# print 0x
-    PUSH     %rdi
-    MOV      $'0', %rdi
-    CALL     KVGAPUT
-    MOV      $'x', %rdi
-    CALL     KVGAPUT
-    POP      %rdi
+            ;# print hexadecimal number (8 bytes - 16 hexdigits)
+            MOV      $16, %cl
 
-    ;# print hexadecimal number (8 bytes - 16 hexdigits)
-    MOV      $16, %cl
+            ;# put next byte in RDI[3:0] (ROL unrolled to prevent stall)
+1:          ROL      %rdi
+            ROL      %rdi
+            ROL      %rdi
+            ROL      %rdi
 
-    ;# put next byte in RDI[3:0] (ROL unrolled to prevent stall)
-1:  ROL      %rdi
-    ROL      %rdi
-    ROL      %rdi
-    ROL      %rdi
+            ;# print DL[0:3]
+            PUSH     %rcx
+            PUSH     %rdi
+            LEA      KLOGDIGS(%rip), %rsi
+            AND      $0x0F, %rdi
+            ADD      %rdi, %rsi
+            XOR      %rax, %rax
+            MOV      (%rsi), %al
+            MOV      %rax, %rdi
+            CALL     KLOGCHR
+            POP      %rdi
+            POP      %rcx
 
-    ;# print DL[0:3]
-    PUSH     %rcx
-    PUSH     %rdi
-    LEA      KLOGDIGS(%rip), %rsi
-    AND      $0x0F, %rdi
-    ADD      %rdi, %rsi
-    XOR      %rax, %rax
-    MOV      (%rsi), %al
-    MOV      %rax, %rdi
-    CALL     KLOGCHR
-    POP      %rdi
-    POP      %rcx
+            ;# next digit
+            DEC      %cl
+            JNZ      1b
 
-    ;# next digit
-    DEC      %cl
-    JNZ      1b
-
-    ;# done
-    XOR      %rax, %rax
-    RET
+            ;# done
+            XOR      %rax, %rax
+            RET
 
 ;###############################################################################
 ;#                                KLOGSTR()                                    #
 ;###############################################################################
 
-KLOGSTR:
+KLOGSTR:    ;# fetch next character
+1:          XOR      %rax, %rax
+            MOV      (%rdi), %al
 
-    ;# fetch next character
-1:  XOR      %rax, %rax
-    MOV      (%rdi), %al
+            ;# terminate if zero
+            AND      %al, %al
+            JZ       2f
 
-    ;# terminate if zero
-    AND      %al, %al
-    JZ       2f
+            ;# print character
+            PUSH     %rdi
+            MOV      %rax, %rdi
+            CALL     KVGAPUT
+            POP      %rdi
 
-    ;# print character
-    PUSH     %rdi
-    MOV      %rax, %rdi
-    CALL     KVGAPUT
-    POP      %rdi
+            ;# LOOP again
+            INC      %rdi
+            JMP      1b
 
-    ;# LOOP again
-    INC      %rdi
-    JMP      1b
-
-    ;# done
-2:  XOR      %rax, %rax
-    RET
+            ;# done
+2:          XOR      %rax, %rax
+            RET
 
 ;##############################################################################
 ;#                                 KLOGATT()                                  #
 ;##############################################################################
 
-KLOGATT:
+KLOGATT:    ;# set vga colours
+            PUSH     %rdi
+            PUSH     %rsi
+            CALL     KVGAATT
+            POP      %rsi
+            POP      %rdi
 
-    ;# set vga colours
-    PUSH     %rdi
-    PUSH     %rsi
-    CALL     KVGAATT
-    POP      %rsi
-    POP      %rdi
-
-    ;# done
-    XOR      %rax, %rax
-    RET
+            ;# done
+            XOR      %rax, %rax
+            RET
 
 
 ;##############################################################################
 ;#                                KLOGCLR()                                   #
 ;##############################################################################
 
-KLOGCLR:
+KLOGCLR:    ;# clear vga screen
+            PUSH     %rdi
+            PUSH     %rsi
+            PUSH     %rcx
+            CALL     KVGACLR
+            POP      %rsi
+            POP      %rdi
+            POP      %rcx
 
-    ;# cLEAr vga screen
-    PUSH     %rdi
-    PUSH     %rsi
-    PUSH     %rcx
-    CALL     KVGACLR
-    POP      %rsi
-    POP      %rdi
-    POP      %rcx
-
-    ;# done
-    XOR      %rax, %rax
-    RET
+            ;# done
+            XOR      %rax, %rax
+            RET
 
 ;###############################################################################
 ;#                              DATA SECTION                                   #
 ;###############################################################################
 
-    ;# data section
-    .data
+            ;# data section
+            .data
 
 ;###############################################################################
 ;#                              MODULE DATA                                    #
@@ -285,12 +271,12 @@ KLOGDIGS:   .ascii   "0123456789ABCDEF"
 
             ;# header text
 KLOGHDR:    .INCBIN  "kernel/header.txt"
-            .byte    0
+            .ascii   "\0"
 
             ;# welcome text
 KLOGWEL:    .INCBIN  "kernel/welcome.txt"
-            .byte    0
+            .ascii   "\0"
 
             ;# license text
 KLOGLIC:    .INCBIN  "kernel/license.txt"
-            .byte    0
+            .ascii   "\0"

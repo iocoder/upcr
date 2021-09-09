@@ -33,75 +33,73 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-    ;# common definitions used by kernel
-    .INCLUDE "kernel/macro.inc"
+            ;# common definitions used by kernel
+            .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-    ;# global symbols
-    .global KVMMINIT
+            ;# global symbols
+            .global  KVMMINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-    ;# text section
-    .text
+            ;# text section
+            .text
 
 ;###############################################################################
 ;#                               KVMMINIT()                                    #
 ;###############################################################################
 
-KVMMINIT:
+KVMMINIT:   ;# print heading of line
+            MOV      $0x0A, %rdi
+            MOV      $-1, %rsi
+            CALL     KLOGATT
+            LEA      KVMMNAME(%rip), %rdi
+            CALL     KLOGSTR
+            MOV      $0x0B, %rdi
+            MOV      $-1, %rsi
+            CALL     KLOGATT
 
-    ;# print heading of line
-    MOV      $0x0A, %rdi
-    MOV      $-1, %rsi
-    CALL     KLOGATT
-    LEA      KVMMNAME(%rip), %rdi
-    CALL     KLOGSTR
-    MOV      $0x0B, %rdi
-    MOV      $-1, %rsi
-    CALL     KLOGATT
+            ;# print module info
+            LEA      KVMMMSG(%rip), %rdi
+            CALL     KLOGSTR
+            MOV      $'\n', %rdi
+            CALL     KLOGCHR
 
-    ;# print module info
-    LEA      KVMMMSG(%rip), %rdi
-    CALL     KLOGSTR
-    MOV      $'\n', %rdi
-    CALL     KLOGCHR
+            ;# initialize PML4Table
+            MOV      %cr3, %rsi
+            MOV      $PM4L_ADDR, %rdi
+            MOV      $0x1000, %rcx
+            ;# copy LOOP
+1:          MOV      (%rsi), %al
+            MOV      %al, (%rdi)
+            INC      %rsi
+            INC      %rdi
+            LOOP     1b
 
-    ;# initialize PML4Table
-    MOV      %cr3, %rsi
-    MOV      $RootPageTableBase, %rdi
-    MOV      $RootPageTableSize, %rcx
-    ;# copy LOOP
-1:  MOV      (%rsi), %al
-    MOV      %al, (%rdi)
-    INC      %rsi
-    INC      %rdi
-    LOOP     1b
+            ;# load CR3 with PML4 table base
+            MOV      $PM4L_ADDR, %rax
+            MOV      %rax, %cr3
 
-    ;# load CR3 with PML4 table base
-    MOV      $RootPageTableBase, %rax
-    MOV      %rax, %cr3
-
-    ;# done
-2:  XOR      %rax, %rax
-    RET
+            ;# done
+2:          XOR      %rax, %rax
+            RET
 
 ;###############################################################################
 ;#                              DATA SECTION                                   #
 ;###############################################################################
 
-    ;# data section
-    .data
+            ;# data section
+            .data
 
 ;###############################################################################
 ;#                            LOGGING STRINGS                                  #
 ;###############################################################################
 
             ;# VMM heading and ascii strings
-KVMMNAME:   .string  " [KERNEL VMM] "
-KVMMMSG:    .string  "Initializing virtual memory manager..."
+KVMMNAME:   .ascii   " [KERNEL VMM] \0"
+KVMMMSG:    .ascii   "Initializing virtual memory manager...\0"

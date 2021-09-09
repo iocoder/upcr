@@ -33,91 +33,89 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-    ;# common definitions used by kernel
-    .INCLUDE "kernel/macro.inc"
+            ;# common definitions used by kernel
+            .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-    ;# global symbols
-    .global KGDTINIT
+            ;# global symbols
+            .global  KGDTINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-    ;# text section
-    .text
+            ;# text section
+            .text
 
 ;###############################################################################
 ;#                                KGDTINIT()                                   #
 ;###############################################################################
 
-KGDTINIT:
+KGDTINIT:   ;# print heading of line
+            MOV      $0x0A, %rdi
+            MOV      $-1, %rsi
+            CALL     KLOGATT
+            LEA      KGDTNAME(%rip), %rdi
+            CALL     KLOGSTR
+            MOV      $0x0B, %rdi
+            MOV      $-1, %rsi
+            CALL     KLOGATT
 
-    ;# print heading of line
-    MOV      $0x0A, %rdi
-    MOV      $-1, %rsi
-    CALL     KLOGATT
-    LEA      KGDTNAME(%rip), %rdi
-    CALL     KLOGSTR
-    MOV      $0x0B, %rdi
-    MOV      $-1, %rsi
-    CALL     KLOGATT
+            ;# print module info
+            LEA      KGDTMSG(%rip), %rdi
+            CALL     KLOGSTR
+            MOV      $'\n', %rdi
+            CALL     KLOGCHR
 
-    ;# print module info
-    LEA      KGDTMSG(%rip), %rdi
-    CALL     KLOGSTR
-    MOV      $'\n', %rdi
-    CALL     KLOGCHR
+            ;# copy the GDTR descriptor to lower memory
+            MOV      $GDTR_ADDR, %rdi
+            MOV      KGDTDESC(%rip), %rax
+            MOV      %rax, (%rdi)
 
-    ;# copy the GDTR descriptor to lower memory
-    MOV      $GdtrDescBase, %rdi
-    MOV      KGDTDESC(%rip), %rax
-    MOV      %rax, (%rdi)
+            ;# copy the GDT table to lower memory
+            MOV      $GDT_ADDR, %rdi
+            LEA      KGDTSTART(%rip), %rsi
+            LEA      KGDTDESC(%rip), %rcx
+            SUB      %rsi, %rcx
 
-    ;# copy the GDT table to lower memory
-    MOV      $GdtTableBase, %rdi
-    LEA      KGDTSTART(%rip), %rsi
-    LEA      KGDTDESC(%rip), %rcx
-    SUB      %rsi, %rcx
+            ;# copy LOOP
+1:          MOV      (%rsi), %al
+            MOV      %al, (%rdi)
+            INC      %rsi
+            INC      %rdi
+            LOOP     1b
 
-    ;# copy LOOP
-1:  MOV      (%rsi), %al
-    MOV      %al, (%rdi)
-    INC      %rsi
-    INC      %rdi
-    LOOP     1b
+            ;# load GDTR descriptor
+            LGDT     GDTR_ADDR
 
-    ;# load GDTR descriptor
-    LGDT     GdtrDescBase
+            ;# make a far jump to reload CS using long-mode lRETq
+            MOV      $0x20, %rax
+            PUSH     %rax
+            LEA      2f(%rip), %rax
+            PUSH     %rax
+            LRETQ
 
-    ;# make a far jump to reload CS using long-mode lRETq
-    MOV      $0x20, %rax
-    PUSH     %rax
-    LEA      2f(%rip), %rax
-    PUSH     %rax
-    LRETQ
+            ;# reload other segment registers
+2:          MOV      $0x28, %ax
+            MOV      %ax, %ds
+            MOV      %ax, %es
+            MOV      %ax, %fs
+            MOV      %ax, %gs
+            MOV      %ax, %ss
 
-    ;# reload other segment registers
-2:  MOV      $0x28, %ax
-    MOV      %ax, %ds
-    MOV      %ax, %es
-    MOV      %ax, %fs
-    MOV      %ax, %gs
-    MOV      %ax, %ss
-
-    ;# done
-3:  XOR      %rax, %rax
-    RET
+            ;# done
+            XOR      %rax, %rax
+            RET
 
 ;###############################################################################
 ;#                              DATA SECTION                                   #
 ;###############################################################################
 
-    ;# data section
-    .data
+            ;# data section
+            .data
 
 ;###############################################################################
 ;#                              MODULE DATA                                    #
@@ -134,8 +132,8 @@ KGDTSTART:  DQ       0x0000000000000000  ;# 0x00
             DQ       0x00AFF2000000FFFF  ;# 0x38 (USER DATA 64-bit)
 
             ;# GDTR descriptor
-KGDTDESC:   DW       GdtTableSize-1
-            DL       GdtTableBase
+KGDTDESC:   DW       0xFFF
+            DL       GDT_ADDR
             DW       0
 
 ;###############################################################################
@@ -143,5 +141,5 @@ KGDTDESC:   DW       GdtTableSize-1
 ;###############################################################################
 
             ;# GDT heading and ascii strings
-KGDTNAME:   .string  " [KERNEL GDT] "
-KGDTMSG:    .string  "Initializing GDT module..."
+KGDTNAME:   .ascii   " [KERNEL GDT] \0"
+KGDTMSG:    .ascii   "Initializing GDT module...\0"

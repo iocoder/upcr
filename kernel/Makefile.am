@@ -15,7 +15,7 @@ ${TARGET}.o: ${SFILES_OUT}
 	${LD} -r ${LDFLAGS} -o $@ $^
 
 %.S:%.asm
-	cp $< $@
+	@cp $< $@
 
 %.o:%.S
 	${CC} -c ${CCASFLAGS} -o $@ ${ASFLAGS} $<

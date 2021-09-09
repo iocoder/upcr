@@ -33,60 +33,58 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-    ;# common definitions used by kernel
-    .INCLUDE "kernel/macro.inc"
+            ;# common definitions used by kernel
+            .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-    ;# global symbols
-    .global KTSSINIT
+            ;# global symbols
+            .global  KTSSINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-    ;# text section
-    .text
+            ;# text section
+            .text
 
 ;###############################################################################
 ;#                               KTSSINIT()                                    #
 ;###############################################################################
 
-KTSSINIT:
+KTSSINIT:   ;# print heading of line
+            MOV      $0x0A, %rdi
+            MOV      $-1, %rsi
+            CALL     KLOGATT
+            LEA      KTSSNAME(%rip), %rdi
+            CALL     KLOGSTR
+            MOV      $0x0B, %rdi
+            MOV      $-1, %rsi
+            CALL     KLOGATT
 
-    ;# print heading of line
-    MOV      $0x0A, %rdi
-    MOV      $-1, %rsi
-    CALL     KLOGATT
-    LEA      KTSSNAME(%rip), %rdi
-    CALL     KLOGSTR
-    MOV      $0x0B, %rdi
-    MOV      $-1, %rsi
-    CALL     KLOGATT
+            ;# print module info
+            LEA      KTSSMSG(%rip), %rdi
+            CALL     KLOGSTR
+            MOV      $'\n', %rdi
+            CALL     KLOGCHR
 
-    ;# print module info
-    LEA      KTSSMSG(%rip), %rdi
-    CALL     KLOGSTR
-    MOV      $'\n', %rdi
-    CALL     KLOGCHR
-
-    ;# done
-1:  XOR      %rax, %rax
-    RET
+            ;# done
+            XOR      %rax, %rax
+            RET
 
 ;###############################################################################
 ;#                              DATA SECTION                                   #
 ;###############################################################################
 
-    ;# data section
-    .data
+            ;# data section
+            .data
 
 ;###############################################################################
 ;#                            LOGGING STRINGS                                  #
 ;###############################################################################
 
             ;# TSS module name and messages
-KTSSNAME:   .string  " [KERNEL TSS] "
-KTSSMSG:    .string  "Initializing TSS module..."
+KTSSNAME:   .ascii   " [KERNEL TSS] \0"
+KTSSMSG:    .ascii   "Initializing TSS module...\0"

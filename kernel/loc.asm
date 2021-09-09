@@ -33,23 +33,23 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-    ;# common definitions used by kernel
-    .INCLUDE "kernel/macro.inc"
+            ;# common definitions used by kernel
+            .INCLUDE "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-    ;# global symbols
-    .global KLOCPEND
-    .global KLOCPOST
+            ;# global symbols
+            .global  KLOCPEND
+            .global  KLOCPOST
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-    ;# text section
-    .text
+            ;# text section
+            .text
 
 ;###############################################################################
 ;#                               KLOCPEND()                                    #
@@ -57,16 +57,16 @@
 
 KLOCPEND:
 
-    ;# cmpxchg LOOP to acquire the semaphore
-1:  XOR      %eax, %eax
-    MOV      $1, %ebx
-    LOCK
-    CMPXCHG  %ebx, KLOC(%rip)
-    JNE      1b
+            ;# cmpxchg LOOP to acquire the semaphore
+1:          XOR      %eax, %eax
+            MOV      $1, %ebx
+            LOCK
+            CMPXCHG  %ebx, KLOC(%rip)
+            JNE      1b
 
-    ;# done
-2:  XOR      %rax, %rax
-    RET
+            ;# done
+            XOR      %rax, %rax
+            RET
 
 ;###############################################################################
 ;#                               KLOCPOST()                                    #
@@ -74,27 +74,27 @@ KLOCPEND:
 
 KLOCPOST:
 
-    ;# reLEAse the kernel access semaphore
-    XOR      %eax, %eax
-    MOV      %eax, KLOC(%rip)
+            ;# reLEAse the kernel access semaphore
+            XOR      %eax, %eax
+            MOV      %eax, KLOC(%rip)
 
-    ;# done
-2:  XOR      %rax, %rax
-    RET
+            ;# done
+            XOR      %rax, %rax
+            RET
 
 ;###############################################################################
 ;#                              DATA SECTION                                   #
 ;###############################################################################
 
-    ;# data section
-    .data
+            ;# data section
+            .data
 
 ;###############################################################################
 ;#                              MODULE DATA                                    #
 ;###############################################################################
 
             ;# alignment to 8 bytes
-            .align  8
+            .align   8
 
             ;# the lock itself
-KLOC:       DQ      0
+KLOC:       DQ       0
