@@ -1,21 +1,21 @@
 ;###############################################################################
-;# File name:    idt.S
-;# Description:  Kernel interrupt descriptor table
-;# Author:       Ramses A.
+;# FILE NAME:    KERNEL/IDT.ASM
+;# DESCRIPTION:  KERNEL INTERRUPT DESCRIPTOR TABLE
+;# AUTHOR:       RAMSES A.
 ;###############################################################################
 ;#
-;# UPCR Operating System for x86_64 architecture
-;# Copyright (c) 2021 Ramses A.
+;# UPCR OPERATING SYSTEM FOR X86_64 ARCHITECTURE
+;# COPYRIGHT (C) 2021 RAMSES A.
 ;#
-;# Permission is hereby granted, free of charge, to any person obtaining a copy
-;# of this software AND associated documentation files (the "Software"), to deal
-;# in the Software without restriction, including without limitation the rights
-;# to use, copy, modify, merge, publish, distribute, sublicense, AND/or sell
-;# copies of the Software, AND to permit persons to whom the Software is
-;# furnished to do so, subject to the following conditions:
+;# PERMISSION IS HEREBY GRANTED, FREE OF CHARGE, TO ANY PERSON OBTAINING A COPY
+;# OF THIS SOFTWARE AND ASSOCIATED DOCUMENTATION FILES (THE "SOFTWARE"), TO DEAL
+;# IN THE SOFTWARE WITHOUT RESTRICTION, INCLUDING WITHOUT LIMITATION THE RIGHTS
+;# TO USE, COPY, MODIFY, MERGE, PUBLISH, DISTRIBUTE, SUBLICENSE, AND/OR SELL
+;# COPIES OF THE SOFTWARE, AND TO PERMIT PERSONS TO WHOM THE SOFTWARE IS
+;# FURNISHED TO DO SO, SUBJECT TO THE FOLLOWING CONDITIONS:
 ;#
-;# The above copyright notice AND this permission notice shall be included in all
-;# copies or substantial portions of the Software.
+;# THE ABOVE COPYRIGHT NOTICE AND THIS PERMISSION NOTICE SHALL BE INCLUDED IN ALL
+;# COPIES OR SUBSTANTIAL PORTIONS OF THE SOFTWARE.
 ;#
 ;###############################################################################
 ;#
