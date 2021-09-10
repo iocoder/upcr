@@ -55,55 +55,55 @@
 ;#-----------------------------------------------------------------------------#
 
 KRAMINIT:   ;# read KRAMAVL from init struct
-            MOV      0x38(%r15), %rax
-            MOV      %rax, KRAMAVL(%rip)
+            MOV      RAX, [R15+0x38]
+            MOV      [RIP+KRAMAVL], RAX
 
             ;# read KRAMSTART from init struct
-            MOV      0x40(%r15), %rax
-            MOV      %rax, KRAMSTART(%rip)
+            MOV      RAX, [R15+0x40]
+            MOV      [RIP+KRAMSTART], RAX
 
             ;# read KRAMEND from init struct
-            MOV      0x48(%r15), %rax
-            MOV      %rax, KRAMEND(%rip)
+            MOV      RAX, [R15+0x48]
+            MOV      [RIP+KRAMEND], RAX
 
             ;# print ram start
-            LEA      KRAMNAME(%rip), %rdi
+            LEA      RDI, [RIP+KRAMNAME]
             CALL     KLOGMOD
-            LEA      KRAMSTARTS(%rip), %rdi
+            LEA      RDI, [RIP+KRAMSTARTS]
             CALL     KLOGSTR
-            MOV      KRAMSTART(%rip), %rdi
+            MOV      RDI, [RIP+KRAMSTART]
             CALL     KLOGHEX
-            MOV      $'\n', %rdi
+            MOV      RDI, '\n'
             CALL     KLOGCHR
 
             ;# print ram end
-            LEA      KRAMNAME(%rip), %rdi
+            LEA      RDI, [RIP+KRAMNAME]
             CALL     KLOGMOD
-            LEA      KRAMENDS(%rip), %rdi
+            LEA      RDI, [RIP+KRAMENDS]
             CALL     KLOGSTR
-            MOV      KRAMEND(%rip), %rdi
+            MOV      RDI, [RIP+KRAMEND]
             CALL     KLOGHEX
-            MOV      $'\n', %rdi
+            MOV      RDI, '\n'
             CALL     KLOGCHR
 
             ;# print ram size
-            LEA      KRAMNAME(%rip), %rdi
+            LEA      RDI, [RIP+KRAMNAME]
             CALL     KLOGMOD
-            LEA      KRAMESIZES(%rip), %rdi
+            LEA      RDI, [RIP+KRAMESIZES]
             CALL     KLOGSTR
-            MOV      KRAMEND(%rip), %rdi
-            SUB      KRAMSTART(%rip), %rdi
-            SHR      $20, %rdi
+            MOV      RDI, [RIP+KRAMEND]
+            SUB      RDI, [RIP+KRAMSTART]
+            SHR      RDI, 20
             CALL     KLOGDEC
-            MOV      $'M', %rdi
+            MOV      RDI, 'M'
             CALL     KLOGCHR
-            MOV      $'B', %rdi
+            MOV      RDI, 'B'
             CALL     KLOGCHR
-            MOV      $'\n', %rdi
+            MOV      RDI, '\n'
             CALL     KLOGCHR
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;###############################################################################

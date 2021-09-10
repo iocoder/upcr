@@ -48,21 +48,21 @@
 ;###############################################################################
 
             ;# dpl levels
-            EQU      DPL0,       0x0000
-            EQU      DPL1,       0x2000
-            EQU      DPL2,       0x4000
-            EQU      DPL3,       0x6000
+            EQU      DPL0,          0x0000
+            EQU      DPL1,          0x2000
+            EQU      DPL2,          0x4000
+            EQU      DPL3,          0x6000
 
             ;# gate types
-            EQU      GATE_CALL,  0x0C00    ;# not even in IDT
-            EQU      GATE_INTR,  0x0E00    ;# disables interrupts
-            EQU      GATE_TRAP,  0x0F00    ;# doesn't disable interrupts
+            EQU      GATE_CALL,     0x0C00    ;# not even in IDT
+            EQU      GATE_INTR,     0x0E00    ;# disables interrupts
+            EQU      GATE_TRAP,     0x0F00    ;# doesn't disable interrupts
 
             ;# present field
-            EQU      PRESENT,    0x8000
+            EQU      PRESENT,       0x8000
 
             ;# gate size
-            EQU      GATE_SIZE,  256
+            EQU      GATE_SIZE,     0x100
 
             ;# IDT sections
             EQU      IDT_EXP_START, 0x00
@@ -86,25 +86,25 @@
             ;# macro to push a dummy error code if needed
             MACRO    PUSHE   DummyErr
             IF       \DummyErr
-            PUSH     $0x00                      
+            PUSH     0x00                      
             ENDIF
             ENDM
 
             ;# macro to pop a dummy error code if needed
             MACRO    POPE   DummyErr
             IF       \DummyErr
-            ADD      $8, %rsp
+            ADD      RSP, 8
             ENDIF
             ENDM
 
             ;# macro to halt the kernel in case of DPL error
             MACRO    CHKDPL   CheckDPL
             IF       \CheckDPL
-            MOV      SFRAME_CS(%rsp), %rax      ;# load origin's CS
-            AND      $3, %rax                   ;# test if origin is DPL3
+            MOV      RAX, [RSP+SFRAME_CS]       ;# load origin's CS
+            AND      RAX, 3                     ;# test if origin is DPL3
             JNZ      1f                         ;# skip next lines if DPL3
             CALL     KIRQIIPI                   ;# DPL0: disable all other CPUs
-            MOV      %rsp, %rdi                 ;# DPL0: load stack frame address
+            MOV      RDI, RSP                   ;# DPL0: load stack frame address
             CALL     KERRPANIC                  ;# DPL0: kernel panic
             HLT                                 ;# DPL0: halt here
             JMP      .                          ;# DPL0: LOOP forever
@@ -117,41 +117,41 @@
             ALIGN    GATE_SIZE
             PUSHE    \DummyErr                  ;# PUSH dummy error if needed
             PUSH     \ExpNbr                    ;# PUSH exception number
-            PUSH     %r15                       ;# PUSH a copy of R15
-            PUSH     %r14                       ;# PUSH a copy of R14
-            PUSH     %r13                       ;# PUSH a copy of R13
-            PUSH     %r12                       ;# PUSH a copy of R12
-            PUSH     %r11                       ;# PUSH a copy of R11
-            PUSH     %r10                       ;# PUSH a copy of R10
-            PUSH     %r9                        ;# PUSH a copy of R9
-            PUSH     %r8                        ;# PUSH a copy of R8
-            PUSH     %rbp                       ;# PUSH a copy of RBP
-            PUSH     %rdi                       ;# PUSH a copy of RDI
-            PUSH     %rsi                       ;# PUSH a copy of RSI
-            PUSH     %rdx                       ;# PUSH a copy of RDX
-            PUSH     %rcx                       ;# PUSH a copy of RCX
-            PUSH     %rbx                       ;# PUSH a copy of RBX
-            PUSH     %rax                       ;# PUSH a copy of RAX
-            SUB      $0x50, %rsp                ;# PUSH padding
+            PUSH     R15                        ;# PUSH a copy of R15
+            PUSH     R14                        ;# PUSH a copy of R14
+            PUSH     R13                        ;# PUSH a copy of R13
+            PUSH     R12                        ;# PUSH a copy of R12
+            PUSH     R11                        ;# PUSH a copy of R11
+            PUSH     R10                        ;# PUSH a copy of R10
+            PUSH     R9                         ;# PUSH a copy of R9
+            PUSH     R8                         ;# PUSH a copy of R8
+            PUSH     RBP                        ;# PUSH a copy of RBP
+            PUSH     RDI                        ;# PUSH a copy of RDI
+            PUSH     RSI                        ;# PUSH a copy of RSI
+            PUSH     RDX                        ;# PUSH a copy of RDX
+            PUSH     RCX                        ;# PUSH a copy of RCX
+            PUSH     RBX                        ;# PUSH a copy of RBX
+            PUSH     RAX                        ;# PUSH a copy of RAX
+            SUB      RSP, 0x50                  ;# PUSH padding
             CHKDPL   \CheckDPL                  ;# CHECK DPL if needed
             CALL     \Handler                   ;# HANDLE interrupt
-            ADD      $0x50, %rsp                ;# POP padding
-            POP      %rax                       ;# POP a copy of RAX
-            POP      %rbx                       ;# POP a copy of RBX
-            POP      %rcx                       ;# POP a copy of RCX
-            POP      %rdx                       ;# POP a copy of RDX
-            POP      %rsi                       ;# POP a copy of RSI
-            POP      %rdi                       ;# POP a copy of RDI
-            POP      %rbp                       ;# POP a copy of RBP
-            POP      %r8                        ;# POP a copy of R8
-            POP      %r9                        ;# POP a copy of R9
-            POP      %r10                       ;# POP a copy of R10
-            POP      %r11                       ;# POP a copy of R11
-            POP      %r12                       ;# POP a copy of R12
-            POP      %r13                       ;# POP a copy of R13
-            POP      %r14                       ;# POP a copy of R14
-            POP      %r15                       ;# POP a copy of R15
-            ADD      $8, %rsp                   ;# POP exception number
+            ADD      RSP, 0x50                  ;# POP padding
+            POP      RAX                        ;# POP a copy of RAX
+            POP      RBX                        ;# POP a copy of RBX
+            POP      RCX                        ;# POP a copy of RCX
+            POP      RDX                        ;# POP a copy of RDX
+            POP      RSI                        ;# POP a copy of RSI
+            POP      RDI                        ;# POP a copy of RDI
+            POP      RBP                        ;# POP a copy of RBP
+            POP      R8                         ;# POP a copy of R8
+            POP      R9                         ;# POP a copy of R9
+            POP      R10                        ;# POP a copy of R10
+            POP      R11                        ;# POP a copy of R11
+            POP      R12                        ;# POP a copy of R12
+            POP      R13                        ;# POP a copy of R13
+            POP      R14                        ;# POP a copy of R14
+            POP      R15                        ;# POP a copy of R15
+            ADD      RSP, 8                     ;# POP exception number
             POPE     \DummyErr                  ;# POP dummy error if needed
             IRETQ                               ;# return from exception
             ALIGN    GATE_SIZE
@@ -164,180 +164,180 @@
             ;# align to 256-byte border
             ALIGN    GATE_SIZE
 
-ExpGates:   ;# 32 exception gates for 32 exceptions
-            GATE     KIDTEXP, $0x00, 1, 1
-            GATE     KIDTEXP, $0x01, 1, 1
-            GATE     KIDTEXP, $0x02, 1, 1
-            GATE     KIDTEXP, $0x03, 1, 1
-            GATE     KIDTEXP, $0x04, 1, 1
-            GATE     KIDTEXP, $0x05, 1, 1
-            GATE     KIDTEXP, $0x06, 1, 1
-            GATE     KIDTEXP, $0x07, 1, 1
-            GATE     KIDTEXP, $0x08, 0, 1
-            GATE     KIDTEXP, $0x09, 0, 1
-            GATE     KIDTEXP, $0x0A, 0, 1
-            GATE     KIDTEXP, $0x0B, 0, 1
-            GATE     KIDTEXP, $0x0C, 0, 1
-            GATE     KIDTEXP, $0x0D, 0, 1
-            GATE     KIDTEXP, $0x0E, 0, 1
-            GATE     KIDTEXP, $0x0F, 0, 1
-            GATE     KIDTEXP, $0x10, 1, 1
-            GATE     KIDTEXP, $0x11, 0, 1
-            GATE     KIDTEXP, $0x12, 1, 1
-            GATE     KIDTEXP, $0x13, 1, 1
-            GATE     KIDTEXP, $0x14, 0, 1
-            GATE     KIDTEXP, $0x15, 0, 1
-            GATE     KIDTEXP, $0x16, 0, 1
-            GATE     KIDTEXP, $0x17, 0, 1
-            GATE     KIDTEXP, $0x18, 0, 1
-            GATE     KIDTEXP, $0x19, 0, 1
-            GATE     KIDTEXP, $0x1A, 0, 1
-            GATE     KIDTEXP, $0x1B, 0, 1
-            GATE     KIDTEXP, $0x1C, 0, 1
-            GATE     KIDTEXP, $0x1D, 0, 1
-            GATE     KIDTEXP, $0x1E, 0, 1
-            GATE     KIDTEXP, $0x1F, 0, 1
+KIDTEXPS:   ;# 32 exception gates for 32 exceptions
+            GATE     KIDTEXP, 0x00, 1, 1
+            GATE     KIDTEXP, 0x01, 1, 1
+            GATE     KIDTEXP, 0x02, 1, 1
+            GATE     KIDTEXP, 0x03, 1, 1
+            GATE     KIDTEXP, 0x04, 1, 1
+            GATE     KIDTEXP, 0x05, 1, 1
+            GATE     KIDTEXP, 0x06, 1, 1
+            GATE     KIDTEXP, 0x07, 1, 1
+            GATE     KIDTEXP, 0x08, 0, 1
+            GATE     KIDTEXP, 0x09, 0, 1
+            GATE     KIDTEXP, 0x0A, 0, 1
+            GATE     KIDTEXP, 0x0B, 0, 1
+            GATE     KIDTEXP, 0x0C, 0, 1
+            GATE     KIDTEXP, 0x0D, 0, 1
+            GATE     KIDTEXP, 0x0E, 0, 1
+            GATE     KIDTEXP, 0x0F, 0, 1
+            GATE     KIDTEXP, 0x10, 1, 1
+            GATE     KIDTEXP, 0x11, 0, 1
+            GATE     KIDTEXP, 0x12, 1, 1
+            GATE     KIDTEXP, 0x13, 1, 1
+            GATE     KIDTEXP, 0x14, 0, 1
+            GATE     KIDTEXP, 0x15, 0, 1
+            GATE     KIDTEXP, 0x16, 0, 1
+            GATE     KIDTEXP, 0x17, 0, 1
+            GATE     KIDTEXP, 0x18, 0, 1
+            GATE     KIDTEXP, 0x19, 0, 1
+            GATE     KIDTEXP, 0x1A, 0, 1
+            GATE     KIDTEXP, 0x1B, 0, 1
+            GATE     KIDTEXP, 0x1C, 0, 1
+            GATE     KIDTEXP, 0x1D, 0, 1
+            GATE     KIDTEXP, 0x1E, 0, 1
+            GATE     KIDTEXP, 0x1F, 0, 1
 
-IrqGates:   ;# 16 IRQ gates for 16 IRQs
-            GATE     KIDTIRQ, $0x00, 1, 0
-            GATE     KIDTIRQ, $0x01, 1, 0
-            GATE     KIDTIRQ, $0x02, 1, 0
-            GATE     KIDTIRQ, $0x03, 1, 0
-            GATE     KIDTIRQ, $0x04, 1, 0
-            GATE     KIDTIRQ, $0x05, 1, 0
-            GATE     KIDTIRQ, $0x06, 1, 0
-            GATE     KIDTIRQ, $0x07, 1, 0
-            GATE     KIDTIRQ, $0x08, 1, 0
-            GATE     KIDTIRQ, $0x09, 1, 0
-            GATE     KIDTIRQ, $0x0A, 1, 0
-            GATE     KIDTIRQ, $0x0B, 1, 0
-            GATE     KIDTIRQ, $0x0C, 1, 0
-            GATE     KIDTIRQ, $0x0D, 1, 0
-            GATE     KIDTIRQ, $0x0E, 1, 0
-            GATE     KIDTIRQ, $0x0F, 1, 0
+KIRQEXPS:   ;# 16 IRQ gates for 16 IRQs
+            GATE     KIDTIRQ, 0x00, 1, 0
+            GATE     KIDTIRQ, 0x01, 1, 0
+            GATE     KIDTIRQ, 0x02, 1, 0
+            GATE     KIDTIRQ, 0x03, 1, 0
+            GATE     KIDTIRQ, 0x04, 1, 0
+            GATE     KIDTIRQ, 0x05, 1, 0
+            GATE     KIDTIRQ, 0x06, 1, 0
+            GATE     KIDTIRQ, 0x07, 1, 0
+            GATE     KIDTIRQ, 0x08, 1, 0
+            GATE     KIDTIRQ, 0x09, 1, 0
+            GATE     KIDTIRQ, 0x0A, 1, 0
+            GATE     KIDTIRQ, 0x0B, 1, 0
+            GATE     KIDTIRQ, 0x0C, 1, 0
+            GATE     KIDTIRQ, 0x0D, 1, 0
+            GATE     KIDTIRQ, 0x0E, 1, 0
+            GATE     KIDTIRQ, 0x0F, 1, 0
 
-SvcGates:   ;# 1 SVC gate for 1 SVC
-            GATE     KIDTSVC, $0x00, 1, 0
+KSVCEXPS:   ;# 1 SVC gate for 1 SVC
+            GATE     KIDTSVC, 0x00, 1, 0
 
 ;#-----------------------------------------------------------------------------#
 ;#                                KIDTINIT()                                   #
 ;#-----------------------------------------------------------------------------#
 
 KIDTINIT:   ;# print init msg
-            LEA      KIDTNAME(%rip), %rdi
+            LEA      RDI, [RIP+KIDTNAME]
             CALL     KLOGMOD
-            LEA      KIDTMSG(%rip), %rdi
+            LEA      RDI, [RIP+KIDTMSG]
             CALL     KLOGSTR
-            MOV      $'\n', %rdi
+            MOV      RDI, '\n'
             CALL     KLOGCHR
 
             ;# initialize IDT exception entries
             ;# RDI: Address of first IDT descriptor to fill
             ;# RCX: Address of the IDT descriptor to stop at
-            ;# RSI: Address of ExpGates
-            MOV      $IDT_ADDR, %rdi
-            MOV      $IDT_ADDR, %rcx
-            ADD      $(IDT_EXP_START*16), %rdi
-            ADD      $(IDT_EXP_START*16+IDT_EXP_COUNT*16), %rcx
-            LEA      ExpGates(%rip), %rsi
+            ;# RSI: Address of KIDTEXPS
+            MOV      RDI, IDT_ADDR
+            MOV      RCX, IDT_ADDR
+            ADD      RDI, IDT_EXP_START*16
+            ADD      RCX, IDT_EXP_START*16+IDT_EXP_COUNT*16
+            LEA      RSI, [RIP+KIDTEXPS]
 
             ;# store an IDT descriptor using gate address in RAX
-1:          MOV      %rsi, %rax
-            MOV      %ax, 0(%rdi)
-            MOV      $0x20, %ax
-            MOV      %ax, 2(%rdi)
-            MOV      $(GATE_INTR|PRESENT|DPL0), %ax
-            MOV      %ax, 4(%rdi)
-            SHR      $16, %rax
-            MOV      %ax, 6(%rdi)
-            SHR      $16, %rax
-            MOV      %eax, 8(%rdi)
-            MOV      $0, %eax
-            MOV      %eax, 12(%rdi)
+1:          MOV      RAX, RSI
+            MOV      [RDI+ 0], AX 
+            MOV      AX, 0x20
+            MOV      [RDI+ 2], AX
+            MOV      AX, GATE_INTR|PRESENT|DPL0
+            MOV      [RDI+ 4], AX
+            SHR      RAX, 16
+            MOV      [RDI+ 6], AX
+            SHR      RAX, 16
+            MOV      [RDI+ 8], EAX
+            MOV      EAX, 0
+            MOV      [RDI+12], EAX
 
             ;# update RAX to next gate address, RDI to next descriptor
-            ADD      $GATE_SIZE, %rsi
-            ADD      $16, %rdi
+            ADD      RSI, GATE_SIZE
+            ADD      RDI, 16
 
             ;# done yet?
-            CMP      %rdi, %rcx
+            CMP      RCX, RDI
             JNZ      1b
 
             ;# initialize IDT IRQ entries
             ;# RDI: Address of first IDT descriptor to fill
             ;# RCX: Address of the IDT descriptor to stop at
-            ;# RSI: Address of IrqGates
-            MOV      $IDT_ADDR, %rdi
-            MOV      $IDT_ADDR, %rcx
-            ADD      $(IDT_IRQ_START*16), %rdi
-            ADD      $(IDT_IRQ_START*16+IDT_IRQ_COUNT*16), %rcx
-            LEA      IrqGates(%rip), %rsi
+            ;# RSI: Address of KIRQEXPS
+            MOV      RDI, IDT_ADDR
+            MOV      RCX, IDT_ADDR
+            ADD      RDI, IDT_IRQ_START*16
+            ADD      RCX, IDT_IRQ_START*16+IDT_IRQ_COUNT*16
+            LEA      RSI, [RIP+KIRQEXPS]
 
             ;# store an IDT descriptor using gate address in RAX
-1:          MOV      %rsi, %rax
-            MOV      %ax, 0(%rdi)
-            MOV      $0x20, %ax
-            MOV      %ax, 2(%rdi)
-            MOV      $(GATE_INTR|PRESENT|DPL0), %ax
-            MOV      %ax, 4(%rdi)
-            SHR      $16, %rax
-            MOV      %ax, 6(%rdi)
-            SHR      $16, %rax
-            MOV      %eax, 8(%rdi)
-            MOV      $0, %eax
-            MOV      %eax, 12(%rdi)
+1:          MOV      RAX, RSI
+            MOV      [RDI+ 0], AX
+            MOV      AX, 0x20
+            MOV      [RDI+ 2], AX
+            MOV      AX, GATE_INTR|PRESENT|DPL0
+            MOV      [RDI+ 4], AX
+            SHR      RAX, 16
+            MOV      [RDI+ 6], AX
+            SHR      RAX, 16
+            MOV      [RDI+ 8], EAX
+            MOV      EAX, 0
+            MOV      [RDI+12], EAX
 
             ;# update RAX to next gate address, RDI to next descriptor
-            ADD      $GATE_SIZE, %rsi
-            ADD      $16, %rdi
+            ADD      RSI, GATE_SIZE
+            ADD      RDI, 16
 
             ;# done yet?
-            CMP      %rdi, %rcx
+            CMP      RCX, RDI
             JNZ      1b
 
             ;# initialize IDT SVC entries
             ;# RDI: Address of first IDT descriptor to fill
             ;# RCX: Address of the IDT descriptor to stop at
-            ;# RSI: Address of SvcGates
-            MOV      $IDT_ADDR, %rdi
-            MOV      $IDT_ADDR, %rcx
-            ADD      $(IDT_SVC_START*16), %rdi
-            ADD      $(IDT_SVC_START*16+IDT_SVC_COUNT*16), %rcx
-            LEA      SvcGates(%rip), %rsi
+            ;# RSI: Address of KSVCEXPS
+            MOV      RDI, IDT_ADDR
+            MOV      RCX, IDT_ADDR
+            ADD      RDI, IDT_SVC_START*16
+            ADD      RCX, IDT_SVC_START*16+IDT_SVC_COUNT*16
+            LEA      RSI, [RIP+KSVCEXPS]
 
             ;# store an IDT descriptor using gate address in RAX
-1:          MOV      %rsi, %rax
-            MOV      %ax, 0(%rdi)
-            MOV      $0x20, %ax
-            MOV      %ax, 2(%rdi)
-            MOV      $(GATE_INTR|PRESENT|DPL3), %ax
-            MOV      %ax, 4(%rdi)
-            SHR      $16, %rax
-            MOV      %ax, 6(%rdi)
-            SHR      $16, %rax
-            MOV      %eax, 8(%rdi)
-            MOV      $0, %eax
-            MOV      %eax, 12(%rdi)
+1:          MOV      RAX, RSI
+            MOV      [RDI+ 0], AX
+            MOV      AX, 0x20
+            MOV      [RDI+ 2], AX
+            MOV      AX, GATE_INTR|PRESENT|DPL3
+            MOV      [RDI+ 4], AX
+            SHR      RAX, 16
+            MOV      [RDI+ 6], AX
+            SHR      RAX, 16
+            MOV      [RDI+ 8], EAX
+            MOV      EAX, 0
+            MOV      [RDI+12], EAX
 
             ;# update RAX to next gate address, RDI to next descriptor
-            ADD      $GATE_SIZE, %rsi
-            ADD      $16, %rdi
+            ADD      RSI, GATE_SIZE
+            ADD      RDI, 16
 
             ;# done yet?
-            CMP      %rdi, %rcx
+            CMP      RCX, RDI
             JNZ      1b
 
             ;# initialize IDTR descriptor
-            MOV      $0xFFF, %ax
-            MOV      %ax, IDTR_ADDR+0
-            MOV      $IDT_ADDR, %eax 
-            MOV      %eax, IDTR_ADDR+2
+            MOV      AX, 0xFFF
+            MOV      [IDTR_ADDR+0], AX
+            MOV      EAX, IDT_ADDR 
+            MOV      [IDTR_ADDR+2], EAX
 
             ;# load IDT table
-            LIDT     IDTR_ADDR
+            LIDT     [IDTR_ADDR]
 
             ;# done
-3:          XOR      %rax, %rax
+3:          XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -354,7 +354,7 @@ KIDTEXP:    ;# TODO:
             JMP      .
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -371,7 +371,7 @@ KIDTIRQ:    ;# TODO:
             JMP      .
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -388,7 +388,7 @@ KIDTSVC:    ;# TODO:
             JMP      .
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -405,7 +405,7 @@ KIDTIPI:    ;# TODO:
             JMP      .
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;###############################################################################

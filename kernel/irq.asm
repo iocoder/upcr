@@ -58,15 +58,15 @@
 ;#-----------------------------------------------------------------------------#
 
 KIRQINIT:   ;# print init msg
-            LEA      KIRQNAME(%rip), %rdi
+            LEA      RDI, [RIP+KIRQNAME]
             CALL     KLOGMOD
-            LEA      KIRQMSG(%rip), %rdi
+            LEA      RDI, [RIP+KIRQMSG]
             CALL     KLOGSTR
-            MOV      $'\n', %rdi
+            MOV      RDI, '\n'
             CALL     KLOGCHR
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -74,17 +74,17 @@ KIRQINIT:   ;# print init msg
 ;#-----------------------------------------------------------------------------#
 
 KIRQEN:     ;# Initialize APIC address MSR
-            XOR      %rax, %rax
-            XOR      %rcx, %rcx
-            XOR      %rdx, %rdx
-            MOV      $0xFEE00800, %eax
-            MOV      $MSR_APIC_BASE, %ecx
+            XOR      RAX, RAX
+            XOR      RCX, RCX
+            XOR      RDX, RDX
+            MOV      EAX, 0xFEE00800
+            MOV      ECX, MSR_APIC_BASE
             WRMSR
             NOP
             NOP
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -92,17 +92,17 @@ KIRQEN:     ;# Initialize APIC address MSR
 ;#-----------------------------------------------------------------------------#
 
 KIRQIIPI:   ;# broadcast the INIT IPI to all processors except self
-            MOV      $LAPIC_INTCMDL, %rsi
-            MOV      $0x000C4500, %eax
-            MOV      %eax, (%rsi)
+            MOV      RSI, LAPIC_INTCMDL
+            MOV      EAX, 0x000C4500
+            MOV      [RSI], EAX
 
             ;# 10-millisecond delay LOOP.
             ;# TBD
-            MOV      $0x1000000, %rcx
+            MOV      RCX, 0x1000000
             LOOP     .
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -110,17 +110,17 @@ KIRQIIPI:   ;# broadcast the INIT IPI to all processors except self
 ;#-----------------------------------------------------------------------------#
 
 KIRQSIPI:   ;# broadcast the SIPI IPI to all processors except self
-            MOV      $LAPIC_INTCMDL, %rsi
-            MOV      $0x000C4600, %eax  ;# vector 0x0000:0x0000
-            MOV      %eax, (%rsi)
+            MOV      RSI, LAPIC_INTCMDL
+            MOV      EAX, 0x000C4600     ;# vector 0x0000:0x0000
+            MOV      [RSI], EAX
 
             ;# 200-microsecond delay LOOP
             ;# TBD
-            MOV      $0x1000000, %rcx
+            MOV      RCX, 0x1000000
             LOOP     .
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;###############################################################################

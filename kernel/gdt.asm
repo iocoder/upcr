@@ -55,51 +55,51 @@
 ;#-----------------------------------------------------------------------------#
 
 KGDTINIT:   ;# print init msg
-            LEA      KGDTNAME(%rip), %rdi
+            LEA      RDI, [RIP+KGDTNAME]
             CALL     KLOGMOD
-            LEA      KGDTMSG(%rip), %rdi
+            LEA      RDI, [RIP+KGDTMSG]
             CALL     KLOGSTR
-            MOV      $'\n', %rdi
+            MOV      RDI, '\n'
             CALL     KLOGCHR
 
             ;# copy the GDTR descriptor to lower memory
-            MOV      $GDTR_ADDR, %rdi
-            MOV      KGDTDESC(%rip), %rax
-            MOV      %rax, (%rdi)
+            MOV      RDI, GDTR_ADDR
+            MOV      RAX, [RIP+KGDTDESC]
+            MOV      [RDI], RAX
 
             ;# copy the GDT table to lower memory
-            MOV      $GDT_ADDR, %rdi
-            LEA      KGDTSTART(%rip), %rsi
-            LEA      KGDTDESC(%rip), %rcx
-            SUB      %rsi, %rcx
+            MOV      RDI, GDT_ADDR
+            LEA      RSI, [RIP+KGDTSTART]
+            LEA      RCX, [RIP+KGDTDESC]
+            SUB      RCX, RSI
 
             ;# copy LOOP
-1:          MOV      (%rsi), %al
-            MOV      %al, (%rdi)
-            INC      %rsi
-            INC      %rdi
+1:          MOV      AL, [RSI]
+            MOV      [RDI], AL 
+            INC      RSI
+            INC      RDI
             LOOP     1b
 
             ;# load GDTR descriptor
-            LGDT     GDTR_ADDR
+            LGDT     [GDTR_ADDR]
 
             ;# make a far jump to reload CS using long-mode lRETq
-            MOV      $0x20, %rax
-            PUSH     %rax
-            LEA      2f(%rip), %rax
-            PUSH     %rax
+            MOV      RAX, 0x20
+            PUSH     RAX
+            LEA      RAX, [RIP+2f]
+            PUSH     RAX
             LRETQ
 
             ;# reload other segment registers
-2:          MOV      $0x28, %ax
-            MOV      %ax, %ds
-            MOV      %ax, %es
-            MOV      %ax, %fs
-            MOV      %ax, %gs
-            MOV      %ax, %ss
+2:          MOV      AX, 0x28
+            MOV      DS, AX
+            MOV      ES, AX
+            MOV      FS, AX
+            MOV      GS, AX
+            MOV      SS, AX
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;###############################################################################
@@ -113,8 +113,8 @@ KGDTINIT:   ;# print init msg
 ;#                              MODULE DATA                                    #
 ;###############################################################################
 
-            ;# GDT table for protected & long mode
-KGDTSTART:  DQ       0x0000000000000000  ;# 0x00
+KGDTSTART:  ;# GDT table for protected & long mode
+            DQ       0x0000000000000000  ;# 0x00
             DQ       0x0000000000000000  ;# 0x00
             DQ       0x00CF9A000000FFFF  ;# 0x10 (KERN CODE 32-bit)
             DQ       0x00CF92000000FFFF  ;# 0x18 (KERN DATA 32-bit)
@@ -123,8 +123,8 @@ KGDTSTART:  DQ       0x0000000000000000  ;# 0x00
             DQ       0x00AFFA000000FFFF  ;# 0x30 (USER CODE 64-bit)
             DQ       0x00AFF2000000FFFF  ;# 0x38 (USER DATA 64-bit)
 
-            ;# GDTR descriptor
-KGDTDESC:   DW       0xFFF
+KGDTDESC:   ;# GDTR descriptor
+            DW       0xFFF
             DD       GDT_ADDR
             DW       0
 

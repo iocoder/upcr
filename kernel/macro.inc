@@ -33,6 +33,8 @@
 ;#                  COMMON DEFINITIONS USED ACROSS KERNEL                      #
 ;###############################################################################
 
+            .intel_syntax  noprefix
+
 # --------------------------------------
 # LOWER 1MB OF MEMORY
 # --------------------------------------
@@ -44,7 +46,7 @@
             .EQU    IDT_ADDR,        0x00003000     ;# IDT Table
             .EQU    TSS_ADDR,        0x00004000     ;# TSS Segments (32 segments for 32 CPUs)
             .EQU    STACK_ADDR,      0x00010000     ;# Kernel Stacks (32 stacks for 32 CPUs)    
-            .EQU    PM4L_ADDR,       0x00040000     ;# Kernel root page table
+            .EQU    PM4L_ADDR,       0x00030000     ;# Kernel root page table
 
 # --------------------------------------
 # MSR REGISTERS

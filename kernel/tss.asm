@@ -55,15 +55,15 @@
 ;#-----------------------------------------------------------------------------#
 
 KTSSINIT:   ;# print init msg
-            LEA      KTSSNAME(%rip), %rdi
+            LEA      RDI, [RIP+KTSSNAME]
             CALL     KLOGMOD
-            LEA      KTSSMSG(%rip), %rdi
+            LEA      RDI, [RIP+KTSSMSG]
             CALL     KLOGSTR
-            MOV      $'\n', %rdi
+            MOV      RDI, '\n'
             CALL     KLOGCHR
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;###############################################################################

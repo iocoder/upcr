@@ -55,30 +55,31 @@
 ;#-----------------------------------------------------------------------------#
 
 KVMMINIT:   ;# print init msg
-            LEA      KVMMNAME(%rip), %rdi
+            LEA      RDI, [RIP+KVMMNAME]
             CALL     KLOGMOD
-            LEA      KVMMMSG(%rip), %rdi
+            LEA      RDI, [RIP+KVMMMSG]
             CALL     KLOGSTR
-            MOV      $'\n', %rdi
+            MOV      RDI, '\n'
             CALL     KLOGCHR
 
             ;# initialize PML4Table
-            MOV      %cr3, %rsi
-            MOV      $PM4L_ADDR, %rdi
-            MOV      $0x1000, %rcx
+            MOV      RSI, CR3
+            MOV      RDI, PM4L_ADDR
+            MOV      RCX, 0x1000
+
             ;# copy LOOP
-1:          MOV      (%rsi), %al
-            MOV      %al, (%rdi)
-            INC      %rsi
-            INC      %rdi
+1:          MOV      AL, [RSI]
+            MOV      [RDI], AL
+            INC      RSI
+            INC      RDI
             LOOP     1b
 
             ;# load CR3 with PML4 table base
-            MOV      $PM4L_ADDR, %rax
-            MOV      %rax, %cr3
+            MOV      RAX, PM4L_ADDR
+            MOV      CR3, RAX
 
             ;# done
-2:          XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;###############################################################################

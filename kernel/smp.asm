@@ -59,27 +59,27 @@ KSMP16:     ;# 16-bit code
             CODE16
 
             ;# first instruction executed by CPU core!!!
-            MOV      $0x55AA, %ax
+            MOV      AX, 0x55AA
 
             ;# make sure interrupts are disabled
             cli
 
             ;# initialize segment registers
-            XOR      %bx, %bx
-            MOV      %bx, %ds
-            MOV      %bx, %es
-            MOV      %bx, %ss
+            XOR      BX, BX
+            MOV      DS, BX
+            MOV      ES, BX
+            MOV      SS, BX
 
             ;# load GDTR register
-            LGDT     GDTR_ADDR
+            LGDT     [GDTR_ADDR]
 
             ;# enter protected mode
-            MOV      %cr0, %eax
-            OR       $1, %eax
-            MOV      %eax, %cr0
+            MOV      EAX, CR0
+            OR       EAX, 1
+            MOV      CR0, EAX
 
-            ;# jump into 32-bit mode
-            LJMP     $0x10, $(KSMP32-KSMP16)
+            ;# far jump into 32-bit mode
+            LJMP     0x10, KSMP32-KSMP16
 
 ;#-----------------------------------------------------------------------------#
 ;#                        PROTECTED MODE TRAMPOLINE                            #
@@ -89,35 +89,35 @@ KSMP32:     ;# 32-bit code
             CODE32
 
             ;# initialize segment registers
-            MOV      $0x18, %ax
-            MOV      %ax, %ds
-            MOV      %ax, %es
-            MOV      %ax, %fs
-            MOV      %ax, %gs
-            MOV      %ax, %ss
+            MOV      AX, 0x18
+            MOV      DS, AX
+            MOV      ES, AX
+            MOV      FS, AX
+            MOV      GS, AX
+            MOV      SS, AX
 
             ;# enable physical address extension
-            MOV      %cr4, %eax
-            OR       $0x00000020, %eax
-            MOV      %eax, %cr4
+            MOV      EAX, CR4
+            OR       EAX, 0x00000020
+            MOV      CR4, EAX
 
             ;# enable long-mode in EFER
-            MOV      $MSR_EFER, %ecx
+            MOV      ECX, MSR_EFER
             RDMSR
-            OR       $0x00000100, %eax
+            OR       EAX, 0x00000100
             WRMSR
 
             ;# load CR3 with PML4 table base
-            MOV      $PM4L_ADDR, %eax
-            MOV      %eax, %cr3
+            MOV      EAX, PM4L_ADDR
+            MOV      CR3, EAX
 
             ;# enable paging; this activates long mode
-            MOV      %cr0, %eax
-            OR       $0x80000000, %eax
-            MOV      %eax, %cr0
+            MOV      EAX, CR0
+            OR       EAX, 0x80000000
+            MOV      CR0, EAX
 
             ;# we are in compatibility mode now! jump to code64
-            LJMP     $0x0020, $(KSMP64-KSMP16)
+            LJMP     0x20, KSMP64-KSMP16
 
 ;#-----------------------------------------------------------------------------#
 ;#                          LONG MODE TRAMPOLINE                               #
@@ -127,50 +127,50 @@ KSMP64:     ;# 64-bit code
             CODE64
 
             ;# initialize segment registers
-            MOV      $0x0028, %ax
-            MOV      %ax, %ds
-            MOV      %ax, %es
-            MOV      %ax, %fs
-            MOV      %ax, %gs
-            MOV      %ax, %ss
+            MOV      AX, 0x0028
+            MOV      DS, AX
+            MOV      ES, AX
+            MOV      FS, AX
+            MOV      GS, AX
+            MOV      SS, AX
 
             ;# initialize all 64-bit GPRs
-            MOV      $0x1111111111111111, %rax
-            MOV      $0x2222222222222222, %rbx
-            MOV      $0x3333333333333333, %rcx
-            MOV      $0x4444444444444444, %rdx
-            MOV      $0xAAAAAAAAAAAAAAAA, %rsi
-            MOV      $0xBBBBBBBBBBBBBBBB, %rdi
-            MOV      $0xCCCCCCCCCCCCCCCC, %rbp
-            MOV      $0xDDDDDDDDDDDDDDDD, %rsp
-            MOV      $0x1111111111111111, %r8
-            MOV      $0x2222222222222222, %r9
-            MOV      $0x3333333333333333, %r10
-            MOV      $0x4444444444444444, %r11
-            MOV      $0xAAAAAAAAAAAAAAAA, %r12
-            MOV      $0xBBBBBBBBBBBBBBBB, %r13
-            MOV      $0xCCCCCCCCCCCCCCCC, %r14
-            MOV      $0xDDDDDDDDDDDDDDDD, %r15
+            MOV      RAX, 0x1111111111111111
+            MOV      RBX, 0x2222222222222222
+            MOV      RCX, 0x3333333333333333
+            MOV      RDX, 0x4444444444444444
+            MOV      RSI, 0xAAAAAAAAAAAAAAAA
+            MOV      RDI, 0xBBBBBBBBBBBBBBBB
+            MOV      RBP, 0xCCCCCCCCCCCCCCCC
+            MOV      RSP, 0xDDDDDDDDDDDDDDDD
+            MOV      R8,  0x1111111111111111
+            MOV      R9,  0x2222222222222222
+            MOV      R10, 0x3333333333333333
+            MOV      R11, 0x4444444444444444
+            MOV      R12, 0xAAAAAAAAAAAAAAAA
+            MOV      R13, 0xBBBBBBBBBBBBBBBB
+            MOV      R14, 0xCCCCCCCCCCCCCCCC
+            MOV      R15, 0xDDDDDDDDDDDDDDDD
 
             ;# read local APIC ID
-            XOR      %rax, %rax
-            MOV      0xFEE00020, %eax
-            SHR      $24, %eax
+            XOR      RAX, RAX
+            MOV      EAX, [0xFEE00020]
+            SHR      EAX, 24
 
             ;# use this particular CPU stack
-            MOV      %rax, %rsp
-            SHL      $12, %rsp
-            ADD      $(STACK_ADDR), %rsp
-            ADD      $0x1000, %rsp
-            MOV      %rsp, %rbp
+            MOV      RSP, RAX
+            SHL      RSP, 12
+            ADD      RSP, STACK_ADDR
+            ADD      RSP, 0x1000
+            MOV      RBP, RSP
             NOP
 
             ;# initialize IDT
-            LIDT     IDTR_ADDR
+            LIDT     [IDTR_ADDR]
 
             ;# jump to KSMPEN
-            MOV      SmpFunAddress-KSMP16, %rax
-            CALL     *%rax
+            MOV      RAX, [SmpFunAddress-KSMP16]
+            CALL     RAX
 
             ;# LOOP forever
             JMP      .
@@ -187,28 +187,28 @@ KSMP64:     ;# 64-bit code
 ;#-----------------------------------------------------------------------------#
 
 KSMPINIT:   ;# print init msg
-            LEA      KSMPNAME(%rip), %rdi
+            LEA      RDI, [RIP+KSMPNAME]
             CALL     KLOGMOD
-            LEA      KSMPMSG(%rip), %rdi
+            LEA      RDI, [RIP+KSMPMSG]
             CALL     KLOGSTR
-            MOV      $'\n', %rdi
+            MOV      RDI, '\n'
             CALL     KLOGCHR
 
             ;# store the address of KSMPEN() to be fetched by trampoline
-            LEA      KSMPEN(%rip), %rax
-            MOV      %rax, SmpFunAddress(%rip)
+            LEA      RAX, [RIP+KSMPEN]
+            MOV      [RIP+SmpFunAddress], RAX
 
             ;# copy the trampoline to lower memory
-            MOV      $TRUMP_ADDR, %rdi
-            LEA      KSMP16(%rip), %rsi
-            LEA      KSMPINIT(%rip), %rcx
-            SUB      %rsi, %rcx
+            MOV      RDI, TRUMP_ADDR
+            LEA      RSI, [RIP+KSMP16]
+            LEA      RCX, [RIP+KSMPINIT]
+            SUB      RCX, RSI
 
             ;# copy LOOP
-1:          MOV      (%rsi), %al
-            MOV      %al, (%rdi)
-            INC      %rsi
-            INC      %rdi
+1:          MOV      AL, [RSI]
+            MOV      [RDI], AL
+            INC      RSI
+            INC      RDI
             LOOP     1b
 
             ;# first we need to initialize core 0
@@ -220,7 +220,7 @@ KSMPINIT:   ;# print init msg
             CALL     KIRQSIPI
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -236,31 +236,31 @@ KSMPEN:     ;# acquire kernel lock to avoid race conditions with other CPUS
             CALL     KIRQEN
 
             ;# print module name
-            LEA      KSMPNAME(%rip), %rdi
+            LEA      RDI, [RIP+KSMPNAME]
             CALL     KLOGMOD
 
             ;# print lapic detection string
-            LEA      KSMPID(%rip), %rdi
+            LEA      RDI, [RIP+KSMPID]
             CALL     KLOGSTR
 
             ;# print LAPIC ID
-            XOR      %rax, %rax
-            MOV      0xFEE00020, %eax
-            SHR      $24, %eax
-            MOV      %rax, %rdi
+            XOR      RAX, RAX
+            MOV      EAX, [0xFEE00020]
+            SHR      EAX, 24
+            MOV      RDI, RAX
             CALL     KLOGDEC
 
             ;# print new line
-            MOV      $'\n', %rdi
+            MOV      RDI, '\n'
             CALL     KLOGCHR
 
             ;# release the lock
-            PUSH     %rdi
+            PUSH     RDI
             CALL     KLOCPOST
-            POP      %rdi
+            POP      RDI
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;###############################################################################

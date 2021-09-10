@@ -55,7 +55,7 @@
 ;#-----------------------------------------------------------------------------#
 
 KSYSINIT:   ;# take a copy of boot info ptr
-            MOV      %rdi, %r15
+            MOV      R15, RDI
 
             ;# initialize kernel modules
             CALL     KVGAINIT
@@ -69,7 +69,7 @@ KSYSINIT:   ;# take a copy of boot info ptr
             CALL     KSMPINIT
 
             ;# store success code in RAX
-            XOR      %rax, %rax
+            XOR      RAX, RAX
 
             ;# return to boot loader
             RET

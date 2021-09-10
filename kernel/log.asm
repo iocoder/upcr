@@ -65,39 +65,39 @@ KLOGINIT:   ;# clear screen
             CALL     KLOGCLR
 
             ;# header colour
-            MOV      $0x0A, %rdi
-            MOV      $-1,   %rsi
+            MOV      RDI, 0x0A
+            MOV      RSI, -1
             CALL     KLOGATT
 
             ;# print header
-            LEA      KLOGHDR(%rip), %rdi
+            LEA      RDI, [RIP+KLOGHDR]
             CALL     KLOGSTR
 
             ;# welcome msg colour
-            MOV      $0x0E, %rdi
-            MOV      $-1,   %rsi
+            MOV      RDI, 0x0E
+            MOV      RSI, -1
             CALL     KLOGATT
 
             ;# print welcome msg
-            LEA      KLOGWEL(%rip), %rdi
+            LEA      RDI, [RIP+KLOGWEL]
             CALL     KLOGSTR
 
             ;# license colour
-            MOV      $0x0F, %rdi
-            MOV      $-1,   %rsi
+            MOV      RDI, 0x0F
+            MOV      RSI, -1
             CALL     KLOGATT
 
             ;# print license
-            LEA      KLOGLIC(%rip), %rdi
+            LEA      RDI, [RIP+KLOGLIC]
             CALL     KLOGSTR
 
             ;# set printing colour to yellow
-            MOV      $0x0B, %rdi
-            MOV      $-1,   %rsi
+            MOV      RDI, 0x0B
+            MOV      RSI, -1
             CALL     KLOGATT
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -105,12 +105,12 @@ KLOGINIT:   ;# clear screen
 ;#-----------------------------------------------------------------------------#
 
 KLOGCHR:    # print character to VGA
-            PUSH     %rdi
+            PUSH     RDI
             CALL     KVGAPUT
-            POP      %rdi
+            POP      RDI
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -118,37 +118,37 @@ KLOGCHR:    # print character to VGA
 ;#-----------------------------------------------------------------------------#
 
 KLOGDEC:    ;# we will keep dividing RDX:RAX by 10
-            MOV      %rdi, %rax
-            XOR      %ecx, %ecx
-            MOV      $10,  %r8
+            MOV      RAX, RDI
+            XOR      ECX, ECX
+            MOV      R8, 10
 
             ;# divide by 10
-1:          XOR      %rdx, %rdx
-            DIV      %r8
+1:          XOR      RDX, RDX
+            DIV      R8
 
             ;# use CPU stack as a PUSH-down automaton
-            PUSH     %rdx
-            INC      %ecx
+            PUSH     RDX
+            INC      ECX
 
             ;# done?
-            AND      %rax, %rax
+            AND      RAX, RAX
             JNZ      1b
 
             ;# now print all the digits
-2:          POP      %rdx
-            add      $'0', %rdx
-            AND      $0xFF, %rdx
-            MOV      %rdx, %rdi
-            PUSH     %rcx
+2:          POP      RDX
+            ADD      RDX, '0'
+            AND      RDX, 0xFF
+            MOV      RDI, RDX
+            PUSH     RCX
             CALL     KLOGCHR
-            POP      %rcx
+            POP      RCX
 
             ;# all digits printed?
-            DEC      %ecx
+            DEC      ECX
             JNZ      2b
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -156,41 +156,41 @@ KLOGDEC:    ;# we will keep dividing RDX:RAX by 10
 ;#-----------------------------------------------------------------------------#
 
 KLOGHEX:    ;# print 0x
-            PUSH     %rdi
-            MOV      $'0', %rdi
+            PUSH     RDI
+            MOV      RDI, '0'
             CALL     KVGAPUT
-            MOV      $'x', %rdi
+            MOV      RDI, 'x'
             CALL     KVGAPUT
-            POP      %rdi
+            POP      RDI
 
             ;# print hexadecimal number (8 bytes - 16 hexdigits)
-            MOV      $16, %cl
+            MOV      CL, 16
 
             ;# put next byte in RDI[3:0] (ROL unrolled to prevent stall)
-1:          ROL      %rdi
-            ROL      %rdi
-            ROL      %rdi
-            ROL      %rdi
+1:          ROL      RDI
+            ROL      RDI
+            ROL      RDI
+            ROL      RDI
 
             ;# print DL[0:3]
-            PUSH     %rcx
-            PUSH     %rdi
-            LEA      KLOGDIGS(%rip), %rsi
-            AND      $0x0F, %rdi
-            ADD      %rdi, %rsi
-            XOR      %rax, %rax
-            MOV      (%rsi), %al
-            MOV      %rax, %rdi
+            PUSH     RCX
+            PUSH     RDI
+            LEA      RSI, [RIP+KLOGDIGS]
+            AND      RDI, 0x0F
+            ADD      RSI, RDI
+            XOR      RAX, RAX
+            MOV      AL, [RSI]
+            MOV      RDI, RAX
             CALL     KLOGCHR
-            POP      %rdi
-            POP      %rcx
+            POP      RDI
+            POP      RCX
 
             ;# next digit
-            DEC      %cl
+            DEC      CL
             JNZ      1b
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -198,25 +198,25 @@ KLOGHEX:    ;# print 0x
 ;#-----------------------------------------------------------------------------#
 
 KLOGSTR:    ;# fetch next character
-1:          XOR      %rax, %rax
-            MOV      (%rdi), %al
+1:          XOR      RAX, RAX
+            MOV      AL, [RDI]
 
             ;# terminate if zero
-            AND      %al, %al
+            AND      AL, AL
             JZ       2f
 
             ;# print character
-            PUSH     %rdi
-            MOV      %rax, %rdi
+            PUSH     RDI
+            MOV      RDI, RAX
             CALL     KVGAPUT
-            POP      %rdi
+            POP      RDI
 
             ;# LOOP again
-            INC      %rdi
+            INC      RDI
             JMP      1b
 
             ;# done
-2:          XOR      %rax, %rax
+2:          XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -224,14 +224,14 @@ KLOGSTR:    ;# fetch next character
 ;#-----------------------------------------------------------------------------#
 
 KLOGATT:    ;# set vga colours
-            PUSH     %rdi
-            PUSH     %rsi
+            PUSH     RDI
+            PUSH     RSI
             CALL     KVGAATT
-            POP      %rsi
-            POP      %rdi
+            POP      RSI
+            POP      RDI
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -239,16 +239,16 @@ KLOGATT:    ;# set vga colours
 ;#-----------------------------------------------------------------------------#
 
 KLOGCLR:    ;# clear vga screen
-            PUSH     %rdi
-            PUSH     %rsi
-            PUSH     %rcx
+            PUSH     RDI
+            PUSH     RSI
+            PUSH     RCX
             CALL     KVGACLR
-            POP      %rsi
-            POP      %rdi
-            POP      %rcx
+            POP      RSI
+            POP      RDI
+            POP      RCX
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -256,38 +256,38 @@ KLOGCLR:    ;# clear vga screen
 ;#-----------------------------------------------------------------------------#
 
 KLOGMOD:    ;# save a copy of RDI
-            PUSH     %rdi
+            PUSH     RDI
 
             ;# change colour to yellow
-            MOV      $0x0A, %rdi
-            MOV      $-1, %rsi
+            MOV      RDI, 0x0A
+            MOV      RSI, -1
             CALL     KLOGATT
 
             ;# print " ["
-            MOV      $' ', %rdi
+            MOV      RDI, ' '
             CALL     KLOGCHR
-            MOV      $'[', %rdi
+            MOV      RDI, '['
             CALL     KLOGCHR
 
             ;# restore RDI
-            POP      %rdi
+            POP      RDI
 
             ;# print the name of the module
             CALL     KLOGSTR
 
             ;# print "] "
-            MOV      $']', %rdi
+            MOV      RDI, ']'
             CALL     KLOGCHR
-            MOV      $' ', %rdi
+            MOV      RDI, ' '
             CALL     KLOGCHR
 
             ;# reset colour to white
-            MOV      $0x0B, %rdi
-            MOV      $-1, %rsi
+            MOV      RDI, 0x0B
+            MOV      RSI, -1
             CALL     KLOGATT
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;###############################################################################

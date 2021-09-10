@@ -56,14 +56,14 @@
 ;#-----------------------------------------------------------------------------#
 
 KLOCPEND:   ;# cmpxchg LOOP to acquire the semaphore
-            XOR      %eax, %eax
-            MOV      $1, %ebx
+            XOR      EAX, EAX
+            MOV      ECX, 1
             LOCK
-            CMPXCHG  %ebx, KLOC(%rip)
+            CMPXCHG  [RIP+KLOC], ECX
             JNE      KLOCPEND
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -71,11 +71,11 @@ KLOCPEND:   ;# cmpxchg LOOP to acquire the semaphore
 ;#-----------------------------------------------------------------------------#
 
 KLOCPOST:   ;# release the kernel access semaphore
-            XOR      %eax, %eax
-            MOV      %eax, KLOC(%rip)
+            XOR      ECX, ECX
+            MOV      [RIP+KLOC], ECX
 
             ;# done
-            XOR      %rax, %rax
+            XOR      RAX, RAX
             RET
 
 ;###############################################################################
