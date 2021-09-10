@@ -33,14 +33,14 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-            ;# common definitions used by kernel
+            ;# COMMON DEFINITIONS USED BY KERNEL
             INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-            ;# global symbols
+            ;# GLOBAL SYMBOLS
             PUBLIC   KLOGINIT
             PUBLIC   KLOGCHR
             PUBLIC   KLOGDEC
@@ -54,49 +54,49 @@
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-            ;# text section
+            ;# TEXT SECTION
             SEGMENT  ".text"
 
 ;#-----------------------------------------------------------------------------#
 ;#                               KLOGINIT()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KLOGINIT:   ;# clear screen
+KLOGINIT:   ;# CLEAR SCREEN
             CALL     KLOGCLR
 
-            ;# header colour
+            ;# HEADER COLOUR
             MOV      RDI, 0x0A
             MOV      RSI, -1
             CALL     KLOGATT
 
-            ;# print header
+            ;# PRINT HEADER
             LEA      RDI, [RIP+KLOGHDR]
             CALL     KLOGSTR
 
-            ;# welcome msg colour
+            ;# WELCOME MSG COLOUR
             MOV      RDI, 0x0E
             MOV      RSI, -1
             CALL     KLOGATT
 
-            ;# print welcome msg
+            ;# PRINT WELCOME MSG
             LEA      RDI, [RIP+KLOGWEL]
             CALL     KLOGSTR
 
-            ;# license colour
+            ;# LICENSE COLOUR
             MOV      RDI, 0x0F
             MOV      RSI, -1
             CALL     KLOGATT
 
-            ;# print license
+            ;# PRINT LICENSE
             LEA      RDI, [RIP+KLOGLIC]
             CALL     KLOGSTR
 
-            ;# set printing colour to yellow
+            ;# SET PRINTING COLOUR TO YELLOW
             MOV      RDI, 0x0B
             MOV      RSI, -1
             CALL     KLOGATT
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -109,7 +109,7 @@ KLOGCHR:    # print character to VGA
             CALL     KVGAPUT
             POP      RDI
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -117,24 +117,24 @@ KLOGCHR:    # print character to VGA
 ;#                              KLOGDEC()                                      #
 ;#-----------------------------------------------------------------------------#
 
-KLOGDEC:    ;# we will keep dividing RDX:RAX by 10
+KLOGDEC:    ;# WE WILL KEEP DIVIDING RDX:RAX BY 10
             MOV      RAX, RDI
             XOR      ECX, ECX
             MOV      R8, 10
 
-            ;# divide by 10
+            ;# DIVIDE BY 10
 1:          XOR      RDX, RDX
             DIV      R8
 
-            ;# use CPU stack as a PUSH-down automaton
+            ;# USE CPU STACK AS A PUSH-DOWN AUTOMATON
             PUSH     RDX
             INC      ECX
 
-            ;# done?
+            ;# DONE?
             AND      RAX, RAX
             JNZ      1b
 
-            ;# now print all the digits
+            ;# NOW PRINT ALL THE DIGITS
 2:          POP      RDX
             ADD      RDX, '0'
             AND      RDX, 0xFF
@@ -143,11 +143,11 @@ KLOGDEC:    ;# we will keep dividing RDX:RAX by 10
             CALL     KLOGCHR
             POP      RCX
 
-            ;# all digits printed?
+            ;# ALL DIGITS PRINTED?
             DEC      ECX
             JNZ      2b
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -155,24 +155,16 @@ KLOGDEC:    ;# we will keep dividing RDX:RAX by 10
 ;#                               KLOGHEX()                                     #
 ;#-----------------------------------------------------------------------------#
 
-KLOGHEX:    ;# print 0x
-            PUSH     RDI
-            MOV      RDI, '0'
-            CALL     KVGAPUT
-            MOV      RDI, 'x'
-            CALL     KVGAPUT
-            POP      RDI
-
-            ;# print hexadecimal number (8 bytes - 16 hexdigits)
+KLOGHEX:    ;# PRINT HEXADECIMAL NUMBER (8 bytes - 16 hexdigits)
             MOV      CL, 16
 
-            ;# put next byte in RDI[3:0] (ROL unrolled to prevent stall)
+            ;# PUT NEXT BYTE IN RDI[3:0] (ROL unrolled to prevent stall)
 1:          ROL      RDI
             ROL      RDI
             ROL      RDI
             ROL      RDI
 
-            ;# print DL[0:3]
+            ;# PRINT DL[0:3]
             PUSH     RCX
             PUSH     RDI
             LEA      RSI, [RIP+KLOGDIGS]
@@ -185,11 +177,11 @@ KLOGHEX:    ;# print 0x
             POP      RDI
             POP      RCX
 
-            ;# next digit
+            ;# NEXT DIGIT
             DEC      CL
             JNZ      1b
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -197,25 +189,25 @@ KLOGHEX:    ;# print 0x
 ;#                                KLOGSTR()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KLOGSTR:    ;# fetch next character
+KLOGSTR:    ;# FETCH NEXT CHARACTER
 1:          XOR      RAX, RAX
             MOV      AL, [RDI]
 
-            ;# terminate if zero
+            ;# TERMINATE IF ZERO
             AND      AL, AL
             JZ       2f
 
-            ;# print character
+            ;# PRINT CHARACTER
             PUSH     RDI
             MOV      RDI, RAX
             CALL     KVGAPUT
             POP      RDI
 
-            ;# LOOP again
+            ;# LOOP AGAIN
             INC      RDI
             JMP      1b
 
-            ;# done
+            ;# DONE
 2:          XOR      RAX, RAX
             RET
 
@@ -223,14 +215,14 @@ KLOGSTR:    ;# fetch next character
 ;#                                 KLOGATT()                                   #
 ;#-----------------------------------------------------------------------------#
 
-KLOGATT:    ;# set vga colours
+KLOGATT:    ;# SET VGA COLOURS
             PUSH     RDI
             PUSH     RSI
             CALL     KVGAATT
             POP      RSI
             POP      RDI
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -238,7 +230,7 @@ KLOGATT:    ;# set vga colours
 ;#                                KLOGCLR()                                   #
 ;#-----------------------------------------------------------------------------#
 
-KLOGCLR:    ;# clear vga screen
+KLOGCLR:    ;# CLEAR VGA SCREEN
             PUSH     RDI
             PUSH     RSI
             PUSH     RCX
@@ -247,7 +239,7 @@ KLOGCLR:    ;# clear vga screen
             POP      RDI
             POP      RCX
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -255,38 +247,38 @@ KLOGCLR:    ;# clear vga screen
 ;#                                KLOGMOD()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KLOGMOD:    ;# save a copy of RDI
+KLOGMOD:    ;# SAVE A COPY OF RDI
             PUSH     RDI
 
-            ;# change colour to yellow
+            ;# CHANGE COLOUR TO YELLOW
             MOV      RDI, 0x0A
             MOV      RSI, -1
             CALL     KLOGATT
 
-            ;# print " ["
+            ;# PRINT " ["
             MOV      RDI, ' '
             CALL     KLOGCHR
             MOV      RDI, '['
             CALL     KLOGCHR
 
-            ;# restore RDI
+            ;# RESTORE RDI
             POP      RDI
 
-            ;# print the name of the module
+            ;# PRINT THE NAME OF THE MODULE
             CALL     KLOGSTR
 
-            ;# print "] "
+            ;# PRINT "] "
             MOV      RDI, ']'
             CALL     KLOGCHR
             MOV      RDI, ' '
             CALL     KLOGCHR
 
-            ;# reset colour to white
+            ;# RESET COLOUR TO WHITE
             MOV      RDI, 0x0B
             MOV      RSI, -1
             CALL     KLOGATT
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -294,28 +286,28 @@ KLOGMOD:    ;# save a copy of RDI
 ;#                              DATA SECTION                                   #
 ;###############################################################################
 
-            ;# data section
+            ;# DATA SECTION
             SEGMENT  ".data"
 
 ;#-----------------------------------------------------------------------------#
 ;#                              MODULE DATA                                    #
 ;#-----------------------------------------------------------------------------#
 
-            ;# digits to print
+            ;# DIGITS TO PRINT
 KLOGDIGS:   DB       "0123456789ABCDEF"
 
 ;#-----------------------------------------------------------------------------#
 ;#                            LOGGING STRINGS                                  #
 ;#-----------------------------------------------------------------------------#
 
-            ;# header text
+            ;# HEADER TEXT
 KLOGHDR:    INCBIN   "kernel/header.txt"
             DB       "\0"
 
-            ;# welcome text
+            ;# WELCOME TEXT
 KLOGWEL:    INCBIN   "kernel/welcome.txt"
             DB       "\0"
 
-            ;# license text
+            ;# LICENSE TEXT
 KLOGLIC:    INCBIN   "kernel/license.txt"
             DB       "\0"

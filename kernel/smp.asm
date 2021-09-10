@@ -33,14 +33,14 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-            ;# common definitions used by kernel
+            ;# COMMON DEFINITIONS USED BY KERNEL
             INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-            ;# global symbols
+            ;# GLOBAL SYMBOLS
             PUBLIC   KSMPINIT
             PUBLIC   KSMPEN
 
@@ -48,47 +48,47 @@
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-            ;# text section
+            ;# TEXT SECTION
             SEGMENT  ".text"
 
 ;#-----------------------------------------------------------------------------#
 ;#                          REAL MODE TRAMPOLINE                               #
 ;#-----------------------------------------------------------------------------#
 
-KSMP16:     ;# 16-bit code
+KSMP16:     ;# 16-BIT CODE
             CODE16
 
-            ;# first instruction executed by CPU core!!!
+            ;# FIRST INSTRUCTION EXECUTED BY CPU CORE!!!
             MOV      AX, 0x55AA
 
-            ;# make sure interrupts are disabled
+            ;# MAKE SURE INTERRUPTS ARE DISABLED
             cli
 
-            ;# initialize segment registers
+            ;# INITIALIZE SEGMENT REGISTERS
             XOR      BX, BX
             MOV      DS, BX
             MOV      ES, BX
             MOV      SS, BX
 
-            ;# load GDTR register
+            ;# LOAD GDTR REGISTER
             LGDT     [GDTR_ADDR]
 
-            ;# enter protected mode
+            ;# ENTER PROTECTED MODE
             MOV      EAX, CR0
             OR       EAX, 1
             MOV      CR0, EAX
 
-            ;# far jump into 32-bit mode
+            ;# FAR JUMP INTO 32-BIT MODE
             LJMP     0x10, KSMP32-KSMP16
 
 ;#-----------------------------------------------------------------------------#
 ;#                        PROTECTED MODE TRAMPOLINE                            #
 ;#-----------------------------------------------------------------------------#
 
-KSMP32:     ;# 32-bit code
+KSMP32:     ;# 32-BIT CODE
             CODE32
 
-            ;# initialize segment registers
+            ;# INITIALIZE SEGMENT REGISTERS
             MOV      AX, 0x18
             MOV      DS, AX
             MOV      ES, AX
@@ -96,37 +96,37 @@ KSMP32:     ;# 32-bit code
             MOV      GS, AX
             MOV      SS, AX
 
-            ;# enable physical address extension
+            ;# ENABLE PHYSICAL ADDRESS EXTENSION
             MOV      EAX, CR4
             OR       EAX, 0x00000020
             MOV      CR4, EAX
 
-            ;# enable long-mode in EFER
+            ;# ENABLE LONG-MODE IN EFER
             MOV      ECX, MSR_EFER
             RDMSR
             OR       EAX, 0x00000100
             WRMSR
 
-            ;# load CR3 with PML4 table base
+            ;# LOAD CR3 WITH PML4 TABLE BASE
             MOV      EAX, PM4L_ADDR
             MOV      CR3, EAX
 
-            ;# enable paging; this activates long mode
+            ;# ENABLE PAGING; THIS ACTIVATES LONG MODE
             MOV      EAX, CR0
             OR       EAX, 0x80000000
             MOV      CR0, EAX
 
-            ;# we are in compatibility mode now! jump to code64
+            ;# WE ARE IN COMPATIBILITY MODE NOW! JUMP TO CODE64
             LJMP     0x20, KSMP64-KSMP16
 
 ;#-----------------------------------------------------------------------------#
 ;#                          LONG MODE TRAMPOLINE                               #
 ;#-----------------------------------------------------------------------------#
 
-KSMP64:     ;# 64-bit code
+KSMP64:     ;# 64-BIT CODE
             CODE64
 
-            ;# initialize segment registers
+            ;# INITIALIZE SEGMENT REGISTERS
             MOV      AX, 0x0028
             MOV      DS, AX
             MOV      ES, AX
@@ -134,7 +134,7 @@ KSMP64:     ;# 64-bit code
             MOV      GS, AX
             MOV      SS, AX
 
-            ;# initialize all 64-bit GPRs
+            ;# INITIALIZE ALL 64-BIT GPRS
             MOV      RAX, 0x1111111111111111
             MOV      RBX, 0x2222222222222222
             MOV      RCX, 0x3333333333333333
@@ -152,12 +152,12 @@ KSMP64:     ;# 64-bit code
             MOV      R14, 0xCCCCCCCCCCCCCCCC
             MOV      R15, 0xDDDDDDDDDDDDDDDD
 
-            ;# read local APIC ID
+            ;# READ LOCAL APIC ID
             XOR      RAX, RAX
             MOV      EAX, [0xFEE00020]
             SHR      EAX, 24
 
-            ;# use this particular CPU stack
+            ;# USE THIS PARTICULAR CPU STACK
             MOV      RSP, RAX
             SHL      RSP, 12
             ADD      RSP, STACK_ADDR
@@ -165,20 +165,20 @@ KSMP64:     ;# 64-bit code
             MOV      RBP, RSP
             NOP
 
-            ;# initialize IDT
+            ;# INITIALIZE IDT
             LIDT     [IDTR_ADDR]
 
-            ;# jump to KSMPEN
+            ;# JUMP TO KSMPEN
             MOV      RAX, [SmpFunAddress-KSMP16]
             CALL     RAX
 
-            ;# LOOP forever
+            ;# LOOP FOREVER
             JMP      .
 
-            ;# alignment for data
+            ;# ALIGNMENT FOR DATA
             ALIGN    8
 
-            ;# SmpFunAddress
+            ;# SMPFUNADDRESS
             EQU      SmpFunAddress, .
             DQ       0
 
@@ -186,7 +186,7 @@ KSMP64:     ;# 64-bit code
 ;#                              KSMPINIT()                                     #
 ;#-----------------------------------------------------------------------------#
 
-KSMPINIT:   ;# print init msg
+KSMPINIT:   ;# PRINT INIT MSG
             LEA      RDI, [RIP+KSMPNAME]
             CALL     KLOGMOD
             LEA      RDI, [RIP+KSMPMSG]
@@ -194,32 +194,32 @@ KSMPINIT:   ;# print init msg
             MOV      RDI, '\n'
             CALL     KLOGCHR
 
-            ;# store the address of KSMPEN() to be fetched by trampoline
+            ;# store the address of KSMPEN to be fetched by trampoline
             LEA      RAX, [RIP+KSMPEN]
             MOV      [RIP+SmpFunAddress], RAX
 
-            ;# copy the trampoline to lower memory
+            ;# COPY THE TRAMPOLINE TO LOWER MEMORY
             MOV      RDI, TRUMP_ADDR
             LEA      RSI, [RIP+KSMP16]
             LEA      RCX, [RIP+KSMPINIT]
             SUB      RCX, RSI
 
-            ;# copy LOOP
+            ;# COPY LOOP
 1:          MOV      AL, [RSI]
             MOV      [RDI], AL
             INC      RSI
             INC      RDI
             LOOP     1b
 
-            ;# first we need to initialize core 0
+            ;# FIRST WE NEED TO INITIALIZE CORE 0
             CALL     KSMPEN
 
-            ;# send INIT-SIPI-SIPI sequence to other CPUs
+            ;# SEND INIT-SIPI-SIPI SEQUENCE TO OTHER CPUS
             CALL     KIRQIIPI
             CALL     KIRQSIPI
             CALL     KIRQSIPI
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -229,37 +229,37 @@ KSMPINIT:   ;# print init msg
 
 ;# TODO: move lock instructions to IDT
 
-KSMPEN:     ;# acquire kernel lock to avoid race conditions with other CPUS
+KSMPEN:     ;# ACQUIRE KERNEL LOCK TO AVOID RACE CONDITIONS WITH OTHER CPUS
             CALL     KLOCPEND
 
-            ;# initialize LAPIC AND enable IRQs
+            ;# INITIALIZE LAPIC AND ENABLE IRQS
             CALL     KIRQEN
 
-            ;# print module name
+            ;# PRINT MODULE NAME
             LEA      RDI, [RIP+KSMPNAME]
             CALL     KLOGMOD
 
-            ;# print lapic detection string
+            ;# PRINT LAPIC DETECTION STRING
             LEA      RDI, [RIP+KSMPID]
             CALL     KLOGSTR
 
-            ;# print LAPIC ID
+            ;# PRINT LAPIC ID
             XOR      RAX, RAX
             MOV      EAX, [0xFEE00020]
             SHR      EAX, 24
             MOV      RDI, RAX
             CALL     KLOGDEC
 
-            ;# print new line
+            ;# PRINT NEW LINE
             MOV      RDI, '\n'
             CALL     KLOGCHR
 
-            ;# release the lock
+            ;# RELEASE THE LOCK
             PUSH     RDI
             CALL     KLOCPOST
             POP      RDI
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -267,14 +267,14 @@ KSMPEN:     ;# acquire kernel lock to avoid race conditions with other CPUS
 ;#                              DATA SECTION                                   #
 ;###############################################################################
 
-            ;# data section
+            ;# DATA SECTION
             SEGMENT  ".data"
 
 ;#-----------------------------------------------------------------------------#
 ;#                            LOGGING STRINGS                                  #
 ;#-----------------------------------------------------------------------------#
 
-            ;# SMP module name and messages
+            ;# SMP MODULE NAME AND MESSAGES
 KSMPNAME:   DB       "KERNEL SMP\0"
-KSMPMSG:    DB       "Detecting CPU cores available in the system...\0"
-KSMPID:     DB       "Successfully initialized CPU core with LAPIC ID: \0"
+KSMPMSG:    DB       "DETECTING CPU CORES AVAILABLE IN THE SYSTEM...\0"
+KSMPID:     DB       "SUCCESSFULLY INITIALIZED CPU CORE WITH LAPIC ID: \0"

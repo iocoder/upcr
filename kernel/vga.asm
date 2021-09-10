@@ -33,14 +33,14 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-            ;# common definitions used by kernel
+            ;# COMMON DEFINITIONS USED BY KERNEL
             INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-            ;# global symbols
+            ;# GLOBAL SYMBOLS
             PUBLIC    KVGAINIT
             PUBLIC    KVGACLR
             PUBLIC    KVGAPUT
@@ -50,57 +50,57 @@
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-            ;# text section
+            ;# TEXT SECTION
             SEGMENT  ".text"
 
 ;#-----------------------------------------------------------------------------#
 ;#                               KVGAINIT()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KVGAINIT:   ;# read KVGAAVL from init struct
+KVGAINIT:   ;# READ KVGAAVL FROM INIT STRUCT
             MOV      RAX, [R15+0x00]
             MOV      [RIP+KVGAAVL], RAX
 
-            ;# read KVGAVMEM from init struct
+            ;# READ KVGAVMEM FROM INIT STRUCT
             MOV      RAX, [R15+0x08]
             MOV      [RIP+KVGAVMEM], RAX
 
-            ;# read KVGAPMEM from init struct
+            ;# READ KVGAPMEM FROM INIT STRUCT
             MOV      RAX, [R15+0x10]
             MOV      [RIP+KVGAPMEM], RAX
 
-            ;# read KVGASIZE from init struct
+            ;# READ KVGASIZE FROM INIT STRUCT
             MOV      RAX, [R15+0x18]
             MOV      [RIP+KVGASIZE], RAX
 
-            ;# read KVGAWIDE from init struct
+            ;# READ KVGAWIDE FROM INIT STRUCT
             MOV      RAX, [R15+0x20]
             MOV      [RIP+KVGAWIDE], RAX
 
-            ;# read KVGAHIGH from init struct
+            ;# READ KVGAHIGH FROM INIT STRUCT
             MOV      RAX, [R15+0x28]
             MOV      [RIP+KVGAHIGH], RAX
 
-            ;# read KVGALINE from init struct
+            ;# READ KVGALINE FROM INIT STRUCT
             MOV      RAX, [R15+0x30]
             MOV      [RIP+KVGALINE], RAX
 
-            ;# did the user provide VGA information anyways?
+            ;# DID THE USER PROVIDE VGA INFORMATION ANYWAYS?
             MOV      RAX, [RIP+KVGAAVL]
             CMP      RAX, 0
             JZ       1f
 
-            ;# compute number of text columns
-            MOV      RAX, [RIP+KVGAWIDE]   ;# RAX = WidthInPixels
-            SHR      RAX, 3                     ;# RAX = WidthInPixels/8
-            MOV      [RIP+KVGACOLS], RAX    ;# i.e. number of glyphs per row
+            ;# COMPUTE NUMBER OF TEXT COLUMNS
+            MOV      RAX, [RIP+KVGAWIDE]        ;# RAX = WIDTH_IN_PIXELS
+            SHR      RAX, 3                     ;# RAX = WIDTH_IN_PIXELS/8
+            MOV      [RIP+KVGACOLS], RAX        ;# I.E. NUMBER OF GLYPHS PER ROW
 
-            ;# compute number of text rows
-            MOV      RAX, [RIP+KVGAHIGH]  ;# RAX = HeightInPixels
-            SHR      RAX, 4                     ;# RAX = HeightInPixels/16
-            MOV      [RIP+KVGAROWS], RAX    ;# i.e. number of glyphs per column
+            ;# COMPUTE NUMBER OF TEXT ROWS
+            MOV      RAX, [RIP+KVGAHIGH]        ;# RAX = HEIGHT_IN_PIXELS
+            SHR      RAX, 4                     ;# RAX = HEIGHT_IN_PIXELS/16
+            MOV      [RIP+KVGAROWS], RAX        ;# I.E. NUMBER OF GLYPHS PER COLUMN
 
-            ;# done
+            ;# DONE
 1:          XOR      RAX, RAX
             RET
 
@@ -108,15 +108,15 @@ KVGAINIT:   ;# read KVGAAVL from init struct
 ;#                               KVGACLR()                                     #
 ;#-----------------------------------------------------------------------------#
 
-KVGACLR:    ;# load buffer addresses AND size to registers
+KVGACLR:    ;# LOAD BUFFER ADDRESSES AND SIZE TO REGISTERS
             MOV      RSI, [RIP+KVGAVMEM]
             MOV      RDI, [RIP+KVGAPMEM]
             MOV      RCX, [RIP+KVGASIZE]
 
-            ;# load default background colour
+            ;# LOAD DEFAULT BACKGROUND COLOUR
             MOV      EAX, [RIP+KVGABG]
 
-            ;# LOOP over all pixels AND cLEAr them
+            ;# LOOP OVER ALL PIXELS AND CLEAR THEM
 1:          MOV      [RSI], EAX
             MOV      [RDI], EAX
             ADD      RSI, 4
@@ -124,12 +124,12 @@ KVGACLR:    ;# load buffer addresses AND size to registers
             SUB      RCX, 4
             JNZ      1b
 
-            ;# set (X,Y) to (0,0)
+            ;# SET (X,Y) TO (0,0)
             XOR      RAX, RAX
             MOV      [RIP+KVGAX], RAX
             MOV      [RIP+KVGAY], RAX
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -138,7 +138,7 @@ KVGACLR:    ;# load buffer addresses AND size to registers
 ;#-----------------------------------------------------------------------------#
 
 KVGAPUT:    ;########
-            ;# (I) process control characters
+            ;# (I) PROCESS CONTROL CHARACTERS
             ;########
             MOV      ECX, EDI
             AND      RCX, 0xFF
@@ -146,137 +146,137 @@ KVGAPUT:    ;########
             JZ       10f
 
             ;########
-            ;# (II) collect all needed information for plotting the glyph
+            ;# (II) COLLECT ALL NEEDED INFORMATION FOR PLOTTING THE GLYPH
             ;########
 
-            ;# convert Y to pixel offset from the beginning of the buffer
-            MOV      RAX, [RIP+KVGAY]    ;# RAX = Y
-            SHL      RAX, 4                  ;# RAX = Y*16  (line height is 16 pixels)
-            MOV      RDX, [RIP+KVGALINE] ;# RDX = PPL
-            MUL      RDX                      ;# RAX = Y*16*PPL (PPL=pixels per line)
+            ;# CONVERT Y TO PIXEL OFFSET FROM THE BEGINNING OF THE BUFFER
+            MOV      RAX, [RIP+KVGAY]        ;# RAX = Y
+            SHL      RAX, 4                  ;# RAX = Y*16  (LINE HEIGHT IS 16 PIXELS)
+            MOV      RDX, [RIP+KVGALINE]     ;# RDX = PPL
+            MUL      RDX                     ;# RAX = Y*16*PPL (PPL=PIXELS PER LINE)
 
-            ;# add amount of horizontal pixels to the offset
-            MOV      RDX, [RIP+KVGAX]    ;# RDX = X
-            SHL      RDX, 3                  ;# RDX = X*8 (char width is 8 pixels)
+            ;# ADD AMOUNT OF HORIZONTAL PIXELS TO THE OFFSET
+            MOV      RDX, [RIP+KVGAX]        ;# RDX = X
+            SHL      RDX, 3                  ;# RDX = X*8 (CHAR WIDTH IS 8 PIXELS)
             ADD      RAX, RDX                ;# RAX = Y*16*PPL + X*8
 
-            ;# store memory address of the pixel in RSI AND RDI
-            MOV      RSI, [RIP+KVGAVMEM]    ;# RSI = &buf[0]
-            MOV      RDI, [RIP+KVGAPMEM]    ;# RDI = &vga[0]
-            SHL      RAX, 2                  ;# RAX = (Y*16*PPL + X*8)*4 (4=bytes/pxl)
-            ADD      RSI, RAX                ;# RSI = &buf[pixel]
-            ADD      RDI, RAX                ;# RDI = &vga[pixel]
+            ;# STORE MEMORY ADDRESS OF THE PIXEL IN RSI AND RDI
+            MOV      RSI, [RIP+KVGAVMEM]     ;# RSI = &BUF[0]
+            MOV      RDI, [RIP+KVGAPMEM]     ;# RDI = &VGA[0]
+            SHL      RAX, 2                  ;# RAX = (Y*16*PPL + X*8)*4 (4=BYTES/PXL)
+            ADD      RSI, RAX                ;# RSI = &BUF[PIXEL]
+            ADD      RDI, RAX                ;# RDI = &VGA[PIXEL]
 
-            ;# store scan line size in R9
+            ;# STORE SCAN LINE SIZE IN R9
             MOV      R9, [RIP+KVGALINE]
-            SHL      R9, 2                   ;# R9  = PPL*4 (scan line size in bytes)
+            SHL      R9, 2                   ;# R9  = PPL*4 (SCAN LINE SIZE IN BYTES)
 
-            ;# get offset of the character pixel image to draw
-            LEA      R8, [RIP+KVGAFONT]    ;# R8 = &font[0]
-            SHL      RCX, 4                  ;# RCX = IDX*16 (each glyph is 16 bytes)
-            ADD      R8, RCX                 ;# R8 = &font[IDX*16]
+            ;# GET OFFSET OF THE CHARACTER PIXEL IMAGE TO DRAW
+            LEA      R8, [RIP+KVGAFONT]      ;# R8 = &FONT[0]
+            SHL      RCX, 4                  ;# RCX = IDX*16 (EACH GLYPH IS 16 BYTES)
+            ADD      R8, RCX                 ;# R8 = &FONT[IDX*16]
 
-            ;# load colours
+            ;# LOAD COLOURS
             MOV      RCX, [RIP+KVGAFG]
             MOV      RDX, [RIP+KVGABG]
 
-            ;# load first byte in the bitmap
+            ;# LOAD FIRST BYTE IN THE BITMAP
             MOV      AL, [R8]
 
-            ;# LOOP over pixel rows/cols to draw
-            MOV      R10, 7                 ;# start from bit 7 AND end at bit 0
-            MOV      R11, 16                ;# total 16 bytes in the font bitmap
+            ;# LOOP OVER PIXEL ROWS/COLS TO DRAW
+            MOV      R10, 7                  ;# START FROM BIT 7 AND END AT BIT 0
+            MOV      R11, 16                 ;# TOTAL 16 BYTES IN THE FONT BITMAP
 
-            ;# Summary of registers:
+            ;# SUMMARY OF REGISTERS:
             ;# ---------------------
-            ;#  AL = current bitmap byte (i.e. row)
-            ;# ECX = foreground colour
-            ;# EDX = background colour
-            ;# RSI = address of current pixel in virtual buffer
-            ;# RDI = address of current pixel in VGA buffer
-            ;# R8  = address of current bitmap byte (in the font data)
-            ;# R9  = scan line size in bytes
-            ;# R10 = currently processed bit in the bitmap byte (see AL)
-            ;# R11 = how many bitmap bytes are remaining (total 16)
+            ;#  AL = CURRENT BITMAP BYTE (I.E. ROW)
+            ;# ECX = FOREGROUND COLOUR
+            ;# EDX = BACKGROUND COLOUR
+            ;# RSI = ADDRESS OF CURRENT PIXEL IN VIRTUAL BUFFER
+            ;# RDI = ADDRESS OF CURRENT PIXEL IN VGA BUFFER
+            ;# R8  = ADDRESS OF CURRENT BITMAP BYTE (IN THE FONT DATA)
+            ;# R9  = SCAN LINE SIZE IN BYTES
+            ;# R10 = CURRENTLY PROCESSED BIT IN THE BITMAP BYTE (SEE AL)
+            ;# R11 = HOW MANY BITMAP BYTES ARE REMAINING (TOTAL 16)
 
             ;########
-            ;# (III) LOOP over glyph pixels AND plot them
+            ;# (III) LOOP OVER GLYPH PIXELS AND PLOT THEM
             ;########
 
-            ;# plot the pixel if its corresponding bit is 1
-1:          BT       RAX, R10               ;# current bit is 0 or 1?
-            JNC      2f                       ;# if 0, draw using EDX
-            MOV      [RSI], ECX             ;# draw fore colour in virtual buffer
-            MOV      [RDI], ECX             ;# draw fore colour in VGA buffer
-            JMP      3f                       ;# skip next two lines
-2:          MOV      [RSI], EDX             ;# draw back colour in virtual buffer
-            MOV      [RDI], EDX             ;# draw back colour in VGA buffer
+            ;# PLOT THE PIXEL IF ITS CORRESPONDING BIT IS 1
+1:          BT       RAX, R10                ;# CURRENT BIT IS 0 OR 1?
+            JNC      2f                      ;# IF 0, DRAW USING EDX
+            MOV      [RSI], ECX              ;# DRAW FORE COLOUR IN VIRTUAL BUFFER
+            MOV      [RDI], ECX              ;# DRAW FORE COLOUR IN VGA BUFFER
+            JMP      3f                      ;# SKIP NEXT TWO LINES
+2:          MOV      [RSI], EDX              ;# DRAW BACK COLOUR IN VIRTUAL BUFFER
+            MOV      [RDI], EDX              ;# DRAW BACK COLOUR IN VGA BUFFER
 
-3:          ;# next pixel
-            ADD      RSI, 4                 ;# MOVe to next pixel
-            ADD      RDI, 4                 ;# MOVe to next pixel (VGA)
-            CMP      R10, 0                 ;# are we done with this bitmap byte?
-            JZ       4f                       ;# yes we are done
-            DEC      R10                     ;# next bit to draw
-            JMP      1b                       ;# jump back to pixel plotting
+3:          ;# NEXT PIXEL
+            ADD      RSI, 4                  ;# MOVE TO NEXT PIXEL
+            ADD      RDI, 4                  ;# MOVE TO NEXT PIXEL (VGA)
+            CMP      R10, 0                  ;# ARE WE DONE WITH THIS BITMAP BYTE?
+            JZ       4f                      ;# YES WE ARE DONE
+            DEC      R10                     ;# NEXT BIT TO DRAW
+            JMP      1b                      ;# JUMP BACK TO PIXEL PLOTTING
 
-4:          ;# next row
-            DEC      R11                     ;# decrease bitmap byte counter
-            JZ       5f                       ;# 16 bytes are all done?
-            MOV      R10, 7                 ;# re-init R10 (start from bit 7 again)
-            SUB      RSI, 32                ;# reset RSI by 8 pixels (glyph width)
-            SUB      RDI, 32                ;# reset RDI by 8 pixels (glyph width)
-            ADD      RSI, R9                ;# MOVe to next scan line
-            ADD      RDI, R9                ;# MOVe to next scan line (VGA)
-            INC      R8                      ;# address of next byte in font bitmap
-            MOV      AL, [R8]               ;# grab that byte
-            JMP      1b                       ;# jump back to pixel plotting
+4:          ;# NEXT ROW
+            DEC      R11                     ;# DECREASE BITMAP BYTE COUNTER
+            JZ       5f                      ;# 16 BYTES ARE ALL DONE?
+            MOV      R10, 7                  ;# RE-INIT R10 (START FROM BIT 7 AGAIN)
+            SUB      RSI, 32                 ;# RESET RSI BY 8 PIXELS (GLYPH WIDTH)
+            SUB      RDI, 32                 ;# RESET RDI BY 8 PIXELS (GLYPH WIDTH)
+            ADD      RSI, R9                 ;# MOVE TO NEXT SCAN LINE
+            ADD      RDI, R9                 ;# MOVE TO NEXT SCAN LINE (VGA)
+            INC      R8                      ;# ADDRESS OF NEXT BYTE IN FONT BITMAP
+            MOV      AL, [R8]                ;# GRAB THAT BYTE
+            JMP      1b                      ;# JUMP BACK TO PIXEL PLOTTING
 
             ;########
-            ;# (IV) increase cursor position
+            ;# (IV) INCREASE CURSOR POSITION
             ;########
 
 5:          MOV      RAX, [RIP+KVGAX]
-            INC      RAX                      ;# KVGAX++
+            INC      RAX                     ;# KVGAX++
             MOV      [RIP+KVGAX], RAX
-            CMP      RAX, [RIP+KVGACOLS] ;# KVGAX == KVGACOLS?
-            JNE      90f                       ;# jump to done if no new line is needed
+            CMP      RAX, [RIP+KVGACOLS]     ;# KVGAX == KVGACOLS?
+            JNE      90f                     ;# JUMP TO DONE IF NO NEW LINE IS NEEDED
 
             ;########
-            ;# (V) new line processing
+            ;# (V) NEW LINE PROCESSING
             ;########
 
-            ;# reset KVGAX to 0
+            ;# RESET KVGAX TO 0
 10:         XOR      RAX, RAX
             MOV      [RIP+KVGAX], RAX
 
-            ;# do we need to scroll?
+            ;# DO WE NEED TO SCROLL?
             MOV      RAX, [RIP+KVGAROWS]
             DEC      RAX
             CMP      [RIP+KVGAY], RAX
             JE       11f
 
-            ;# increase KVGAY AND skip scrolling
+            ;# INCREASE KVGAY AND SKIP SCROLLING
             MOV      RAX, [RIP+KVGAY]
             INC      RAX
             MOV      [RIP+KVGAY], RAX
             JMP      18f
 
-11:         ;# load destination addresses for scrolling
+11:         ;# LOAD DESTINATION ADDRESSES FOR SCROLLING
             MOV      RSI, [RIP+KVGAVMEM]
             MOV      RDI, [RIP+KVGAPMEM]
 
-            ;# set RBX to the base source address for scrolling
+            ;# SET RBX TO THE BASE SOURCE ADDRESS FOR SCROLLING
             MOV      RAX, [RIP+KVGALINE]
-            SHL      RAX, 4                 ;# each glyph takes 16 lines
-            SHL      RAX, 2                 ;# each pixel is 4 bytes
+            SHL      RAX, 4                  ;# EACH GLYPH TAKES 16 LINES
+            SHL      RAX, 2                  ;# EACH PIXEL IS 4 BYTES
             LEA      R8, [RSI+RAX]
 
-            ;# obtain size of memory region to scroll up
+            ;# OBTAIN SIZE OF MEMORY REGION TO SCROLL UP
             MOV      RCX, [RIP+KVGASIZE]
             SUB      RCX, RAX
 
-            ;# we are all good, copy AND LOOP until rcx is 0
+            ;# WE ARE ALL GOOD, COPY AND LOOP UNTIL RCX IS 0
 12:         MOV      EAX, [R8]
             MOV      [RSI], EAX
             MOV      [RDI], EAX
@@ -286,40 +286,40 @@ KVGAPUT:    ;########
             SUB      RCX, 4
             JNZ      12b
 
-            ;# compute address of the first pixel in the line
-18:         MOV      RAX, [RIP+KVGAY]    ;# RAX = KVGAY
+            ;# COMPUTE ADDRESS OF THE FIRST PIXEL IN THE LINE
+18:         MOV      RAX, [RIP+KVGAY]        ;# RAX = KVGAY
             SHL      RAX, 4                  ;# RAX = KVGAY*16
-            MOV      RDX, [RIP+KVGALINE] ;# RDX = PPL
-            MUL      RDX                      ;# RAX = KVGAY*16*PPL
+            MOV      RDX, [RIP+KVGALINE]     ;# RDX = PPL
+            MUL      RDX                     ;# RAX = KVGAY*16*PPL
             SHL      RAX, 2                  ;# RAX = (KVGAY*16*PPL)*4
             MOV      RSI, [RIP+KVGAVMEM]
             MOV      RDI, [RIP+KVGAPMEM]
-            ADD      RSI, RAX                ;# RSI = &buf[first-pixel-in-new-line]
-            ADD      RDI, RAX                ;# RDI = &vga[first-pixel-in-new-line]
+            ADD      RSI, RAX                ;# RSI = &BUF[FIRST-PIXEL-IN-NEW-LINE]
+            ADD      RDI, RAX                ;# RDI = &VGA[FIRST-PIXEL-IN-NEW-LINE]
 
-            ;# compute number of pixels to erase
+            ;# COMPUTE NUMBER OF PIXELS TO ERASE
             MOV      RCX, [RIP+KVGALINE]
-            SHL      RCX, 4                  ;# RCX = PPL*16 (glyph/line height)
-            SHL      RCX, 2                  ;# RCX = PPL*16*4 (4 bytes/pixel)
+            SHL      RCX, 4                  ;# RCX = PPL*16 (GLYPH/LINE HEIGHT)
+            SHL      RCX, 2                  ;# RCX = PPL*16*4 (4 BYTES/PIXEL)
 
-            ;# load colour
+            ;# LOAD COLOUR
             MOV      EAX, [RIP+KVGABG]
 
-            ;# draw current pixel
-19:         MOV      [RSI], EAX              ;# draw pixel in virtual buffer
-            MOV      [RDI], EAX              ;# draw pixel in physical buffer
+            ;# DRAW CURRENT PIXEL
+19:         MOV      [RSI], EAX              ;# DRAW PIXEL IN VIRTUAL BUFFER
+            MOV      [RDI], EAX              ;# DRAW PIXEL IN PHYSICAL BUFFER
 
-            ;# next pixel
-            ADD      RSI, 4                  ;# each pixel is 4 bytes
+            ;# NEXT PIXEL
+            ADD      RSI, 4                  ;# EACH PIXEL IS 4 BYTES
             ADD      RDI, 4
             SUB      RCX, 4
             JNZ      19b
 
             ;########
-            ;# (VI) return to caller
+            ;# (VI) RETURN TO CALLER
             ;########
 
-            ;# done
+            ;# DONE
 90:         XOR      RAX, RAX
             RET
 
@@ -327,28 +327,28 @@ KVGAPUT:    ;########
 ;#                                KVGAATT()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KVGAATT:    ;# load KVGAPAL address
+KVGAATT:    ;# LOAD KVGAPAL ADDRESS
             LEA      R8, [RIP+KVGAPAL]
 
-            ;# foreground colour specified?
+            ;# FOREGROUND COLOUR SPECIFIED?
 1:          CMP      RDI, 0x10
             JNB      2f
 
-            ;# read the RGB value from palette AND store it
+            ;# READ THE RGB VALUE FROM PALETTE AND STORE IT
             SHL      RDI, 3
             MOV      EAX, [R8+RDI]
             MOV      [RIP+KVGAFG], EAX
 
-            ;# background colour specified?
+            ;# BACKGROUND COLOUR SPECIFIED?
 2:          CMP      RSI, 0x10
             JNB      3f
 
-            ;# read the RGB value from palette AND store it
+            ;# READ THE RGB VALUE FROM PALETTE AND STORE IT
             SHL      RSI, 3
             MOV      EAX, [R8+RSI]
             MOV      [RIP+KVGABG], EAX
 
-            ;# done
+            ;# DONE
 3:          XOR      RAX, RAX
             RET
 
@@ -356,14 +356,14 @@ KVGAATT:    ;# load KVGAPAL address
 ;#                              DATA SECTION                                   #
 ;###############################################################################
 
-            ;# data section
+            ;# DATA SECTION
             SEGMENT  ".data"
 
 ;#-----------------------------------------------------------------------------#
 ;#                              MODULE DATA                                    #
 ;#-----------------------------------------------------------------------------#
 
-            ;# VgaInitInfo structure
+            ;# VGAINITINFO STRUCTURE
 KVGAAVL:    DQ       0
 KVGAVMEM:   DQ       0
 KVGAPMEM:   DQ       0
@@ -372,19 +372,19 @@ KVGAWIDE:   DQ       0
 KVGALINE:   DQ       0
 KVGAHIGH:   DQ       0
 
-            ;# Cursor location
+            ;# CURSOR LOCATION
 KVGAX:      DQ       0
 KVGAY:      DQ       0
 
-            ;# output window size (number of glyphs per row/col)
+            ;# OUTPUT WINDOW SIZE (NUMBER OF GLYPHS PER ROW/COL)
 KVGACOLS:   DQ       0
 KVGAROWS:   DQ       0
 
-            ;# default colours
+            ;# DEFAULT COLOURS
 KVGAFG:     DQ       0x00FFFF00  ;# DEFAULT FOREGROUND COLOUR
 KVGABG:     DQ       0x00010410  ;# DEFAULT BACKGROUND COLOUR
 
-            ;# colour palette
+            ;# COLOUR PALETTE
 KVGAPAL:    DQ       0x00000000  ;# 00: BLACK
             DQ       0x00800000  ;# 01: MAROON
             DQ       0x00008000  ;# 02: GREEN
@@ -402,5 +402,5 @@ KVGAPAL:    DQ       0x00000000  ;# 00: BLACK
             DQ       0x0000FFFF  ;# 0E: CYAN
             DQ       0x00FFFFFF  ;# 0F: WHITE
 
-            ;# font data
-KVGAFONT:   .incbin  "kernel/font.bin"
+            ;# FONT DATA
+KVGAFONT:   INCBIN   "kernel/font.bin"

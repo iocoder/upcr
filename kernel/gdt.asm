@@ -33,28 +33,28 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-            ;# common definitions used by kernel
+            ;# COMMON DEFINITIONS USED BY KERNEL
             INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-            ;# global symbols
+            ;# GLOBAL SYMBOLS
             PUBLIC   KGDTINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-            ;# text section
+            ;# TEXT SECTION
             SEGMENT  ".text"
 
 ;#-----------------------------------------------------------------------------#
 ;#                                KGDTINIT()                                   #
 ;#-----------------------------------------------------------------------------#
 
-KGDTINIT:   ;# print init msg
+KGDTINIT:   ;# PRINT INIT MSG
             LEA      RDI, [RIP+KGDTNAME]
             CALL     KLOGMOD
             LEA      RDI, [RIP+KGDTMSG]
@@ -62,35 +62,35 @@ KGDTINIT:   ;# print init msg
             MOV      RDI, '\n'
             CALL     KLOGCHR
 
-            ;# copy the GDTR descriptor to lower memory
+            ;# COPY THE GDTR DESCRIPTOR TO LOWER MEMORY
             MOV      RDI, GDTR_ADDR
             MOV      RAX, [RIP+KGDTDESC]
             MOV      [RDI], RAX
 
-            ;# copy the GDT table to lower memory
+            ;# COPY THE GDT TABLE TO LOWER MEMORY
             MOV      RDI, GDT_ADDR
             LEA      RSI, [RIP+KGDTSTART]
             LEA      RCX, [RIP+KGDTDESC]
             SUB      RCX, RSI
 
-            ;# copy LOOP
+            ;# COPY LOOP
 1:          MOV      AL, [RSI]
             MOV      [RDI], AL 
             INC      RSI
             INC      RDI
             LOOP     1b
 
-            ;# load GDTR descriptor
+            ;# LOAD GDTR DESCRIPTOR
             LGDT     [GDTR_ADDR]
 
-            ;# make a far jump to reload CS using long-mode lRETq
+            ;# MAKE A FAR JUMP TO RELOAD CS USING LONG-MODE LRETQ
             MOV      RAX, 0x20
             PUSH     RAX
             LEA      RAX, [RIP+2f]
             PUSH     RAX
             LRETQ
 
-            ;# reload other segment registers
+            ;# RELOAD OTHER SEGMENT REGISTERS
 2:          MOV      AX, 0x28
             MOV      DS, AX
             MOV      ES, AX
@@ -98,7 +98,7 @@ KGDTINIT:   ;# print init msg
             MOV      GS, AX
             MOV      SS, AX
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -106,14 +106,14 @@ KGDTINIT:   ;# print init msg
 ;#                              DATA SECTION                                   #
 ;###############################################################################
 
-            ;# data section
+            ;# DATA SECTION
             SEGMENT  ".data"
 
 ;###############################################################################
 ;#                              MODULE DATA                                    #
 ;###############################################################################
 
-KGDTSTART:  ;# GDT table for protected & long mode
+KGDTSTART:  ;# GDT TABLE FOR PROTECTED AND LONG MODE
             DQ       0x0000000000000000  ;# 0x00
             DQ       0x0000000000000000  ;# 0x00
             DQ       0x00CF9A000000FFFF  ;# 0x10 (KERN CODE 32-bit)
@@ -123,7 +123,7 @@ KGDTSTART:  ;# GDT table for protected & long mode
             DQ       0x00AFFA000000FFFF  ;# 0x30 (USER CODE 64-bit)
             DQ       0x00AFF2000000FFFF  ;# 0x38 (USER DATA 64-bit)
 
-KGDTDESC:   ;# GDTR descriptor
+KGDTDESC:   ;# GDTR DESCRIPTOR
             DW       0xFFF
             DD       GDT_ADDR
             DW       0
@@ -132,6 +132,6 @@ KGDTDESC:   ;# GDTR descriptor
 ;#                            LOGGING STRINGS                                  #
 ;###############################################################################
 
-            ;# GDT heading and ascii strings
+            ;# GDT HEADING AND ASCII STRINGS
 KGDTNAME:   DB       "KERNEL GDT\0"
-KGDTMSG:    DB       "Initializing GDT module...\0"
+KGDTMSG:    DB       "INITIALIZING GDT MODULE...\0"

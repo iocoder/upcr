@@ -33,31 +33,31 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-            ;# common definitions used by kernel
+            ;# COMMON DEFINITIONS USED BY KERNEL
             INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-            ;# global symbols
+            ;# GLOBAL SYMBOLS
             PUBLIC   KSYSINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-            ;# text section
+            ;# TEXT SECTION
             SEGMENT  ".text"
 
 ;#-----------------------------------------------------------------------------#
 ;#                              KSYSINIT()                                     #
 ;#-----------------------------------------------------------------------------#
 
-KSYSINIT:   ;# take a copy of boot info ptr
+KSYSINIT:   ;# TAKE A COPY OF BOOT INFO PTR
             MOV      R15, RDI
 
-            ;# initialize kernel modules
+            ;# INITIALIZE KERNEL MODULES
             CALL     KVGAINIT
             CALL     KLOGINIT
             CALL     KRAMINIT
@@ -68,8 +68,8 @@ KSYSINIT:   ;# take a copy of boot info ptr
             CALL     KIRQINIT
             CALL     KSMPINIT
 
-            ;# store success code in RAX
+            ;# STORE SUCCESS CODE IN RAX
             XOR      RAX, RAX
 
-            ;# return to boot loader
+            ;# RETURN TO BOOT LOADER
             RET

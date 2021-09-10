@@ -33,38 +33,38 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-            ;# common definitions used by kernel
+            ;# COMMON DEFINITIONS USED BY KERNEL
             INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-            ;# global symbols
+            ;# GLOBAL SYMBOLS
             PUBLIC   KIDTINIT
 
 ;###############################################################################
 ;#                                 MACROS                                      #
 ;###############################################################################
 
-            ;# dpl levels
+            ;# DPL LEVELS
             EQU      DPL0,          0x0000
             EQU      DPL1,          0x2000
             EQU      DPL2,          0x4000
             EQU      DPL3,          0x6000
 
-            ;# gate types
-            EQU      GATE_CALL,     0x0C00    ;# not even in IDT
-            EQU      GATE_INTR,     0x0E00    ;# disables interrupts
-            EQU      GATE_TRAP,     0x0F00    ;# doesn't disable interrupts
+            ;# GATE TYPES
+            EQU      GATE_CALL,     0x0C00    ;# NOT EVEN IN IDT
+            EQU      GATE_INTR,     0x0E00    ;# DISABLES INTERRUPTS
+            EQU      GATE_TRAP,     0x0F00    ;# DOES NOT DISABLE INTERRUPTS
 
-            ;# present field
+            ;# PRESENT FIELD
             EQU      PRESENT,       0x8000
 
-            ;# gate size
+            ;# GATE SIZE
             EQU      GATE_SIZE,     0x100
 
-            ;# IDT sections
+            ;# IDT SECTIONS
             EQU      IDT_EXP_START, 0x00
             EQU      IDT_EXP_COUNT, 0x20
             EQU      IDT_IRQ_START, 0x40
@@ -76,84 +76,84 @@
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-            ;# text section
+            ;# TEXT SECTION
             SEGMENT  ".text"
 
 ;#-----------------------------------------------------------------------------#
 ;#                            EXCEPTION GATES                                  #
 ;#-----------------------------------------------------------------------------#
 
-            ;# macro to push a dummy error code if needed
+            ;# MACRO TO PUSH A DUMMY ERROR CODE IF NEEDED
             MACRO    PUSHE   DummyErr
             IF       \DummyErr
             PUSH     0x00                      
             ENDIF
             ENDM
 
-            ;# macro to pop a dummy error code if needed
+            ;# MACRO TO POP A DUMMY ERROR CODE IF NEEDED
             MACRO    POPE   DummyErr
             IF       \DummyErr
             ADD      RSP, 8
             ENDIF
             ENDM
 
-            ;# macro to halt the kernel in case of DPL error
+            ;# MACRO TO HALT THE KERNEL IN CASE OF DPL ERROR
             MACRO    CHKDPL   CheckDPL
             IF       \CheckDPL
-            MOV      RAX, [RSP+SFRAME_CS]       ;# load origin's CS
-            AND      RAX, 3                     ;# test if origin is DPL3
-            JNZ      1f                         ;# skip next lines if DPL3
-            CALL     KIRQIIPI                   ;# DPL0: disable all other CPUs
-            MOV      RDI, RSP                   ;# DPL0: load stack frame address
-            CALL     KERRPANIC                  ;# DPL0: kernel panic
-            HLT                                 ;# DPL0: halt here
-            JMP      .                          ;# DPL0: LOOP forever
+            MOV      RAX, [RSP+SFRAME_CS]       ;# LOAD ORIGIN'S CS
+            AND      RAX, 3                     ;# TEST IF ORIGIN IS DPL3
+            JNZ      1f                         ;# SKIP NEXT LINES IF DPL3
+            CALL     KIRQIIPI                   ;# DPL0: DISABLE ALL OTHER CPUS
+            MOV      RDI, RSP                   ;# DPL0: LOAD STACK FRAME ADDRESS
+            CALL     KERRPANIC                  ;# DPL0: KERNEL PANIC
+            HLT                                 ;# DPL0: HALT HERE
+            JMP      .                          ;# DPL0: LOOP FOREVER
 1:          NOP
             ENDIF
             ENDM
 
-            ;# template macro for all IDT gates
+            ;# TEMPLATE MACRO FOR ALL IDT GATES
             MACRO    GATE  Handler, ExpNbr, DummyErr, CheckDPL
             ALIGN    GATE_SIZE
-            PUSHE    \DummyErr                  ;# PUSH dummy error if needed
-            PUSH     \ExpNbr                    ;# PUSH exception number
-            PUSH     R15                        ;# PUSH a copy of R15
-            PUSH     R14                        ;# PUSH a copy of R14
-            PUSH     R13                        ;# PUSH a copy of R13
-            PUSH     R12                        ;# PUSH a copy of R12
-            PUSH     R11                        ;# PUSH a copy of R11
-            PUSH     R10                        ;# PUSH a copy of R10
-            PUSH     R9                         ;# PUSH a copy of R9
-            PUSH     R8                         ;# PUSH a copy of R8
-            PUSH     RBP                        ;# PUSH a copy of RBP
-            PUSH     RDI                        ;# PUSH a copy of RDI
-            PUSH     RSI                        ;# PUSH a copy of RSI
-            PUSH     RDX                        ;# PUSH a copy of RDX
-            PUSH     RCX                        ;# PUSH a copy of RCX
-            PUSH     RBX                        ;# PUSH a copy of RBX
-            PUSH     RAX                        ;# PUSH a copy of RAX
-            SUB      RSP, 0x50                  ;# PUSH padding
-            CHKDPL   \CheckDPL                  ;# CHECK DPL if needed
-            CALL     \Handler                   ;# HANDLE interrupt
-            ADD      RSP, 0x50                  ;# POP padding
-            POP      RAX                        ;# POP a copy of RAX
-            POP      RBX                        ;# POP a copy of RBX
-            POP      RCX                        ;# POP a copy of RCX
-            POP      RDX                        ;# POP a copy of RDX
-            POP      RSI                        ;# POP a copy of RSI
-            POP      RDI                        ;# POP a copy of RDI
-            POP      RBP                        ;# POP a copy of RBP
-            POP      R8                         ;# POP a copy of R8
-            POP      R9                         ;# POP a copy of R9
-            POP      R10                        ;# POP a copy of R10
-            POP      R11                        ;# POP a copy of R11
-            POP      R12                        ;# POP a copy of R12
-            POP      R13                        ;# POP a copy of R13
-            POP      R14                        ;# POP a copy of R14
-            POP      R15                        ;# POP a copy of R15
-            ADD      RSP, 8                     ;# POP exception number
-            POPE     \DummyErr                  ;# POP dummy error if needed
-            IRETQ                               ;# return from exception
+            PUSHE    \DummyErr                  ;# PUSH DUMMY ERROR IF NEEDED
+            PUSH     \ExpNbr                    ;# PUSH EXCEPTION NUMBER
+            PUSH     R15                        ;# PUSH A COPY OF R15
+            PUSH     R14                        ;# PUSH A COPY OF R14
+            PUSH     R13                        ;# PUSH A COPY OF R13
+            PUSH     R12                        ;# PUSH A COPY OF R12
+            PUSH     R11                        ;# PUSH A COPY OF R11
+            PUSH     R10                        ;# PUSH A COPY OF R10
+            PUSH     R9                         ;# PUSH A COPY OF R9
+            PUSH     R8                         ;# PUSH A COPY OF R8
+            PUSH     RBP                        ;# PUSH A COPY OF RBP
+            PUSH     RDI                        ;# PUSH A COPY OF RDI
+            PUSH     RSI                        ;# PUSH A COPY OF RSI
+            PUSH     RDX                        ;# PUSH A COPY OF RDX
+            PUSH     RCX                        ;# PUSH A COPY OF RCX
+            PUSH     RBX                        ;# PUSH A COPY OF RBX
+            PUSH     RAX                        ;# PUSH A COPY OF RAX
+            SUB      RSP, 0x50                  ;# PUSH PADDING
+            CHKDPL   \CheckDPL                  ;# CHECK DPL IF NEEDED
+            CALL     \Handler                   ;# HANDLE INTERRUPT
+            ADD      RSP, 0x50                  ;# POP PADDING
+            POP      RAX                        ;# POP A COPY OF RAX
+            POP      RBX                        ;# POP A COPY OF RBX
+            POP      RCX                        ;# POP A COPY OF RCX
+            POP      RDX                        ;# POP A COPY OF RDX
+            POP      RSI                        ;# POP A COPY OF RSI
+            POP      RDI                        ;# POP A COPY OF RDI
+            POP      RBP                        ;# POP A COPY OF RBP
+            POP      R8                         ;# POP A COPY OF R8
+            POP      R9                         ;# POP A COPY OF R9
+            POP      R10                        ;# POP A COPY OF R10
+            POP      R11                        ;# POP A COPY OF R11
+            POP      R12                        ;# POP A COPY OF R12
+            POP      R13                        ;# POP A COPY OF R13
+            POP      R14                        ;# POP A COPY OF R14
+            POP      R15                        ;# POP A COPY OF R15
+            ADD      RSP, 8                     ;# POP EXCEPTION NUMBER
+            POPE     \DummyErr                  ;# POP DUMMY ERROR IF NEEDED
+            IRETQ                               ;# RETURN FROM EXCEPTION
             ALIGN    GATE_SIZE
             ENDM
 
@@ -161,10 +161,10 @@
 ;#                               IDT GATES                                     #
 ;#-----------------------------------------------------------------------------#
 
-            ;# align to 256-byte border
+            ;# ALIGN TO 256-BYTE BORDER
             ALIGN    GATE_SIZE
 
-KIDTEXPS:   ;# 32 exception gates for 32 exceptions
+KIDTEXPS:   ;# 32 EXCEPTION GATES FOR 32 EXCEPTIONS
             GATE     KIDTEXP, 0x00, 1, 1
             GATE     KIDTEXP, 0x01, 1, 1
             GATE     KIDTEXP, 0x02, 1, 1
@@ -198,7 +198,7 @@ KIDTEXPS:   ;# 32 exception gates for 32 exceptions
             GATE     KIDTEXP, 0x1E, 0, 1
             GATE     KIDTEXP, 0x1F, 0, 1
 
-KIRQEXPS:   ;# 16 IRQ gates for 16 IRQs
+KIRQEXPS:   ;# 16 IRQ GATES FOR 16 IRQS
             GATE     KIDTIRQ, 0x00, 1, 0
             GATE     KIDTIRQ, 0x01, 1, 0
             GATE     KIDTIRQ, 0x02, 1, 0
@@ -216,14 +216,14 @@ KIRQEXPS:   ;# 16 IRQ gates for 16 IRQs
             GATE     KIDTIRQ, 0x0E, 1, 0
             GATE     KIDTIRQ, 0x0F, 1, 0
 
-KSVCEXPS:   ;# 1 SVC gate for 1 SVC
+KSVCEXPS:   ;# 1 SVC GATE FOR 1 SVC
             GATE     KIDTSVC, 0x00, 1, 0
 
 ;#-----------------------------------------------------------------------------#
 ;#                                KIDTINIT()                                   #
 ;#-----------------------------------------------------------------------------#
 
-KIDTINIT:   ;# print init msg
+KIDTINIT:   ;# PRINT INIT MSG
             LEA      RDI, [RIP+KIDTNAME]
             CALL     KLOGMOD
             LEA      RDI, [RIP+KIDTMSG]
@@ -231,17 +231,17 @@ KIDTINIT:   ;# print init msg
             MOV      RDI, '\n'
             CALL     KLOGCHR
 
-            ;# initialize IDT exception entries
-            ;# RDI: Address of first IDT descriptor to fill
-            ;# RCX: Address of the IDT descriptor to stop at
-            ;# RSI: Address of KIDTEXPS
+            ;# INITIALIZE IDT EXCEPTION ENTRIES
+            ;# RDI: ADDRESS OF FIRST IDT DESCRIPTOR TO FILL
+            ;# RCX: ADDRESS OF THE IDT DESCRIPTOR TO STOP AT
+            ;# RSI: ADDRESS OF KIDTEXPS
             MOV      RDI, IDT_ADDR
             MOV      RCX, IDT_ADDR
             ADD      RDI, IDT_EXP_START*16
             ADD      RCX, IDT_EXP_START*16+IDT_EXP_COUNT*16
             LEA      RSI, [RIP+KIDTEXPS]
 
-            ;# store an IDT descriptor using gate address in RAX
+            ;# STORE AN IDT DESCRIPTOR USING GATE ADDRESS IN RAX
 1:          MOV      RAX, RSI
             MOV      [RDI+ 0], AX 
             MOV      AX, 0x20
@@ -255,25 +255,25 @@ KIDTINIT:   ;# print init msg
             MOV      EAX, 0
             MOV      [RDI+12], EAX
 
-            ;# update RAX to next gate address, RDI to next descriptor
+            ;# UPDATE RAX TO NEXT GATE ADDRESS, RDI TO NEXT DESCRIPTOR
             ADD      RSI, GATE_SIZE
             ADD      RDI, 16
 
-            ;# done yet?
+            ;# DONE YET?
             CMP      RCX, RDI
             JNZ      1b
 
-            ;# initialize IDT IRQ entries
-            ;# RDI: Address of first IDT descriptor to fill
-            ;# RCX: Address of the IDT descriptor to stop at
-            ;# RSI: Address of KIRQEXPS
+            ;# INITIALIZE IDT IRQ ENTRIES
+            ;# RDI: ADDRESS OF FIRST IDT DESCRIPTOR TO FILL
+            ;# RCX: ADDRESS OF THE IDT DESCRIPTOR TO STOP AT
+            ;# RSI: ADDRESS OF KIRQEXPS
             MOV      RDI, IDT_ADDR
             MOV      RCX, IDT_ADDR
             ADD      RDI, IDT_IRQ_START*16
             ADD      RCX, IDT_IRQ_START*16+IDT_IRQ_COUNT*16
             LEA      RSI, [RIP+KIRQEXPS]
 
-            ;# store an IDT descriptor using gate address in RAX
+            ;# STORE AN IDT DESCRIPTOR USING GATE ADDRESS IN RAX
 1:          MOV      RAX, RSI
             MOV      [RDI+ 0], AX
             MOV      AX, 0x20
@@ -287,25 +287,25 @@ KIDTINIT:   ;# print init msg
             MOV      EAX, 0
             MOV      [RDI+12], EAX
 
-            ;# update RAX to next gate address, RDI to next descriptor
+            ;# UPDATE RAX TO NEXT GATE ADDRESS, RDI TO NEXT DESCRIPTOR
             ADD      RSI, GATE_SIZE
             ADD      RDI, 16
 
-            ;# done yet?
+            ;# DONE YET?
             CMP      RCX, RDI
             JNZ      1b
 
-            ;# initialize IDT SVC entries
-            ;# RDI: Address of first IDT descriptor to fill
-            ;# RCX: Address of the IDT descriptor to stop at
-            ;# RSI: Address of KSVCEXPS
+            ;# INITIALIZE IDT SVC ENTRIES
+            ;# RDI: ADDRESS OF FIRST IDT DESCRIPTOR TO FILL
+            ;# RCX: ADDRESS OF THE IDT DESCRIPTOR TO STOP AT
+            ;# RSI: ADDRESS OF KSVCEXPS
             MOV      RDI, IDT_ADDR
             MOV      RCX, IDT_ADDR
             ADD      RDI, IDT_SVC_START*16
             ADD      RCX, IDT_SVC_START*16+IDT_SVC_COUNT*16
             LEA      RSI, [RIP+KSVCEXPS]
 
-            ;# store an IDT descriptor using gate address in RAX
+            ;# STORE AN IDT DESCRIPTOR USING GATE ADDRESS IN RAX
 1:          MOV      RAX, RSI
             MOV      [RDI+ 0], AX
             MOV      AX, 0x20
@@ -319,24 +319,24 @@ KIDTINIT:   ;# print init msg
             MOV      EAX, 0
             MOV      [RDI+12], EAX
 
-            ;# update RAX to next gate address, RDI to next descriptor
+            ;# UPDATE RAX TO NEXT GATE ADDRESS, RDI TO NEXT DESCRIPTOR
             ADD      RSI, GATE_SIZE
             ADD      RDI, 16
 
-            ;# done yet?
+            ;# DONE YET?
             CMP      RCX, RDI
             JNZ      1b
 
-            ;# initialize IDTR descriptor
+            ;# INITIALIZE IDTR DESCRIPTOR
             MOV      AX, 0xFFF
             MOV      [IDTR_ADDR+0], AX
             MOV      EAX, IDT_ADDR 
             MOV      [IDTR_ADDR+2], EAX
 
-            ;# load IDT table
+            ;# LOAD IDT TABLE
             LIDT     [IDTR_ADDR]
 
-            ;# done
+            ;# DONE
 3:          XOR      RAX, RAX
             RET
 
@@ -346,14 +346,14 @@ KIDTINIT:   ;# print init msg
 
 KIDTEXP:    ;# TODO:
             ;# -----
-            ;# 1. acquire kernel lock
-            ;# 2. handle exception by terminating the bad task
-            ;# 3. reLEAse kernel lock
+            ;# 1. ACQUIRE KERNEL LOCK
+            ;# 2. HANDLE EXCEPTION BY TERMINATING THE BAD TASK
+            ;# 3. RELEASE KERNEL LOCK
 
-            ;# infinte LOOP
+            ;# INFINTE LOOP
             JMP      .
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -363,14 +363,14 @@ KIDTEXP:    ;# TODO:
 
 KIDTIRQ:    ;# TODO:
             ;# -----
-            ;# 1. acquire kernel lock
-            ;# 2. handle irq
-            ;# 3. reLEAse kernel lock
+            ;# 1. ACQUIRE KERNEL LOCK
+            ;# 2. HANDLE IRQ
+            ;# 3. RELEASE KERNEL LOCK
 
-            ;# infinte LOOP
+            ;# INFINTE LOOP
             JMP      .
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -380,14 +380,14 @@ KIDTIRQ:    ;# TODO:
 
 KIDTSVC:    ;# TODO:
             ;# -----
-            ;# 1. acquire kernel lock
-            ;# 2. handle system CALL
-            ;# 3. reLEAse kernel lock
+            ;# 1. ACQUIRE KERNEL LOCK
+            ;# 2. HANDLE SYSTEM CALL
+            ;# 3. RELEASE KERNEL LOCK
 
-            ;# infinte LOOP
+            ;# INFINTE LOOP
             JMP      .
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -397,14 +397,14 @@ KIDTSVC:    ;# TODO:
 
 KIDTIPI:    ;# TODO:
             ;# -----
-            ;# 1. acquire kernel lock
-            ;# 2. handle inter-process interrupt
-            ;# 3. reLEAse kernel lock
+            ;# 1. ACQUIRE KERNEL LOCK
+            ;# 2. HANDLE INTER-PROCESS INTERRUPT
+            ;# 3. RELEASE KERNEL LOCK
 
-            ;# infinte LOOP
+            ;# INFINTE LOOP
             JMP      .
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -412,13 +412,13 @@ KIDTIPI:    ;# TODO:
 ;#                              DATA SECTION                                   #
 ;###############################################################################
 
-            ;# data section
+            ;# DATA SECTION
             SEGMENT  ".data"
 
 ;#-----------------------------------------------------------------------------#
 ;#                            LOGGING STRINGS                                  #
 ;#-----------------------------------------------------------------------------#
 
-            ;# IDT heading and ascii strings
+            ;# IDT HEADING AND ASCII STRINGS
 KIDTNAME:   DB       "KERNEL IDT\0"
-KIDTMSG:    DB       "Initializing IDT module...\0"
+KIDTMSG:    DB       "INITIALIZING IDT MODULE...\0"

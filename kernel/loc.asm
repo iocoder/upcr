@@ -33,14 +33,14 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-            ;# common definitions used by kernel
+            ;# COMMON DEFINITIONS USED BY KERNEL
             INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-            ;# global symbols
+            ;# GLOBAL SYMBOLS
             PUBLIC   KLOCPEND
             PUBLIC   KLOCPOST
 
@@ -48,21 +48,21 @@
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-            ;# text section
+            ;# TEXT SECTION
             SEGMENT  ".text"
 
 ;#-----------------------------------------------------------------------------#
 ;#                               KLOCPEND()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KLOCPEND:   ;# cmpxchg LOOP to acquire the semaphore
+KLOCPEND:   ;# CMPXCHG LOOP TO ACQUIRE THE SEMAPHORE
             XOR      EAX, EAX
             MOV      ECX, 1
             LOCK
             CMPXCHG  [RIP+KLOC], ECX
             JNE      KLOCPEND
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -70,11 +70,11 @@ KLOCPEND:   ;# cmpxchg LOOP to acquire the semaphore
 ;#                               KLOCPOST()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KLOCPOST:   ;# release the kernel access semaphore
+KLOCPOST:   ;# RELEASE THE KERNEL ACCESS SEMAPHORE
             XOR      ECX, ECX
             MOV      [RIP+KLOC], ECX
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -82,15 +82,15 @@ KLOCPOST:   ;# release the kernel access semaphore
 ;#                              DATA SECTION                                   #
 ;###############################################################################
 
-            ;# data section
+            ;# DATA SECTION
             SEGMENT  ".data"
 
 ;#-----------------------------------------------------------------------------#
 ;#                              MODULE DATA                                    #
 ;#-----------------------------------------------------------------------------#
 
-            ;# alignment to 8 bytes
+            ;# ALIGNMENT TO 8 BYTES
             ALIGN    8
 
-            ;# the lock itself
+            ;# THE LOCK ITSELF
 KLOC:       DQ       0

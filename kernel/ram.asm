@@ -33,40 +33,40 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-            ;# common definitions used by kernel
+            ;# COMMON DEFINITIONS USED BY KERNEL
             INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-            ;# global symbols
+            ;# GLOBAL SYMBOLS
             PUBLIC   KRAMINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-            ;# text section
+            ;# TEXT SECTION
             SEGMENT  ".text"
 
 ;#-----------------------------------------------------------------------------#
 ;#                              KRAMINIT()                                     #
 ;#-----------------------------------------------------------------------------#
 
-KRAMINIT:   ;# read KRAMAVL from init struct
+KRAMINIT:   ;# READ KRAMAVL FROM INIT STRUCT
             MOV      RAX, [R15+0x38]
             MOV      [RIP+KRAMAVL], RAX
 
-            ;# read KRAMSTART from init struct
+            ;# READ KRAMSTART FROM INIT STRUCT
             MOV      RAX, [R15+0x40]
             MOV      [RIP+KRAMSTART], RAX
 
-            ;# read KRAMEND from init struct
+            ;# READ KRAMEND FROM INIT STRUCT
             MOV      RAX, [R15+0x48]
             MOV      [RIP+KRAMEND], RAX
 
-            ;# print ram start
+            ;# PRINT RAM START
             LEA      RDI, [RIP+KRAMNAME]
             CALL     KLOGMOD
             LEA      RDI, [RIP+KRAMSTARTS]
@@ -76,7 +76,7 @@ KRAMINIT:   ;# read KRAMAVL from init struct
             MOV      RDI, '\n'
             CALL     KLOGCHR
 
-            ;# print ram end
+            ;# PRINT RAM END
             LEA      RDI, [RIP+KRAMNAME]
             CALL     KLOGMOD
             LEA      RDI, [RIP+KRAMENDS]
@@ -86,7 +86,7 @@ KRAMINIT:   ;# read KRAMAVL from init struct
             MOV      RDI, '\n'
             CALL     KLOGCHR
 
-            ;# print ram size
+            ;# PRINT RAM SIZE
             LEA      RDI, [RIP+KRAMNAME]
             CALL     KLOGMOD
             LEA      RDI, [RIP+KRAMESIZES]
@@ -102,7 +102,7 @@ KRAMINIT:   ;# read KRAMAVL from init struct
             MOV      RDI, '\n'
             CALL     KLOGCHR
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -110,14 +110,14 @@ KRAMINIT:   ;# read KRAMAVL from init struct
 ;#                              DATA SECTION                                   #
 ;###############################################################################
 
-            ;# data section
+            ;# DATA SECTION
             SEGMENT  ".data"
 
 ;#-----------------------------------------------------------------------------#
 ;#                              MODULE DATA                                    #
 ;#-----------------------------------------------------------------------------#
 
-            ;# RamInitInfo structure
+            ;# RAMINITINFO STRUCTURE
 KRAMAVL:    DQ       0
 KRAMSTART:  DQ       0
 KRAMEND:    DQ       0
@@ -126,8 +126,8 @@ KRAMEND:    DQ       0
 ;#                            LOGGING STRINGS                                  #
 ;#-----------------------------------------------------------------------------#
 
-            ;# RAM heading and messages
+            ;# RAM HEADING AND MESSAGES
 KRAMNAME:   DB       "KERNEL RAM\0"
-KRAMSTARTS: DB       "Detected RAM Start: \0"
-KRAMENDS:   DB       "Detected RAM End:   \0"
-KRAMESIZES: DB       "Detected RAM Size:  \0"
+KRAMSTARTS: DB       "DETECTED RAM START: \0"
+KRAMENDS:   DB       "DETECTED RAM END:   \0"
+KRAMESIZES: DB       "DETECTED RAM SIZE:  \0"

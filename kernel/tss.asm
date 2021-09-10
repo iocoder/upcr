@@ -33,28 +33,28 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-            ;# common definitions used by kernel
+            ;# COMMON DEFINITIONS USED BY KERNEL
             INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-            ;# global symbols
+            ;# GLOBAL SYMBOLS
             PUBLIC   KTSSINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-            ;# text section
+            ;# TEXT SECTION
             SEGMENT  ".text"
 
 ;#-----------------------------------------------------------------------------#
 ;#                               KTSSINIT()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KTSSINIT:   ;# print init msg
+KTSSINIT:   ;# PRINT INIT MSG
             LEA      RDI, [RIP+KTSSNAME]
             CALL     KLOGMOD
             LEA      RDI, [RIP+KTSSMSG]
@@ -62,7 +62,7 @@ KTSSINIT:   ;# print init msg
             MOV      RDI, '\n'
             CALL     KLOGCHR
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -70,13 +70,13 @@ KTSSINIT:   ;# print init msg
 ;#                              DATA SECTION                                   #
 ;###############################################################################
 
-            ;# data section
+            ;# DATA SECTION
             SEGMENT  ".data"
 
 ;#-----------------------------------------------------------------------------#
 ;#                            LOGGING STRINGS                                  #
 ;#-----------------------------------------------------------------------------#
 
-            ;# TSS module name and messages
+            ;# TSS MODULE NAME AND MESSAGES
 KTSSNAME:   DB       "KERNEL TSS\0"
-KTSSMSG:    DB       "Initializing TSS module...\0"
+KTSSMSG:    DB       "INITIALIZING TSS MODULE...\0"

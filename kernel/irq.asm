@@ -33,14 +33,14 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-            ;# common definitions used by kernel
+            ;# COMMON DEFINITIONS USED BY KERNEL
             INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-            ;# global symbols
+            ;# GLOBAL SYMBOLS
             PUBLIC   KIRQINIT
             PUBLIC   KIRQEN
             PUBLIC   KIRQIIPI
@@ -50,14 +50,14 @@
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-            ;# text section
+            ;# TEXT SECTION
             SEGMENT  ".text"
 
 ;#-----------------------------------------------------------------------------#
 ;#                               KIRQINIT()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KIRQINIT:   ;# print init msg
+KIRQINIT:   ;# PRINT INIT MSG
             LEA      RDI, [RIP+KIRQNAME]
             CALL     KLOGMOD
             LEA      RDI, [RIP+KIRQMSG]
@@ -65,7 +65,7 @@ KIRQINIT:   ;# print init msg
             MOV      RDI, '\n'
             CALL     KLOGCHR
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -73,7 +73,7 @@ KIRQINIT:   ;# print init msg
 ;#                               KIRQEN()                                      #
 ;#-----------------------------------------------------------------------------#
 
-KIRQEN:     ;# Initialize APIC address MSR
+KIRQEN:     ;# INITIALIZE APIC ADDRESS MSR
             XOR      RAX, RAX
             XOR      RCX, RCX
             XOR      RDX, RDX
@@ -83,7 +83,7 @@ KIRQEN:     ;# Initialize APIC address MSR
             NOP
             NOP
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -91,17 +91,17 @@ KIRQEN:     ;# Initialize APIC address MSR
 ;#                               KIRQIIPI()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KIRQIIPI:   ;# broadcast the INIT IPI to all processors except self
+KIRQIIPI:   ;# BROADCAST THE INIT IPI TO ALL PROCESSORS EXCEPT SELF
             MOV      RSI, LAPIC_INTCMDL
             MOV      EAX, 0x000C4500
             MOV      [RSI], EAX
 
-            ;# 10-millisecond delay LOOP.
+            ;# 10-MILLISECOND DELAY LOOP.
             ;# TBD
             MOV      RCX, 0x1000000
             LOOP     .
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -109,17 +109,17 @@ KIRQIIPI:   ;# broadcast the INIT IPI to all processors except self
 ;#                                KIRQSIPI()                                   #
 ;#-----------------------------------------------------------------------------#
 
-KIRQSIPI:   ;# broadcast the SIPI IPI to all processors except self
+KIRQSIPI:   ;# BROADCAST THE SIPI IPI TO ALL PROCESSORS EXCEPT SELF
             MOV      RSI, LAPIC_INTCMDL
-            MOV      EAX, 0x000C4600     ;# vector 0x0000:0x0000
+            MOV      EAX, 0x000C4600     ;# VECTOR 0x0000:0x0000
             MOV      [RSI], EAX
 
-            ;# 200-microsecond delay LOOP
+            ;# 200-MICROSECOND DELAY LOOP
             ;# TBD
             MOV      RCX, 0x1000000
             LOOP     .
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -127,13 +127,13 @@ KIRQSIPI:   ;# broadcast the SIPI IPI to all processors except self
 ;#                              DATA SECTION                                   #
 ;###############################################################################
 
-            ;# data section
+            ;# DATA SECTION
             SEGMENT  ".data"
 
 ;#-----------------------------------------------------------------------------#
 ;#                            LOGGING STRINGS                                  #
 ;#-----------------------------------------------------------------------------#
 
-            ;# IRQ heading and ascii strings
+            ;# IRQ HEADING AND ASCII STRINGS
 KIRQNAME:   DB       "KERNEL IRQ\0"
-KIRQMSG:    DB       "Supported x86 interrupt controllers: LAPIC, I/O APIC.\0"
+KIRQMSG:    DB       "SUPPORTED X86 INTERRUPT CONTROLLERS: LAPIC, I/O APIC.\0"

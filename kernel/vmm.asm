@@ -95,4 +95,4 @@ KVMMINIT:   ;# print init msg
 
             ;# VMM heading and ascii strings
 KVMMNAME:   DB       "KERNEL VMM\0"
-KVMMMSG:    DB       "Initializing virtual memory manager...\0"
+KVMMMSG:    DB       "INITIALIZING VIRTUAL MEMORY MANAGER...\0"

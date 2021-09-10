@@ -1,9 +1,9 @@
 
 
              *************************************************
-             *  Universal Platform for Configurable Routing  *
-             *      UPCR Version 21.09 - x86_64 Kernel       *
+             *  UNIVERSAL PLATFORM FOR CONFIGURABLE ROUTING  *
+             *      UPCR VERSION 21.09 - X86_64 KERNEL       *
              *************************************************
-             *       Copyright (C) 2021  Ramses Nagib        *
+             *       COPYRIGHT (C) 2021  RAMSES NAGIB        *
              *************************************************
 

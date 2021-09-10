@@ -1,5 +1,5 @@
 
- Welcome to UPCR operating system. UPCR is a free software platform designed
- for networking applications where configurability and software performance
- are of big importance.
+ WELCOME TO UPCR OPERATING SYSTEM. UPCR IS A FREE SOFTWARE PLATFORM DESIGNED
+ FOR NETWORKING APPLICATIONS WHERE CONFIGURABILITY AND SOFTWARE PERFORMANCE
+ ARE OF BIG IMPORTANCE.
 

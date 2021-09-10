@@ -33,46 +33,46 @@
 ;#                                INCLUDES                                     #
 ;###############################################################################
 
-            ;# common definitions used by kernel
+            ;# COMMON DEFINITIONS USED BY KERNEL
             INCLUDE  "kernel/macro.inc"
 
 ;###############################################################################
 ;#                                GLOBALS                                      #
 ;###############################################################################
 
-            ;# global symbols
+            ;# GLOBAL SYMBOLS
             PUBLIC   KERRPANIC
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
 
-            ;# text section
+            ;# TEXT SECTION
             SEGMENT  ".text"
 
 ;#-----------------------------------------------------------------------------#
 ;#                              KERRPANIC()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KERRPANIC:  ;# set panic colour
+KERRPANIC:  ;# SET PANIC COLOUR
             PUSH     RDI
             MOV      RDI, 0x0A
             MOV      RSI, 0x01
             CALL     KLOGATT
             POP      RDI 
 
-            ;# clear screen
+            ;# CLEAR SCREEN
             PUSH     RDI
             CALL     KLOGCLR
             POP      RDI
 
-            ;# print panic heading
+            ;# PRINT PANIC HEADING
             PUSH     RDI
             LEA      RDI, [RIP+KERRHDR]
             CALL     KLOGSTR
             POP      RDI
 
-            ;# print exception name
+            ;# PRINT EXCEPTION NAME
             PUSH     RDI
             LEA      RDI, [RIP+KERREXPN]
             CALL     KLOGSTR
@@ -85,13 +85,13 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGSTR
             POP      RDI
 
-            ;# new line
+            ;# NEW LINE
             PUSH     RDI
             MOV      RDI, '\n'
             CALL     KLOGCHR
             POP      RDI
 
-            ;# print exception code
+            ;# PRINT EXCEPTION CODE
             PUSH     RDI
             LEA      RDI, [RIP+KERREXPC]
             CALL     KLOGSTR
@@ -101,13 +101,13 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
 
-            ;# new line
+            ;# NEW LINE
             PUSH     RDI
             MOV      RDI, '\n'
             CALL     KLOGCHR
             POP      RDI
 
-            ;# print err code
+            ;# PRINT ERR CODE
             PUSH     RDI
             LEA      RDI, [RIP+KERRCODE]
             CALL     KLOGSTR
@@ -117,13 +117,13 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
 
-            ;# new line
+            ;# NEW LINE
             PUSH     RDI
             MOV      RDI, '\n'
             CALL     KLOGCHR
             POP      RDI
 
-            ;# print cpu core number
+            ;# PRINT CPU CORE NUMBER
             PUSH     RDI
             LEA      RDI, [RIP+KERRCORE]
             CALL     KLOGSTR
@@ -136,13 +136,13 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGDEC
             POP      RDI
 
-            ;# horizontal line
+            ;# HORIZONTAL LINE
             PUSH     RDI
             LEA      RDI, [RIP+KERRHR]
             CALL     KLOGSTR
             POP      RDI
             
-            ;# print CS
+            ;# PRINT CS
             PUSH     RDI
             LEA      RDI, [RIP+KERRCS]
             CALL     KLOGSTR
@@ -152,7 +152,7 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
             
-            ;# print RIP
+            ;# PRINT RIP
             PUSH     RDI
             LEA      RDI, [RIP+KERRRIP]
             CALL     KLOGSTR
@@ -162,7 +162,7 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
             
-            ;# print RFLAGS
+            ;# PRINT RFLAGS
             PUSH     RDI
             LEA      RDI, [RIP+KERRFLG]
             CALL     KLOGSTR
@@ -172,13 +172,13 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
 
-            ;# new line
+            ;# NEW LINE
             PUSH     RDI
             MOV      RDI, '\n'
             CALL     KLOGCHR
             POP      RDI
             
-            ;# print SS
+            ;# PRINT SS
             PUSH     RDI
             LEA      RDI, [RIP+KERRSS]
             CALL     KLOGSTR
@@ -188,7 +188,7 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
             
-            ;# print RSP
+            ;# PRINT RSP
             PUSH     RDI
             LEA      RDI, [RIP+KERRRSP]
             CALL     KLOGSTR
@@ -198,13 +198,13 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
 
-            ;# horizontal line
+            ;# HORIZONTAL LINE
             PUSH     RDI
             LEA      RDI, [RIP+KERRHR]
             CALL     KLOGSTR
             POP      RDI
             
-            ;# print RAX
+            ;# PRINT RAX
             PUSH     RDI
             LEA      RDI, [RIP+KERRRAX]
             CALL     KLOGSTR
@@ -214,7 +214,7 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
             
-            ;# print RBX
+            ;# PRINT RBX
             PUSH     RDI
             LEA      RDI, [RIP+KERRRBX]
             CALL     KLOGSTR
@@ -224,7 +224,7 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
             
-            ;# print RCX
+            ;# PRINT RCX
             PUSH     RDI
             LEA      RDI, [RIP+KERRRCX]
             CALL     KLOGSTR
@@ -234,13 +234,13 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
 
-            ;# new line
+            ;# NEW LINE
             PUSH     RDI
             MOV      RDI, '\n'
             CALL     KLOGCHR
             POP      RDI
 
-            ;# print RDX
+            ;# PRINT RDX
             PUSH     RDI
             LEA      RDI, [RIP+KERRRDX]
             CALL     KLOGSTR
@@ -250,7 +250,7 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
 
-            ;# print RSI
+            ;# PRINT RSI
             PUSH     RDI
             LEA      RDI, [RIP+KERRRSI]
             CALL     KLOGSTR
@@ -260,7 +260,7 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
 
-            ;# print RDI
+            ;# PRINT RDI
             PUSH     RDI
             LEA      RDI, [RIP+KERRRDI]
             CALL     KLOGSTR
@@ -270,13 +270,13 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
 
-            ;# new line
+            ;# NEW LINE
             PUSH     RDI
             MOV      RDI, '\n'
             CALL     KLOGCHR
             POP      RDI
             
-            ;# print RBP
+            ;# PRINT RBP
             PUSH     RDI
             LEA      RDI, [RIP+KERRRBP]
             CALL     KLOGSTR
@@ -286,13 +286,13 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
 
-            ;# horizontal line
+            ;# HORIZONTAL LINE
             PUSH     RDI
             LEA      RDI, [RIP+KERRHR]
             CALL     KLOGSTR
             POP      RDI
             
-            ;# print R8
+            ;# PRINT R8
             PUSH     RDI
             LEA      RDI, [RIP+KERRR8]
             CALL     KLOGSTR
@@ -302,7 +302,7 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
             
-            ;# print R9
+            ;# PRINT R9
             PUSH     RDI
             LEA      RDI, [RIP+KERRR9]
             CALL     KLOGSTR
@@ -312,7 +312,7 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
             
-            ;# print R10
+            ;# PRINT R10
             PUSH     RDI
             LEA      RDI, [RIP+KERRR10]
             CALL     KLOGSTR
@@ -322,13 +322,13 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
 
-            ;# new line
+            ;# NEW LINE
             PUSH     RDI
             MOV      RDI, '\n'
             CALL     KLOGCHR
             POP      RDI
             
-            ;# print R11
+            ;# PRINT R11
             PUSH     RDI
             LEA      RDI, [RIP+KERRR11]
             CALL     KLOGSTR
@@ -338,7 +338,7 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
             
-            ;# print R12
+            ;# PRINT R12
             PUSH     RDI
             LEA      RDI, [RIP+KERRR12]
             CALL     KLOGSTR
@@ -348,7 +348,7 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
             
-            ;# print R13
+            ;# PRINT R13
             PUSH     RDI
             LEA      RDI, [RIP+KERRR13]
             CALL     KLOGSTR
@@ -358,13 +358,13 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
 
-            ;# new line
+            ;# NEW LINE
             PUSH     RDI
             MOV      RDI, '\n'
             CALL     KLOGCHR
             POP      RDI
             
-            ;# print R14
+            ;# PRINT R14
             PUSH     RDI
             LEA      RDI, [RIP+KERRR14]
             CALL     KLOGSTR
@@ -374,7 +374,7 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
             
-            ;# print R15
+            ;# PRINT R15
             PUSH     RDI
             LEA      RDI, [RIP+KERRR15]
             CALL     KLOGSTR
@@ -384,13 +384,13 @@ KERRPANIC:  ;# set panic colour
             CALL     KLOGHEX
             POP      RDI
 
-            ;# horizontal line
+            ;# HORIZONTAL LINE
             PUSH     RDI
             LEA      RDI, [RIP+KERRHR]
             CALL     KLOGSTR
             POP      RDI
 
-            ;# done
+            ;# DONE
             XOR      RAX, RAX
             RET
 
@@ -398,14 +398,14 @@ KERRPANIC:  ;# set panic colour
 ;#                              DATA SECTION                                   #
 ;###############################################################################
 
-            ;# data section
+            ;# DATA SECTION
             SEGMENT  ".data"
 
 ;#-----------------------------------------------------------------------------#
 ;#                            LOGGING STRINGS                                  #
 ;#-----------------------------------------------------------------------------#
 
-            ;# Panic header
+            ;# PANIC HEADER
 KERRHDR:    DB       "\n"
             DB       "\n"
             DB       "  "
@@ -422,7 +422,7 @@ KERRHDR:    DB       "\n"
             DB       "\n"
             DB       "\0"
 
-            ;# panic horizontal line
+            ;# PANIC HORIZONTAL LINE
 KERRHR:     DB       "\n"
             DB       "\n"
             DB       "  "
@@ -432,7 +432,7 @@ KERRHR:     DB       "\n"
             DB       "\n"
             DB       "\0"
 
-            ;# registers
+            ;# REGISTERS
 KERREXPN:   DB       "  EXCEPTION NAME: \0"
 KERREXPC:   DB       "  EXCEPTION CODE: \0"
 KERRCODE:   DB       "  ERROR CODE:     \0"
@@ -458,7 +458,7 @@ KERRR13:    DB       "  R13: \0"
 KERRR14:    DB       "  R14: \0"
 KERRR15:    DB       "  R15: \0"
 
-            ;# exception names
+            ;# EXCEPTION NAMES
 KERRSTR:    DB       "DIVISION BY ZERO EXCEPTION     \0"  ;# 0x00
             DB       "DEBUG EXCEPTION                \0"  ;# 0x01
             DB       "NON MASKABLE INTERRUPT         \0"  ;# 0x02
