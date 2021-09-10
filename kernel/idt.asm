@@ -101,14 +101,8 @@
             MACRO    CHKDPL   CheckDPL
             IF       \CheckDPL
             MOV      RAX, [RSP+SFRAME_CS]       ;# LOAD ORIGIN'S CS
-            AND      RAX, 3                     ;# TEST IF ORIGIN IS DPL3
-            JNZ      1f                         ;# SKIP NEXT LINES IF DPL3
-            CALL     KIRQIIPI                   ;# DPL0: DISABLE ALL OTHER CPUS
-            MOV      RDI, RSP                   ;# DPL0: LOAD STACK FRAME ADDRESS
-            CALL     KERRPANIC                  ;# DPL0: KERNEL PANIC
-            HLT                                 ;# DPL0: HALT HERE
-            JMP      .                          ;# DPL0: LOOP FOREVER
-1:          NOP
+            AND      RAX, 3                     ;# MASK DPL BITS
+            JZ       KERRPANIC                  ;# PANIC IF DPL IS 0
             ENDIF
             ENDM
 
