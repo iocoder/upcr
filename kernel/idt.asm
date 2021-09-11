@@ -385,7 +385,7 @@ KIDTEXP:    ;# ACQUIRE KERNEL LOCK
             CALL     KLOCPEND
             POP      RDI
 
-            ;# INFINTE LOOP
+            ;# INFINTE LOOP (TODO: KSCHISR/KTSKISR/KSIGISR)
             JMP      .
 
             ;# RELEASE THE LOCK
@@ -406,7 +406,7 @@ KIDTSVC:    ;# ACQUIRE KERNEL LOCK
             CALL     KLOCPEND
             POP      RDI
 
-            ;# INFINTE LOOP
+            ;# INFINTE LOOP (TODO: KSVCISR)
             JMP      .
 
             ;# RELEASE THE LOCK
@@ -429,7 +429,7 @@ KIDTSMP:    ;# ACQUIRE KERNEL LOCK
 
             ;# ENABLE SMP CORE
             PUSH     RDI
-            CALL     KSMPEN
+            CALL     KSMPISR
             POP      RDI
 
             ;# RELEASE THE LOCK

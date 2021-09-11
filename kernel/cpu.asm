@@ -1,6 +1,6 @@
 ;###############################################################################
-;# File name:    KERNEL/RAM.ASM
-;# DESCRIPTION:  KERNEL PHYSICAL MEMORY MODULE
+;# File name:    KERNEL/CPU.ASM
+;# DESCRIPTION:  CPU CORE SETUP PROCEDURE
 ;# AUTHOR:       RAMSES A.
 ;###############################################################################
 ;#
@@ -41,7 +41,8 @@
 ;###############################################################################
 
             ;# GLOBAL SYMBOLS
-            PUBLIC   KRAMINIT
+            PUBLIC   KCPUINIT
+            PUBLIC   KCPUSETUP
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -51,56 +52,105 @@
             SEGMENT  ".text"
 
 ;#-----------------------------------------------------------------------------#
-;#                              KRAMINIT()                                     #
+;#                               KCPUINIT()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KRAMINIT:   ;# READ KRAMAVL FROM INIT STRUCT
-            MOV      RAX, [R15+0x38]
-            MOV      [RIP+KRAMAVL], RAX
+KCPUINIT:   ;# SET LCMV TO 0 BECAUSE OF WINDOWS NT KERNEL BUG
+            MOV      ECX, MSR_MISC_ENABLE
+            RDMSR
+            AND      EAX, 0xFFBFFFFF
+            WRMSR
 
-            ;# READ KRAMSTART FROM INIT STRUCT
-            MOV      RAX, [R15+0x40]
-            MOV      [RIP+KRAMSTART], RAX
+            ;# GET CPU MANUFACTURER
+            MOV      EAX, 0
+            CPUID
+            MOV      [RIP+KCPUMAN+0], EBX
+            MOV      [RIP+KCPUMAN+4], EDX
+            MOV      [RIP+KCPUMAN+8], ECX
 
-            ;# READ KRAMEND FROM INIT STRUCT
-            MOV      RAX, [R15+0x48]
-            MOV      [RIP+KRAMEND], RAX
-
-            ;# PRINT RAM START
-            LEA      RDI, [RIP+KRAMNAME]
+            ;# PRINT CPU MANUFACTURER
+            LEA      RDI, [RIP+KCPUNAME]
             CALL     KLOGMOD
-            LEA      RDI, [RIP+KRAMSTARTS]
+            LEA      RDI, [RIP+KCPUMANS]
             CALL     KLOGSTR
-            MOV      RDI, [RIP+KRAMSTART]
-            CALL     KLOGHEX
+            LEA      RDI, [RIP+KCPUMAN]
+            CALL     KLOGSTR
             MOV      RDI, '\n'
             CALL     KLOGCHR
 
-            ;# PRINT RAM END
-            LEA      RDI, [RIP+KRAMNAME]
+            ;# GET CPU BRAND NAME
+            MOV      EAX, 0x80000002
+            CPUID
+            MOV      [RIP+KCPUBRND+ 0], EAX
+            MOV      [RIP+KCPUBRND+ 4], EBX
+            MOV      [RIP+KCPUBRND+ 8], ECX
+            MOV      [RIP+KCPUBRND+12], EDX
+            MOV      EAX, 0x80000003
+            CPUID
+            MOV      [RIP+KCPUBRND+16], EAX
+            MOV      [RIP+KCPUBRND+20], EBX
+            MOV      [RIP+KCPUBRND+24], ECX
+            MOV      [RIP+KCPUBRND+28], EDX
+            MOV      EAX, 0x80000004
+            CPUID
+            MOV      [RIP+KCPUBRND+32], EAX
+            MOV      [RIP+KCPUBRND+36], EBX
+            MOV      [RIP+KCPUBRND+40], ECX
+            MOV      [RIP+KCPUBRND+44], EDX
+
+            ;# PRINT CPU BRAND NAME
+            LEA      RDI, [RIP+KCPUNAME]
             CALL     KLOGMOD
-            LEA      RDI, [RIP+KRAMENDS]
+            LEA      RDI, [RIP+KCPUBRNDS]
             CALL     KLOGSTR
-            MOV      RDI, [RIP+KRAMEND]
-            CALL     KLOGHEX
+            LEA      RDI, [RIP+KCPUBRND]
+            CALL     KLOGSTR
             MOV      RDI, '\n'
             CALL     KLOGCHR
 
-            ;# PRINT RAM SIZE
-            LEA      RDI, [RIP+KRAMNAME]
+            ;# GET CPU CRYSTAL FREQUENCY
+            MOV      EAX, 0x15
+            CPUID
+            MOV      [RIP+KCPUFREQ], ECX
+
+            ;# PRINT CPU CRYSTAL FREQUENCY
+            LEA      RDI, [RIP+KCPUNAME]
             CALL     KLOGMOD
-            LEA      RDI, [RIP+KRAMESIZES]
+            LEA      RDI, [RIP+KCPUFREQS]
             CALL     KLOGSTR
-            MOV      RDI, [RIP+KRAMEND]
-            SUB      RDI, [RIP+KRAMSTART]
-            SHR      RDI, 20
+            MOV      RDI, [RIP+KCPUFREQ]
             CALL     KLOGDEC
             MOV      RDI, 'M'
             CALL     KLOGCHR
-            MOV      RDI, 'B'
+            MOV      RDI, 'H'
+            CALL     KLOGCHR
+            MOV      RDI, 'z'
             CALL     KLOGCHR
             MOV      RDI, '\n'
             CALL     KLOGCHR
+
+            ;# DONE
+            XOR      RAX, RAX
+            RET
+
+;#-----------------------------------------------------------------------------#
+;#                              KCPUSETUP()                                    #
+;#-----------------------------------------------------------------------------#
+
+KCPUSETUP:  ;# INVALIDATE CACHE
+            WBINVD
+
+            ;# INITIALIZE CR0
+            MOV      RAX, 0x80010033   ;# CACHE EN, WR THRU, X87 FPU EN, PM
+            MOV      CR0, RAX
+
+            ;# INITIALIZE CR4
+            MOV      RAX, 0x00000668   ;# DEBUG, PAE, MACHINE, SIMD 
+            MOV      CR4, RAX
+
+            ;# INITIALIZE CR8
+            MOV      RAX, 0x00000000   ;# PRI = 0
+            MOV      CR8, RAX
 
             ;# DONE
             XOR      RAX, RAX
@@ -113,21 +163,29 @@ KRAMINIT:   ;# READ KRAMAVL FROM INIT STRUCT
             ;# DATA SECTION
             SEGMENT  ".data"
 
-;#-----------------------------------------------------------------------------#
-;#                              MODULE DATA                                    #
-;#-----------------------------------------------------------------------------#
+            ;# THE NAME OF THE CPU MANUFACTURER
+KCPUMAN:    DQ       0
+            DQ       0
 
-            ;# RAMINITINFO STRUCTURE
-KRAMAVL:    DQ       0
-KRAMSTART:  DQ       0
-KRAMEND:    DQ       0
+            ;# THE NAME OF THE CPU BRAND
+KCPUBRND:   DQ       0
+            DQ       0
+            DQ       0
+            DQ       0
+            DQ       0
+            DQ       0
+            DQ       0
+            DQ       0
+
+            ;# CPU FREQUENCY IN MHz
+KCPUFREQ:   DQ       0
 
 ;#-----------------------------------------------------------------------------#
 ;#                            LOGGING STRINGS                                  #
 ;#-----------------------------------------------------------------------------#
 
-            ;# RAM HEADING AND MESSAGES
-KRAMNAME:   DB       "KERNEL RAM\0"
-KRAMSTARTS: DB       "DETECTED RAM BASE: \0"
-KRAMENDS:   DB       "DETECTED RAM LAST: \0"
-KRAMESIZES: DB       "DETECTED RAM SIZE: \0"
+            ;# CPU HEADING AND ASCII STRINGS
+KCPUNAME:   DB       "KERNEL CPU\0"
+KCPUMANS:   DB       "CPU MANUFACTURER: \0"
+KCPUBRNDS:  DB       "CPU BRAND NAME: \0"
+KCPUFREQS:  DB       "CPU FREQUENCY: \0"

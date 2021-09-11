@@ -60,6 +60,7 @@ KSYSINIT:   ;# TAKE A COPY OF BOOT INFO PTR
             ;# INITIALIZE KERNEL MODULES
             CALL     KVGAINIT
             CALL     KLOGINIT
+            CALL     KCPUINIT
             CALL     KRAMINIT
             CALL     KVMMINIT
             CALL     KGDTINIT
@@ -70,7 +71,6 @@ KSYSINIT:   ;# TAKE A COPY OF BOOT INFO PTR
 
             ;# STORE SUCCESS CODE IN RAX
             XOR      RAX, RAX
-            STI
 
             ;# RETURN TO BOOT LOADER
             RET

@@ -42,7 +42,7 @@
 
             ;# GLOBAL SYMBOLS
             PUBLIC   KIRQINIT
-            PUBLIC   KIRQEN
+            PUBLIC   KIRQSETUP
             PUBLIC   KIRQIIPI
             PUBLIC   KIRQSIPI
             PUBLIC   KIRQISR
@@ -71,29 +71,97 @@ KIRQINIT:   ;# PRINT INIT MSG
             RET
 
 ;#-----------------------------------------------------------------------------#
-;#                               KIRQEN()                                      #
+;#                              KIRQSETUP()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KIRQEN:     ;# INITIALIZE APIC ADDRESS MSR
-            XOR      RAX, RAX
-            XOR      RCX, RCX
-            XOR      RDX, RDX
-            MOV      EAX, 0xFEE00800
-            MOV      ECX, MSR_APIC_BASE
-            WRMSR
-            NOP
-            NOP
+KIRQSETUP:  ;# MASK SPURIOUS IVT REGISTER
+            MOV      EAX, 0x10000
+            MOV      EDI, LAPIC_SPUIVT
+            MOV      [EDI], EAX
 
-            ;# INITIALIZE TIMER IVT
-            MOV      EAX, IVT_IRQ_TIMER | 0x20000
+            ;# MASK TIMER IVT REGISTER
+            MOV      EAX, 0x10000
             MOV      EDI, LAPIC_TIMERIVT
             MOV      [EDI], EAX
 
-            ;# RUN TIMER
-            MOV      EAX, 0x00
+            ;# MASK THERMAL SENSOR IVT REGISTER
+            MOV      EAX, 0x10000
+            MOV      EDI, LAPIC_THERMIVT
+            MOV      [EDI], EAX
+
+            ;# MASK PERF COUNTER IVT REGISTER
+            MOV      EAX, 0x10000
+            MOV      EDI, LAPIC_PERFCIVT
+            MOV      [EDI], EAX
+
+            ;# MASK LINT0 IVT REGISTER
+            MOV      EAX, 0x10000
+            MOV      EDI, LAPIC_LINT0IVT
+            MOV      [EDI], EAX
+
+            ;# MASK LINT1 IVT REGISTER
+            MOV      EAX, 0x10000
+            MOV      EDI, LAPIC_LINT1IVT
+            MOV      [EDI], EAX
+
+            ;# MASK ERROR IVT REGISTER
+            MOV      EAX, 0x10000
+            MOV      EDI, LAPIC_ERRORIVT
+            MOV      [EDI], EAX
+
+            ;# INITIALIZE SPURIOUS IVT REGISTER
+            MOV      EAX, IVT_IRQ_SPURI | 0x100
+            MOV      EDI, LAPIC_SPUIVT
+            MOV      [EDI], EAX
+
+            ;# INITIALIZE TIMER IVT REGISTER
+            MOV      EAX, IVT_IRQ_TIMER
+            MOV      EDI, LAPIC_TIMERIVT
+            MOV      [EDI], EAX
+
+            ;# INITIALIZE THERMAL SENSOR IVT REGISTER
+            MOV      EAX, IVT_IRQ_THERM
+            MOV      EDI, LAPIC_THERMIVT
+            MOV      [EDI], EAX
+
+            ;# INITIALIZE PERF COUNTER IVT REGISTER
+            MOV      EAX, IVT_IRQ_PERFC
+            MOV      EDI, LAPIC_PERFCIVT
+            MOV      [EDI], EAX
+
+            ;# INITIALIZE LINT0 IVT REGISTER
+            MOV      EAX, IVT_IRQ_LINT0
+            MOV      EDI, LAPIC_LINT0IVT
+            MOV      [EDI], EAX
+
+            ;# INITIALIZE LINT1 IVT REGISTER
+            MOV      EAX, IVT_IRQ_LINT1
+            MOV      EDI, LAPIC_LINT1IVT
+            MOV      [EDI], EAX
+
+            ;# INITIALIZE ERROR IVT REGISTER
+            MOV      EAX, IVT_IRQ_ERROR
+            MOV      EDI, LAPIC_ERRORIVT
+            MOV      [EDI], EAX
+
+            ;# INITIALIZE TIMER DIVIDER REGISTER
+            MOV      EAX, 0x0B
             MOV      EDI, LAPIC_TMRDIVD
             MOV      [EDI], EAX
-            MOV      EAX, 0x80000000
+
+            ;# INITIALIZE TASK PRIORITY REGISTER
+            MOV      EAX, 0
+            MOV      EDI, LAPIC_TASKPRI
+            MOV      [EDI], EAX
+
+            ;# ENABLE LAPIC
+            MOV      ECX, MSR_APIC_BASE
+            RDMSR
+            OR       EAX, 0x800
+            WRMSR
+
+            ;# RUN TIMER
+            MOV      EAX, 0x8000000
             MOV      EDI, LAPIC_TMRINIT
             MOV      [EDI], EAX
 

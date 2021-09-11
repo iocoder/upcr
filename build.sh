@@ -12,6 +12,10 @@ cd build
 
 ../configure
 make
+if [ "$TFTP_SERVER" != "" ]
+then
+  scp image/upcr-21.09.efi "$TFTP_USER@$TFTP_SERVER:$TFTP_DIR/"
+fi
 
 rm -rf /tmp/qemu-dir
 mkdir -p /tmp/qemu-dir/efi/boot

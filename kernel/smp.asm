@@ -42,7 +42,7 @@
 
             ;# GLOBAL SYMBOLS
             PUBLIC   KSMPINIT
-            PUBLIC   KSMPEN
+            PUBLIC   KSMPISR
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -154,7 +154,7 @@ KSMP64:     ;# 64-BIT CODE
 
             ;# READ LOCAL APIC ID
             XOR      RAX, RAX
-            MOV      EAX, [0xFEE00020]
+            MOV      EAX, [LAPIC_ID]
             SHR      EAX, 24
 
             ;# USE THIS PARTICULAR CPU STACK
@@ -203,7 +203,7 @@ KSMPINIT:   ;# PRINT INIT MSG
             LOOP     1b
 
             ;# WE NEED TO INITIALIZE CORE 0 FIRST
-            CALL     KSMPEN
+            INT      IVT_SMP_EN
 
             ;# SEND INIT-SIPI-SIPI SEQUENCE TO OTHER CPUS
             CALL     KIRQIIPI
@@ -215,13 +215,14 @@ KSMPINIT:   ;# PRINT INIT MSG
             RET
 
 ;#-----------------------------------------------------------------------------#
-;#                               KSMPEN()                                      #
+;#                               KSMPISR()                                     #
 ;#-----------------------------------------------------------------------------#
 
-;# TODO: move lock instructions to IDT
+KSMPISR:    ;# INITIALIZE CPU CORE
+            CALL     KCPUSETUP
 
-KSMPEN:     ;# INITIALIZE LAPIC AND ENABLE IRQS
-            CALL     KIRQEN
+            ;# INITIALIZE LAPIC AND ENABLE IRQS
+            CALL     KIRQSETUP
 
             ;# PRINT MODULE NAME
             LEA      RDI, [RIP+KSMPNAME]
@@ -233,7 +234,7 @@ KSMPEN:     ;# INITIALIZE LAPIC AND ENABLE IRQS
 
             ;# PRINT LAPIC ID
             XOR      RAX, RAX
-            MOV      EAX, [0xFEE00020]
+            MOV      EAX, [LAPIC_ID]
             SHR      EAX, 24
             MOV      RDI, RAX
             CALL     KLOGDEC
