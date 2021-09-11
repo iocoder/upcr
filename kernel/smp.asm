@@ -210,6 +210,24 @@ KSMPINIT:   ;# PRINT INIT MSG
             CALL     KIRQSIPI
             CALL     KIRQSIPI
 
+            ;# PRINT NUMBER OF DETECTED CORES
+            LEA      RDI, [RIP+KSMPNAME]
+            CALL     KLOGMOD
+            LEA      RDI, [RIP+KSMPDET]
+            CALL     KLOGSTR
+            MOV      RDI, [RIP+KSMPCORES]
+            CALL     KLOGDEC
+            MOV      RDI, '\n'
+            CALL     KLOGCHR
+
+            ;# PRINT SUCCESS MESSAGE
+            LEA      RDI, [RIP+KSMPNAME]
+            CALL     KLOGMOD
+            LEA      RDI, [RIP+KSMPSUC]
+            CALL     KLOGSTR
+            MOV      RDI, '\n'
+            CALL     KLOGCHR
+
             ;# DONE
             XOR      RAX, RAX
             RET
@@ -224,24 +242,10 @@ KSMPISR:    ;# INITIALIZE CPU CORE
             ;# INITIALIZE LAPIC AND ENABLE IRQS
             CALL     KIRQSETUP
 
-            ;# PRINT MODULE NAME
-            LEA      RDI, [RIP+KSMPNAME]
-            CALL     KLOGMOD
-
-            ;# PRINT LAPIC DETECTION STRING
-            LEA      RDI, [RIP+KSMPID]
-            CALL     KLOGSTR
-
-            ;# PRINT LAPIC ID
-            XOR      RAX, RAX
-            MOV      EAX, [LAPIC_ID]
-            SHR      EAX, 24
-            MOV      RDI, RAX
-            CALL     KLOGDEC
-
-            ;# PRINT NEW LINE
-            MOV      RDI, '\n'
-            CALL     KLOGCHR
+            ;# INCREASE CORE COUNT
+            MOV      RAX, [RIP+KSMPCORES]
+            INC      RAX
+            MOV      [RIP+KSMPCORES], RAX
 
             ;# DONE
             XOR      RAX, RAX
@@ -255,10 +259,18 @@ KSMPISR:    ;# INITIALIZE CPU CORE
             SEGMENT  ".data"
 
 ;#-----------------------------------------------------------------------------#
+;#                             MODULE DATA                                     #
+;#-----------------------------------------------------------------------------#
+
+            ;# HOW MANY CORES IN THE SYSTEM
+KSMPCORES:  DQ       0
+
+;#-----------------------------------------------------------------------------#
 ;#                            LOGGING STRINGS                                  #
 ;#-----------------------------------------------------------------------------#
 
             ;# SMP MODULE NAME AND MESSAGES
 KSMPNAME:   DB       "KERNEL SMP\0"
 KSMPMSG:    DB       "DETECTING CPU CORES AVAILABLE IN THE SYSTEM...\0"
-KSMPID:     DB       "SUCCESSFULLY INITIALIZED CPU CORE WITH LAPIC ID: \0"
+KSMPDET:    DB       "TOTAL NUMBER OF DETECTED CPU CORES: \0"
+KSMPSUC:    DB       "ALL CORES INITIALIZED SUCCESSFULLY.\0"

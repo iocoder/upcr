@@ -161,9 +161,9 @@ KIRQSETUP:  ;# MASK SPURIOUS IVT REGISTER
             WRMSR
 
             ;# RUN TIMER
-            MOV      EAX, 0x8000000
-            MOV      EDI, LAPIC_TMRINIT
-            MOV      [EDI], EAX
+            ;# MOV      EAX, 0x8000000
+            ;# MOV      EDI, LAPIC_TMRINIT
+            ;# MOV      [EDI], EAX
 
             ;# DONE
             XOR      RAX, RAX
@@ -178,10 +178,9 @@ KIRQIIPI:   ;# BROADCAST THE INIT IPI TO ALL PROCESSORS EXCEPT SELF
             MOV      EAX, 0x000C4500
             MOV      [RSI], EAX
 
-            ;# 10-MILLISECOND DELAY LOOP.
-            ;# TBD
-            MOV      RCX, 0x1000000
-            LOOP     .
+            ;# WAIT FOR 10 MS.
+            MOV      RDI, PIT_CTR_10MS
+            CALL     KPITCH0
 
             ;# DONE
             XOR      RAX, RAX
@@ -196,10 +195,9 @@ KIRQSIPI:   ;# BROADCAST THE SIPI IPI TO ALL PROCESSORS EXCEPT SELF
             MOV      EAX, 0x000C4600     ;# VECTOR 0x0000:0x0000
             MOV      [RSI], EAX
 
-            ;# 200-MICROSECOND DELAY LOOP
-            ;# TBD
-            MOV      RCX, 0x1000000
-            LOOP     .
+            ;# WAIT FOR 10 MS.
+            MOV      RDI, PIT_CTR_10MS
+            CALL     KPITCH0
 
             ;# DONE
             XOR      RAX, RAX

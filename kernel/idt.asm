@@ -54,9 +54,9 @@
             EQU      DPL3,          0x6000
 
             ;# GATE TYPES
-            EQU      GATE_CALL,     0x0C00    ;# NOT EVEN IN IDT
-            EQU      GATE_INTR,     0x0E00    ;# DISABLES INTERRUPTS
-            EQU      GATE_TRAP,     0x0F00    ;# DOES NOT DISABLE INTERRUPTS
+            EQU      TYPE_CALL,     0x0C00    ;# NOT EVEN IN IDT
+            EQU      TYPE_INTR,     0x0E00    ;# DISABLES INTERRUPTS
+            EQU      TYPE_TRAP,     0x0F00    ;# DOES NOT DISABLE INTERRUPTS
 
             ;# PRESENT FIELD
             EQU      PRESENT,       0x8000
@@ -250,7 +250,7 @@ KIDTINIT:   ;# PRINT INIT MSG
             MOV      [RDI+ 0], AX 
             MOV      AX, 0x20
             MOV      [RDI+ 2], AX
-            MOV      AX, GATE_INTR|PRESENT|DPL0
+            MOV      AX, TYPE_INTR|PRESENT|DPL0
             MOV      [RDI+ 4], AX
             SHR      RAX, 16
             MOV      [RDI+ 6], AX
@@ -282,7 +282,7 @@ KIDTINIT:   ;# PRINT INIT MSG
             MOV      [RDI+ 0], AX
             MOV      AX, 0x20
             MOV      [RDI+ 2], AX
-            MOV      AX, GATE_INTR|PRESENT|DPL3
+            MOV      AX, TYPE_INTR|PRESENT|DPL3
             MOV      [RDI+ 4], AX
             SHR      RAX, 16
             MOV      [RDI+ 6], AX
@@ -314,7 +314,7 @@ KIDTINIT:   ;# PRINT INIT MSG
             MOV      [RDI+ 0], AX
             MOV      AX, 0x20
             MOV      [RDI+ 2], AX
-            MOV      AX, GATE_INTR|PRESENT|DPL0
+            MOV      AX, TYPE_INTR|PRESENT|DPL0
             MOV      [RDI+ 4], AX
             SHR      RAX, 16
             MOV      [RDI+ 6], AX
@@ -346,7 +346,7 @@ KIDTINIT:   ;# PRINT INIT MSG
             MOV      [RDI+ 0], AX
             MOV      AX, 0x20
             MOV      [RDI+ 2], AX
-            MOV      AX, GATE_INTR|PRESENT|DPL0
+            MOV      AX, TYPE_INTR|PRESENT|DPL0
             MOV      [RDI+ 4], AX
             SHR      RAX, 16
             MOV      [RDI+ 6], AX

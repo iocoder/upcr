@@ -66,6 +66,7 @@ KSYSINIT:   ;# TAKE A COPY OF BOOT INFO PTR
             CALL     KGDTINIT
             CALL     KIDTINIT
             CALL     KTSSINIT
+            CALL     KPITINIT
             CALL     KIRQINIT
             CALL     KSMPINIT
 

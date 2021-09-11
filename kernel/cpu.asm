@@ -55,13 +55,7 @@
 ;#                               KCPUINIT()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KCPUINIT:   ;# SET LCMV TO 0 BECAUSE OF WINDOWS NT KERNEL BUG
-            MOV      ECX, MSR_MISC_ENABLE
-            RDMSR
-            AND      EAX, 0xFFBFFFFF
-            WRMSR
-
-            ;# GET CPU MANUFACTURER
+KCPUINIT:   ;# GET CPU MANUFACTURER
             MOV      EAX, 0
             CPUID
             MOV      [RIP+KCPUMAN+0], EBX
@@ -105,27 +99,6 @@ KCPUINIT:   ;# SET LCMV TO 0 BECAUSE OF WINDOWS NT KERNEL BUG
             CALL     KLOGSTR
             LEA      RDI, [RIP+KCPUBRND]
             CALL     KLOGSTR
-            MOV      RDI, '\n'
-            CALL     KLOGCHR
-
-            ;# GET CPU CRYSTAL FREQUENCY
-            MOV      EAX, 0x15
-            CPUID
-            MOV      [RIP+KCPUFREQ], ECX
-
-            ;# PRINT CPU CRYSTAL FREQUENCY
-            LEA      RDI, [RIP+KCPUNAME]
-            CALL     KLOGMOD
-            LEA      RDI, [RIP+KCPUFREQS]
-            CALL     KLOGSTR
-            MOV      RDI, [RIP+KCPUFREQ]
-            CALL     KLOGDEC
-            MOV      RDI, 'M'
-            CALL     KLOGCHR
-            MOV      RDI, 'H'
-            CALL     KLOGCHR
-            MOV      RDI, 'z'
-            CALL     KLOGCHR
             MOV      RDI, '\n'
             CALL     KLOGCHR
 
@@ -177,9 +150,6 @@ KCPUBRND:   DQ       0
             DQ       0
             DQ       0
 
-            ;# CPU FREQUENCY IN MHz
-KCPUFREQ:   DQ       0
-
 ;#-----------------------------------------------------------------------------#
 ;#                            LOGGING STRINGS                                  #
 ;#-----------------------------------------------------------------------------#
@@ -188,4 +158,3 @@ KCPUFREQ:   DQ       0
 KCPUNAME:   DB       "KERNEL CPU\0"
 KCPUMANS:   DB       "CPU MANUFACTURER: \0"
 KCPUBRNDS:  DB       "CPU BRAND NAME: \0"
-KCPUFREQS:  DB       "CPU FREQUENCY: \0"

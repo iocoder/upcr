@@ -182,38 +182,46 @@
             .EQU     IVT_IRQ_COUNT,     0x1E
 
 # --------------------------------------
+# PIT FREQUENCY
+# --------------------------------------
+
+            .EQU     PIT_FREQ,          1193182
+            .EQU     PIT_CTR_1MS,       1193
+            .EQU     PIT_CTR_10MS,      11931
+
+# --------------------------------------
 # STACK FRAME LAYOT
 # --------------------------------------
 
-            .EQU     SFRAME_PAD0,     0x00
-            .EQU     SFRAME_PAD1,     0x08
-            .EQU     SFRAME_PAD2,     0x10
-            .EQU     SFRAME_PAD3,     0x18
-            .EQU     SFRAME_PAD4,     0x20
-            .EQU     SFRAME_PAD5,     0x28
-            .EQU     SFRAME_PAD6,     0x30
-            .EQU     SFRAME_PAD7,     0x38
-            .EQU     SFRAME_PAD8,     0x40
-            .EQU     SFRAME_PAD9,     0x48
-            .EQU     SFRAME_RAX,      0x50
-            .EQU     SFRAME_RBX,      0x58
-            .EQU     SFRAME_RCX,      0x60
-            .EQU     SFRAME_RDX,      0x68
-            .EQU     SFRAME_RSI,      0x70
-            .EQU     SFRAME_RDI,      0x78
-            .EQU     SFRAME_RBP,      0x80
-            .EQU     SFRAME_R8,       0x88
-            .EQU     SFRAME_R9,       0x90
-            .EQU     SFRAME_R10,      0x98
-            .EQU     SFRAME_R11,      0xA0
-            .EQU     SFRAME_R12,      0xA8
-            .EQU     SFRAME_R13,      0xB0
-            .EQU     SFRAME_R14,      0xB8
-            .EQU     SFRAME_R15,      0xC0
-            .EQU     SFRAME_NBR,      0xC8
-            .EQU     SFRAME_ERR,      0xD0
-            .EQU     SFRAME_RIP,      0xD8
-            .EQU     SFRAME_CS,       0xE0
-            .EQU     SFRAME_RFLAGS,   0xE8
-            .EQU     SFRAME_RSP,      0xF0
-            .EQU     SFRAME_SS,       0xF8
+            .EQU     SFRAME_PAD0,       0x00
+            .EQU     SFRAME_PAD1,       0x08
+            .EQU     SFRAME_PAD2,       0x10
+            .EQU     SFRAME_PAD3,       0x18
+            .EQU     SFRAME_PAD4,       0x20
+            .EQU     SFRAME_PAD5,       0x28
+            .EQU     SFRAME_PAD6,       0x30
+            .EQU     SFRAME_PAD7,       0x38
+            .EQU     SFRAME_PAD8,       0x40
+            .EQU     SFRAME_PAD9,       0x48
+            .EQU     SFRAME_RAX,        0x50
+            .EQU     SFRAME_RBX,        0x58
+            .EQU     SFRAME_RCX,        0x60
+            .EQU     SFRAME_RDX,        0x68
+            .EQU     SFRAME_RSI,        0x70
+            .EQU     SFRAME_RDI,        0x78
+            .EQU     SFRAME_RBP,        0x80
+            .EQU     SFRAME_R8,         0x88
+            .EQU     SFRAME_R9,         0x90
+            .EQU     SFRAME_R10,        0x98
+            .EQU     SFRAME_R11,        0xA0
+            .EQU     SFRAME_R12,        0xA8
+            .EQU     SFRAME_R13,        0xB0
+            .EQU     SFRAME_R14,        0xB8
+            .EQU     SFRAME_R15,        0xC0
+            .EQU     SFRAME_NBR,        0xC8
+            .EQU     SFRAME_ERR,        0xD0
+            .EQU     SFRAME_RIP,        0xD8
+            .EQU     SFRAME_CS,         0xE0
+            .EQU     SFRAME_RFLAGS,     0xE8
+            .EQU     SFRAME_RSP,        0xF0
+            .EQU     SFRAME_SS,         0xF8
