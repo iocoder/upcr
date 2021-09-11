@@ -171,9 +171,6 @@ KSMP64:     ;# 64-BIT CODE
             ;# ENABLE THE CORE
             INT      IVT_SMP_EN
 
-            ;# ENABLE IRQS
-            STI
-
             ;# WAIT UNTIL CPU0 SENDS SCHED IRQ
             JMP      .
 
@@ -237,10 +234,19 @@ KSMPINIT:   ;# PRINT INIT MSG
 ;#-----------------------------------------------------------------------------#
 
 KSMPISR:    ;# INITIALIZE CPU CORE
+            PUSH     RDI
             CALL     KCPUSETUP
+            POP      RDI
 
             ;# INITIALIZE LAPIC AND ENABLE IRQS
+            PUSH     RDI
             CALL     KIRQSETUP
+            POP      RDI
+
+            ;# ENABLE INTERRUPTS ON RETURN
+            MOV      RAX, [RDI+SFRAME_RFLAGS]
+            OR       RAX, 0x0200
+            MOV      [RDI+SFRAME_RFLAGS], RAX
 
             ;# INCREASE CORE COUNT
             MOV      RAX, [RIP+KSMPCORES]

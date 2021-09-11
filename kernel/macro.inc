@@ -52,8 +52,10 @@
 # MSR REGISTERS
 # --------------------------------------
 
+            .EQU     MSR_TSC,         0x00000010
             .EQU     MSR_APIC_BASE,   0x0000001B
             .EQU     MSR_MISC_ENABLE, 0x000001A0
+            .EQU     MSR_TSC_DEADLN,  0x000006E0
             .EQU     MSR_EFER,        0xC0000080
 
 # --------------------------------------
@@ -187,7 +189,7 @@
 
             .EQU     PIT_FREQ,          1193182
             .EQU     PIT_CTR_1MS,       1193
-            .EQU     PIT_CTR_10MS,      11931
+            .EQU     PIT_CTR_10MS,      11932
 
 # --------------------------------------
 # STACK FRAME LAYOT

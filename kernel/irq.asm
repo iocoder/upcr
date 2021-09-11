@@ -115,7 +115,7 @@ KIRQSETUP:  ;# MASK SPURIOUS IVT REGISTER
             MOV      [EDI], EAX
 
             ;# INITIALIZE TIMER IVT REGISTER
-            MOV      EAX, IVT_IRQ_TIMER
+            MOV      EAX, IVT_IRQ_TIMER | 0x40000
             MOV      EDI, LAPIC_TIMERIVT
             MOV      [EDI], EAX
 
@@ -144,26 +144,19 @@ KIRQSETUP:  ;# MASK SPURIOUS IVT REGISTER
             MOV      EDI, LAPIC_ERRORIVT
             MOV      [EDI], EAX
 
-            ;# INITIALIZE TIMER DIVIDER REGISTER
-            MOV      EAX, 0x0B
-            MOV      EDI, LAPIC_TMRDIVD
-            MOV      [EDI], EAX
-
             ;# INITIALIZE TASK PRIORITY REGISTER
             MOV      EAX, 0
             MOV      EDI, LAPIC_TASKPRI
             MOV      [EDI], EAX
+
+            ;# MAKE SURE ALL WRITES ARE HANDLED
+            MFENCE
 
             ;# ENABLE LAPIC
             MOV      ECX, MSR_APIC_BASE
             RDMSR
             OR       EAX, 0x800
             WRMSR
-
-            ;# RUN TIMER
-            ;# MOV      EAX, 0x8000000
-            ;# MOV      EDI, LAPIC_TMRINIT
-            ;# MOV      [EDI], EAX
 
             ;# DONE
             XOR      RAX, RAX

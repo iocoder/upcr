@@ -1,6 +1,6 @@
 ;###############################################################################
-;# File name:    KERNEL/SYS.ASM
-;# DESCRIPTION:  KERNEL SYSTEM INITIALIZATION PROCEDURES
+;# File name:    KERNEL/TMR.ASM
+;# DESCRIPTION:  KERNEL TIMER MANAGEMENT
 ;# AUTHOR:       RAMSES A.
 ;###############################################################################
 ;#
@@ -41,7 +41,7 @@
 ;###############################################################################
 
             ;# GLOBAL SYMBOLS
-            PUBLIC   KSYSINIT
+            PUBLIC   KTMRINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -51,32 +51,32 @@
             SEGMENT  ".text"
 
 ;#-----------------------------------------------------------------------------#
-;#                              KSYSINIT()                                     #
+;#                               KTMRINIT()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KSYSINIT:   ;# TAKE A COPY OF BOOT INFO PTR
-            MOV      R15, RDI
+KTMRINIT:   ;# PRINT INIT MSG
+            LEA      RDI, [RIP+KTMRNAME]
+            CALL     KLOGMOD
+            LEA      RDI, [RIP+KTMRMSG]
+            CALL     KLOGSTR
+            MOV      RDI, '\n'
+            CALL     KLOGCHR
 
-            ;# INITIALIZE KERNEL MODULES
-            CALL     KVGAINIT
-            CALL     KLOGINIT
-            CALL     KCPUINIT
-            CALL     KRAMINIT
-            CALL     KVMMINIT
-            CALL     KGDTINIT
-            CALL     KIDTINIT
-            CALL     KTSSINIT
-            CALL     KPITINIT
-            CALL     KLATINIT
-            CALL     KTSCINIT
-            CALL     KTMRINIT
-            CALL     KIRQINIT
-            CALL     KSMPINIT
-
-            CALL     KTSCUS
-
-            ;# STORE SUCCESS CODE IN RAX
+            ;# DONE
             XOR      RAX, RAX
-
-            ;# RETURN TO BOOT LOADER
             RET
+
+;###############################################################################
+;#                              DATA SECTION                                   #
+;###############################################################################
+
+            ;# DATA SECTION
+            SEGMENT  ".data"
+
+;#-----------------------------------------------------------------------------#
+;#                            LOGGING STRINGS                                  #
+;#-----------------------------------------------------------------------------#
+
+            ;# TMR HEADING AND ASCII STRINGS
+KTMRNAME:   DB       "KERNEL TMR\0"
+KTMRMSG:    DB       "TSC IS SELECTED TO BE THE MAIN TIMER.\0"
