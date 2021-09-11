@@ -168,19 +168,14 @@ KSMP64:     ;# 64-BIT CODE
             ;# INITIALIZE IDT
             LIDT     [IDTR_ADDR]
 
-            ;# JUMP TO KSMPEN
-            MOV      RAX, [SmpFunAddress-KSMP16]
-            CALL     RAX
+            ;# ENABLE THE CORE
+            INT      IVT_SMP_EN
 
-            ;# LOOP FOREVER
+            ;# ENABLE IRQS
+            STI
+
+            ;# WAIT UNTIL CPU0 SENDS SCHED IRQ
             JMP      .
-
-            ;# ALIGNMENT FOR DATA
-            ALIGN    8
-
-            ;# SMPFUNADDRESS
-            EQU      SmpFunAddress, .
-            DQ       0
 
 ;#-----------------------------------------------------------------------------#
 ;#                              KSMPINIT()                                     #
@@ -193,10 +188,6 @@ KSMPINIT:   ;# PRINT INIT MSG
             CALL     KLOGSTR
             MOV      RDI, '\n'
             CALL     KLOGCHR
-
-            ;# store the address of KSMPEN to be fetched by trampoline
-            LEA      RAX, [RIP+KSMPEN]
-            MOV      [RIP+SmpFunAddress], RAX
 
             ;# COPY THE TRAMPOLINE TO LOWER MEMORY
             MOV      RDI, TRUMP_ADDR
@@ -211,7 +202,7 @@ KSMPINIT:   ;# PRINT INIT MSG
             INC      RDI
             LOOP     1b
 
-            ;# FIRST WE NEED TO INITIALIZE CORE 0
+            ;# WE NEED TO INITIALIZE CORE 0 FIRST
             CALL     KSMPEN
 
             ;# SEND INIT-SIPI-SIPI SEQUENCE TO OTHER CPUS
@@ -229,10 +220,7 @@ KSMPINIT:   ;# PRINT INIT MSG
 
 ;# TODO: move lock instructions to IDT
 
-KSMPEN:     ;# ACQUIRE KERNEL LOCK TO AVOID RACE CONDITIONS WITH OTHER CPUS
-            CALL     KLOCPEND
-
-            ;# INITIALIZE LAPIC AND ENABLE IRQS
+KSMPEN:     ;# INITIALIZE LAPIC AND ENABLE IRQS
             CALL     KIRQEN
 
             ;# PRINT MODULE NAME
@@ -253,11 +241,6 @@ KSMPEN:     ;# ACQUIRE KERNEL LOCK TO AVOID RACE CONDITIONS WITH OTHER CPUS
             ;# PRINT NEW LINE
             MOV      RDI, '\n'
             CALL     KLOGCHR
-
-            ;# RELEASE THE LOCK
-            PUSH     RDI
-            CALL     KLOCPOST
-            POP      RDI
 
             ;# DONE
             XOR      RAX, RAX

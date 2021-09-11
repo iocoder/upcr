@@ -70,6 +70,7 @@ KSYSINIT:   ;# TAKE A COPY OF BOOT INFO PTR
 
             ;# STORE SUCCESS CODE IN RAX
             XOR      RAX, RAX
+            STI
 
             ;# RETURN TO BOOT LOADER
             RET

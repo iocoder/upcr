@@ -45,6 +45,7 @@
             PUBLIC   KIRQEN
             PUBLIC   KIRQIIPI
             PUBLIC   KIRQSIPI
+            PUBLIC   KIRQISR
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -82,6 +83,19 @@ KIRQEN:     ;# INITIALIZE APIC ADDRESS MSR
             WRMSR
             NOP
             NOP
+
+            ;# INITIALIZE TIMER IVT
+            MOV      EAX, IVT_IRQ_TIMER | 0x20000
+            MOV      EDI, LAPIC_TIMERIVT
+            MOV      [EDI], EAX
+
+            ;# RUN TIMER
+            MOV      EAX, 0x00
+            MOV      EDI, LAPIC_TMRDIVD
+            MOV      [EDI], EAX
+            MOV      EAX, 0x80000000
+            MOV      EDI, LAPIC_TMRINIT
+            MOV      [EDI], EAX
 
             ;# DONE
             XOR      RAX, RAX
@@ -123,6 +137,32 @@ KIRQSIPI:   ;# BROADCAST THE SIPI IPI TO ALL PROCESSORS EXCEPT SELF
             XOR      RAX, RAX
             RET
 
+;#-----------------------------------------------------------------------------#
+;#                               KIRQISR()                                     #
+;#-----------------------------------------------------------------------------#
+
+KIRQISR:    ;# WE JUST RECEIVED AN IRQ DELIVERED BY LAPIC
+            PUSH     RDI
+            LEA      RDI, [RIP+KIRQNAME]
+            CALL     KLOGMOD
+            LEA      RDI, [RIP+KIRQRECV]
+            CALL     KLOGSTR
+            MOV      RDI, '\n'
+            CALL     KLOGCHR
+            POP      RDI
+
+            ;# PRINT REGISTER DUMP
+            CALL     KREGDUMP
+
+            ;# SEND END OF INTERRUPT SIGNAL
+            MOV      EAX, 0x00
+            MOV      EDI, LAPIC_EOI
+            MOV      [EDI], EAX
+
+            ;# DONE
+            XOR      RAX, RAX
+            RET
+
 ;###############################################################################
 ;#                              DATA SECTION                                   #
 ;###############################################################################
@@ -137,3 +177,4 @@ KIRQSIPI:   ;# BROADCAST THE SIPI IPI TO ALL PROCESSORS EXCEPT SELF
             ;# IRQ HEADING AND ASCII STRINGS
 KIRQNAME:   DB       "KERNEL IRQ\0"
 KIRQMSG:    DB       "SUPPORTED X86 INTERRUPT CONTROLLERS: LAPIC, I/O APIC.\0"
+KIRQRECV:   DB       "WE RECEIVED AN IRQ!\0"

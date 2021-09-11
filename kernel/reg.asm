@@ -54,7 +54,13 @@
 ;#                               KREGDUMP()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KREGDUMP:   ;# PRINT EXCEPTION NAME
+KREGDUMP:   ;# PRINT HEADING
+            PUSH     RDI
+            LEA      RDI, [RIP+KREGHD]
+            CALL     KLOGSTR
+            POP      RDI
+
+            ;# PRINT INTERRUPT NAME
             PUSH     RDI
             LEA      RDI, [RIP+KREGEXPN]
             CALL     KLOGSTR
@@ -73,7 +79,7 @@ KREGDUMP:   ;# PRINT EXCEPTION NAME
             CALL     KLOGCHR
             POP      RDI
 
-            ;# PRINT EXCEPTION CODE
+            ;# PRINT INTERRUPT CODE
             PUSH     RDI
             LEA      RDI, [RIP+KREGEXPC]
             CALL     KLOGSTR
@@ -387,6 +393,21 @@ KREGDUMP:   ;# PRINT EXCEPTION NAME
 ;#                            LOGGING STRINGS                                  #
 ;#-----------------------------------------------------------------------------#
 
+            ;# HEADING
+KREGHD:     DB       "\n"
+            DB       "  "
+            DB       "------------------------------------------"
+            DB       "------------------------------------------"
+            DB       "\n"
+            DB       "  REGISTER DUMP:"
+            DB       "\n"
+            DB       "  "
+            DB       "------------------------------------------"
+            DB       "------------------------------------------"
+            DB       "\n"
+            DB       "\n"
+            DB       "\0"
+
             ;# HORIZONTAL LINE
 KREGHR:     DB       "\n"
             DB       "\n"
@@ -398,10 +419,10 @@ KREGHR:     DB       "\n"
             DB       "\0"
 
             ;# REGISTERS
-KREGEXPN:   DB       "  EXCEPTION NAME: \0"
-KREGEXPC:   DB       "  EXCEPTION CODE: \0"
-KREGCODE:   DB       "  ERROR CODE:     \0"
-KREGCORE:   DB       "  CPU CORE:       \0"
+KREGEXPN:   DB       "  INTERRUPT NAME:   \0"
+KREGEXPC:   DB       "  INTERRUPT VECTOR: \0"
+KREGCODE:   DB       "  ERROR CODE:       \0"
+KREGCORE:   DB       "  CPU CORE:         \0"
 KREGCS:     DB       "  CS:  \0"
 KREGRIP:    DB       "  RIP: \0"
 KREGFLG:    DB       "  RFLAGS: \0"
@@ -456,4 +477,36 @@ KREGSTR:    DB       "DIVISION BY ZERO EXCEPTION     \0"  ;# 0x00
             DB       "VMM COMMUNICATION EXCEPTION    \0"  ;# 0x1D
             DB       "SECURITY EXCEPTION             \0"  ;# 0x1E
             DB       "RESERVED                       \0"  ;# 0x1F
+            DB       "SVC SYSTEM CALL                \0"  ;# 0x20
+            DB       "SMP ENABLE CORE                \0"  ;# 0x21
+            DB       "LOCAL TIMER IRQ                \0"  ;# 0x22
+            DB       "LOCAL THERM SENSOR IRQ         \0"  ;# 0x23
+            DB       "LOCAL PERF COUNTER IRQ         \0"  ;# 0x24
+            DB       "LOCAL LINT0 IRQ                \0"  ;# 0x25
+            DB       "LOCAL LINT1 IRQ                \0"  ;# 0x26
+            DB       "LOCAL ERROR IRQ                \0"  ;# 0x27
+            DB       "LOCAL SPURIOUS IRQ             \0"  ;# 0x28
+            DB       "LOCAL SCHEDULER IRQ            \0"  ;# 0x29
+            DB       "LOCAL RESERVED IRQ             \0"  ;# 0x2A
+            DB       "LOCAL RESERVED IRQ             \0"  ;# 0x2B
+            DB       "LOCAL RESERVED IRQ             \0"  ;# 0x2C
+            DB       "LOCAL RESERVED IRQ             \0"  ;# 0x2D
+            DB       "LOCAL RESERVED IRQ             \0"  ;# 0x2E
+            DB       "LOCAL RESERVED IRQ             \0"  ;# 0x2F
+            DB       "HARDWARE IRQ00                 \0"  ;# 0x30
+            DB       "HARDWARE IRQ01                 \0"  ;# 0x31
+            DB       "HARDWARE IRQ02                 \0"  ;# 0x32
+            DB       "HARDWARE IRQ03                 \0"  ;# 0x33
+            DB       "HARDWARE IRQ04                 \0"  ;# 0x34
+            DB       "HARDWARE IRQ05                 \0"  ;# 0x35
+            DB       "HARDWARE IRQ06                 \0"  ;# 0x36
+            DB       "HARDWARE IRQ07                 \0"  ;# 0x37
+            DB       "HARDWARE IRQ08                 \0"  ;# 0x38
+            DB       "HARDWARE IRQ09                 \0"  ;# 0x39
+            DB       "HARDWARE IRQ10                 \0"  ;# 0x3A
+            DB       "HARDWARE IRQ11                 \0"  ;# 0x3B
+            DB       "HARDWARE IRQ12                 \0"  ;# 0x3C
+            DB       "HARDWARE IRQ13                 \0"  ;# 0x3D
+            DB       "HARDWARE IRQ14                 \0"  ;# 0x3E
+            DB       "HARDWARE IRQ15                 \0"  ;# 0x3F
             ;#       "0123456789ABCDEF0123456789ABCDEF"

@@ -64,14 +64,6 @@
             ;# GATE SIZE
             EQU      GATE_SIZE,     0x100
 
-            ;# IDT SECTIONS
-            EQU      IDT_EXP_START, 0x00
-            EQU      IDT_EXP_COUNT, 0x20
-            EQU      IDT_IRQ_START, 0x40
-            EQU      IDT_IRQ_COUNT, 0x10
-            EQU      IDT_SVC_START, 0x80
-            EQU      IDT_SVC_COUNT, 0x01
-
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
 ;###############################################################################
@@ -128,6 +120,7 @@
             PUSH     RAX                        ;# PUSH A COPY OF RAX
             SUB      RSP, 0x50                  ;# PUSH PADDING
             CHKDPL   \CheckDPL                  ;# CHECK DPL IF NEEDED
+            MOV      RDI, RSP                   ;# STORE FRAME BASE
             CALL     \Handler                   ;# HANDLE INTERRUPT
             ADD      RSP, 0x50                  ;# POP PADDING
             POP      RAX                        ;# POP A COPY OF RAX
@@ -158,7 +151,7 @@
             ;# ALIGN TO 256-BYTE BORDER
             ALIGN    GATE_SIZE
 
-KIDTEXPS:   ;# 32 EXCEPTION GATES FOR 32 EXCEPTIONS
+KIDTEXPS:   ;# EXCEPTION GATES (TRIGGERED BY CPU)
             GATE     KIDTEXP, 0x00, 1, 1
             GATE     KIDTEXP, 0x01, 1, 1
             GATE     KIDTEXP, 0x02, 1, 1
@@ -192,26 +185,43 @@ KIDTEXPS:   ;# 32 EXCEPTION GATES FOR 32 EXCEPTIONS
             GATE     KIDTEXP, 0x1E, 0, 1
             GATE     KIDTEXP, 0x1F, 0, 1
 
-KIRQEXPS:   ;# 16 IRQ GATES FOR 16 IRQS
-            GATE     KIDTIRQ, 0x00, 1, 0
-            GATE     KIDTIRQ, 0x01, 1, 0
-            GATE     KIDTIRQ, 0x02, 1, 0
-            GATE     KIDTIRQ, 0x03, 1, 0
-            GATE     KIDTIRQ, 0x04, 1, 0
-            GATE     KIDTIRQ, 0x05, 1, 0
-            GATE     KIDTIRQ, 0x06, 1, 0
-            GATE     KIDTIRQ, 0x07, 1, 0
-            GATE     KIDTIRQ, 0x08, 1, 0
-            GATE     KIDTIRQ, 0x09, 1, 0
-            GATE     KIDTIRQ, 0x0A, 1, 0
-            GATE     KIDTIRQ, 0x0B, 1, 0
-            GATE     KIDTIRQ, 0x0C, 1, 0
-            GATE     KIDTIRQ, 0x0D, 1, 0
-            GATE     KIDTIRQ, 0x0E, 1, 0
-            GATE     KIDTIRQ, 0x0F, 1, 0
+KIDTSVCS:   ;# SVC GATES (TRIGGERED BY PROGRAM)
+            GATE     KIDTSVC, 0x20, 1, 0
 
-KSVCEXPS:   ;# 1 SVC GATE FOR 1 SVC
-            GATE     KIDTSVC, 0x00, 1, 0
+KIDTSMPS:   ;# SMP GATES (TRIGGERED BY KERNEL)
+            GATE     KIDTSMP, 0x21, 1, 0
+
+KIDTIRQS:   ;# IRQ GATES (TRIGGERED BY LAPIC)
+            GATE     KIDTIRQ, 0x22, 1, 0
+            GATE     KIDTIRQ, 0x23, 1, 0
+            GATE     KIDTIRQ, 0x24, 1, 0
+            GATE     KIDTIRQ, 0x25, 1, 0
+            GATE     KIDTIRQ, 0x26, 1, 0
+            GATE     KIDTIRQ, 0x27, 1, 0
+            GATE     KIDTIRQ, 0x28, 1, 0
+            GATE     KIDTIRQ, 0x29, 1, 0
+            GATE     KIDTIRQ, 0x2A, 1, 0
+            GATE     KIDTIRQ, 0x2B, 1, 0
+            GATE     KIDTIRQ, 0x2C, 1, 0
+            GATE     KIDTIRQ, 0x2D, 1, 0
+            GATE     KIDTIRQ, 0x2E, 1, 0
+            GATE     KIDTIRQ, 0x2F, 1, 0
+            GATE     KIDTIRQ, 0x30, 1, 0
+            GATE     KIDTIRQ, 0x31, 1, 0
+            GATE     KIDTIRQ, 0x32, 1, 0
+            GATE     KIDTIRQ, 0x33, 1, 0
+            GATE     KIDTIRQ, 0x34, 1, 0
+            GATE     KIDTIRQ, 0x35, 1, 0
+            GATE     KIDTIRQ, 0x36, 1, 0
+            GATE     KIDTIRQ, 0x37, 1, 0
+            GATE     KIDTIRQ, 0x38, 1, 0
+            GATE     KIDTIRQ, 0x39, 1, 0
+            GATE     KIDTIRQ, 0x3A, 1, 0
+            GATE     KIDTIRQ, 0x3B, 1, 0
+            GATE     KIDTIRQ, 0x3C, 1, 0
+            GATE     KIDTIRQ, 0x3D, 1, 0
+            GATE     KIDTIRQ, 0x3E, 1, 0
+            GATE     KIDTIRQ, 0x3F, 1, 0
 
 ;#-----------------------------------------------------------------------------#
 ;#                                KIDTINIT()                                   #
@@ -231,8 +241,8 @@ KIDTINIT:   ;# PRINT INIT MSG
             ;# RSI: ADDRESS OF KIDTEXPS
             MOV      RDI, IDT_ADDR
             MOV      RCX, IDT_ADDR
-            ADD      RDI, IDT_EXP_START*16
-            ADD      RCX, IDT_EXP_START*16+IDT_EXP_COUNT*16
+            ADD      RDI, IVT_EXP_START*16
+            ADD      RCX, IVT_EXP_START*16+IVT_EXP_COUNT*16
             LEA      RSI, [RIP+KIDTEXPS]
 
             ;# STORE AN IDT DESCRIPTOR USING GATE ADDRESS IN RAX
@@ -257,15 +267,47 @@ KIDTINIT:   ;# PRINT INIT MSG
             CMP      RCX, RDI
             JNZ      1b
 
-            ;# INITIALIZE IDT IRQ ENTRIES
+            ;# INITIALIZE IDT SVC ENTRIES
             ;# RDI: ADDRESS OF FIRST IDT DESCRIPTOR TO FILL
             ;# RCX: ADDRESS OF THE IDT DESCRIPTOR TO STOP AT
-            ;# RSI: ADDRESS OF KIRQEXPS
+            ;# RSI: ADDRESS OF KIDTSVCS
             MOV      RDI, IDT_ADDR
             MOV      RCX, IDT_ADDR
-            ADD      RDI, IDT_IRQ_START*16
-            ADD      RCX, IDT_IRQ_START*16+IDT_IRQ_COUNT*16
-            LEA      RSI, [RIP+KIRQEXPS]
+            ADD      RDI, IVT_SVC_START*16
+            ADD      RCX, IVT_SVC_START*16+IVT_SVC_COUNT*16
+            LEA      RSI, [RIP+KIDTSVCS]
+
+            ;# STORE AN IDT DESCRIPTOR USING GATE ADDRESS IN RAX
+1:          MOV      RAX, RSI
+            MOV      [RDI+ 0], AX
+            MOV      AX, 0x20
+            MOV      [RDI+ 2], AX
+            MOV      AX, GATE_INTR|PRESENT|DPL3
+            MOV      [RDI+ 4], AX
+            SHR      RAX, 16
+            MOV      [RDI+ 6], AX
+            SHR      RAX, 16
+            MOV      [RDI+ 8], EAX
+            MOV      EAX, 0
+            MOV      [RDI+12], EAX
+
+            ;# UPDATE RAX TO NEXT GATE ADDRESS, RDI TO NEXT DESCRIPTOR
+            ADD      RSI, GATE_SIZE
+            ADD      RDI, 16
+
+            ;# DONE YET?
+            CMP      RCX, RDI
+            JNZ      1b
+
+            ;# INITIALIZE IDT SMP ENTRIES
+            ;# RDI: ADDRESS OF FIRST IDT DESCRIPTOR TO FILL
+            ;# RCX: ADDRESS OF THE IDT DESCRIPTOR TO STOP AT
+            ;# RSI: ADDRESS OF KIDTSMPS
+            MOV      RDI, IDT_ADDR
+            MOV      RCX, IDT_ADDR
+            ADD      RDI, IVT_SMP_START*16
+            ADD      RCX, IVT_SMP_START*16+IVT_SMP_COUNT*16
+            LEA      RSI, [RIP+KIDTSMPS]
 
             ;# STORE AN IDT DESCRIPTOR USING GATE ADDRESS IN RAX
 1:          MOV      RAX, RSI
@@ -289,22 +331,22 @@ KIDTINIT:   ;# PRINT INIT MSG
             CMP      RCX, RDI
             JNZ      1b
 
-            ;# INITIALIZE IDT SVC ENTRIES
+            ;# INITIALIZE IDT IRQ ENTRIES
             ;# RDI: ADDRESS OF FIRST IDT DESCRIPTOR TO FILL
             ;# RCX: ADDRESS OF THE IDT DESCRIPTOR TO STOP AT
-            ;# RSI: ADDRESS OF KSVCEXPS
+            ;# RSI: ADDRESS OF KIDTIRQS
             MOV      RDI, IDT_ADDR
             MOV      RCX, IDT_ADDR
-            ADD      RDI, IDT_SVC_START*16
-            ADD      RCX, IDT_SVC_START*16+IDT_SVC_COUNT*16
-            LEA      RSI, [RIP+KSVCEXPS]
+            ADD      RDI, IVT_IRQ_START*16
+            ADD      RCX, IVT_IRQ_START*16+IVT_IRQ_COUNT*16
+            LEA      RSI, [RIP+KIDTIRQS]
 
             ;# STORE AN IDT DESCRIPTOR USING GATE ADDRESS IN RAX
 1:          MOV      RAX, RSI
             MOV      [RDI+ 0], AX
             MOV      AX, 0x20
             MOV      [RDI+ 2], AX
-            MOV      AX, GATE_INTR|PRESENT|DPL3
+            MOV      AX, GATE_INTR|PRESENT|DPL0
             MOV      [RDI+ 4], AX
             SHR      RAX, 16
             MOV      [RDI+ 6], AX
@@ -338,31 +380,18 @@ KIDTINIT:   ;# PRINT INIT MSG
 ;#                              KIDTEXP()                                      #
 ;#-----------------------------------------------------------------------------#
 
-KIDTEXP:    ;# TODO:
-            ;# -----
-            ;# 1. ACQUIRE KERNEL LOCK
-            ;# 2. HANDLE EXCEPTION BY TERMINATING THE BAD TASK
-            ;# 3. RELEASE KERNEL LOCK
+KIDTEXP:    ;# ACQUIRE KERNEL LOCK
+            PUSH     RDI
+            CALL     KLOCPEND
+            POP      RDI
 
             ;# INFINTE LOOP
             JMP      .
 
-            ;# DONE
-            XOR      RAX, RAX
-            RET
-
-;#-----------------------------------------------------------------------------#
-;#                               KIDTIRQ()                                     #
-;#-----------------------------------------------------------------------------#
-
-KIDTIRQ:    ;# TODO:
-            ;# -----
-            ;# 1. ACQUIRE KERNEL LOCK
-            ;# 2. HANDLE IRQ
-            ;# 3. RELEASE KERNEL LOCK
-
-            ;# INFINTE LOOP
-            JMP      .
+            ;# RELEASE THE LOCK
+            PUSH     RDI
+            CALL     KLOCPOST
+            POP      RDI
 
             ;# DONE
             XOR      RAX, RAX
@@ -372,31 +401,62 @@ KIDTIRQ:    ;# TODO:
 ;#                               KIDTSVC()                                     #
 ;#-----------------------------------------------------------------------------#
 
-KIDTSVC:    ;# TODO:
-            ;# -----
-            ;# 1. ACQUIRE KERNEL LOCK
-            ;# 2. HANDLE SYSTEM CALL
-            ;# 3. RELEASE KERNEL LOCK
+KIDTSVC:    ;# ACQUIRE KERNEL LOCK
+            PUSH     RDI
+            CALL     KLOCPEND
+            POP      RDI
 
             ;# INFINTE LOOP
             JMP      .
+
+            ;# RELEASE THE LOCK
+            PUSH     RDI
+            CALL     KLOCPOST
+            POP      RDI
 
             ;# DONE
             XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
-;#                               KIDTIPI()                                     #
+;#                               KIDTSMP()                                     #
 ;#-----------------------------------------------------------------------------#
 
-KIDTIPI:    ;# TODO:
-            ;# -----
-            ;# 1. ACQUIRE KERNEL LOCK
-            ;# 2. HANDLE INTER-PROCESS INTERRUPT
-            ;# 3. RELEASE KERNEL LOCK
+KIDTSMP:    ;# ACQUIRE KERNEL LOCK
+            PUSH     RDI
+            CALL     KLOCPEND
+            POP      RDI
 
-            ;# INFINTE LOOP
-            JMP      .
+            ;# ENABLE SMP CORE
+            PUSH     RDI
+            CALL     KSMPEN
+            POP      RDI
+
+            ;# RELEASE THE LOCK
+            PUSH     RDI
+            CALL     KLOCPOST
+            POP      RDI
+
+            ;# DONE
+            XOR      RAX, RAX
+            RET
+
+;#-----------------------------------------------------------------------------#
+;#                               KIDTIRQ()                                     #
+;#-----------------------------------------------------------------------------#
+
+KIDTIRQ:    ;# ACQUIRE KERNEL LOCK
+            PUSH     RDI
+            CALL     KLOCPEND
+            POP      RDI
+
+            ;# CALL IRQ MODULE ISR
+            CALL     KIRQISR
+
+            ;# RELEASE THE LOCK
+            PUSH     RDI
+            CALL     KLOCPOST
+            POP      RDI
 
             ;# DONE
             XOR      RAX, RAX
