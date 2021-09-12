@@ -243,6 +243,11 @@ KSMPISR:    ;# INITIALIZE CPU CORE
             CALL     KIRQSETUP
             POP      RDI
 
+            ;# SCHEDULE TIMER INTERRUPTS
+            PUSH     RDI
+            CALL     KTMRSETUP
+            POP      RDI
+
             ;# ENABLE INTERRUPTS ON RETURN
             MOV      RAX, [RDI+SFRAME_RFLAGS]
             OR       RAX, 0x0200

@@ -73,7 +73,7 @@ KSYSINIT:   ;# TAKE A COPY OF BOOT INFO PTR
             CALL     KIRQINIT
             CALL     KSMPINIT
 
-            CALL     KTSCUS
+            ;# CALL     KTSCUS
 
             ;# STORE SUCCESS CODE IN RAX
             XOR      RAX, RAX

@@ -45,6 +45,8 @@
             PUBLIC    KVGACLR
             PUBLIC    KVGAPUT
             PUBLIC    KVGAATT
+            PUBLIC    KVGAVMEM
+            PUBLIC    KVGAPMEM
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -262,29 +264,130 @@ KVGAPUT:    ;########
             MOV      [RIP+KVGAY], RAX
             JMP      18f
 
-11:         ;# LOAD DESTINATION ADDRESSES FOR SCROLLING
-            MOV      RSI, [RIP+KVGAVMEM]
-            MOV      RDI, [RIP+KVGAPMEM]
-
-            ;# SET RBX TO THE BASE SOURCE ADDRESS FOR SCROLLING
+11:         ;# COMPUTE AMOUNT OF BYTES TO SHIFT
             MOV      RAX, [RIP+KVGALINE]
             SHL      RAX, 4                  ;# EACH GLYPH TAKES 16 LINES
             SHL      RAX, 2                  ;# EACH PIXEL IS 4 BYTES
-            LEA      R8, [RSI+RAX]
 
-            ;# OBTAIN SIZE OF MEMORY REGION TO SCROLL UP
+            ;# FIRST: TRANSFER FROM MEMBUF TO VGABUF
+            MOV      RSI, [RIP+KVGAVMEM]
+            MOV      RDI, [RIP+KVGAPMEM]
             MOV      RCX, [RIP+KVGASIZE]
+            ADD      RSI, RAX
             SUB      RCX, RAX
+            SHR      RCX, 8
 
-            ;# WE ARE ALL GOOD, COPY AND LOOP UNTIL RCX IS 0
-12:         MOV      EAX, [R8]
-            MOV      [RSI], EAX
-            MOV      [RDI], EAX
-            ADD      R8, 4
-            ADD      RSI, 4
-            ADD      RDI, 4
-            SUB      RCX, 4
-            JNZ      12b
+            ;# PREFETCH DATA TO SPEED UP THE PIPELINE
+12:         PREFETCHNTA [RSI + 256]
+            PREFETCHNTA [RSI + 288]
+            PREFETCHNTA [RSI + 320]
+            PREFETCHNTA [RSI + 352]
+            PREFETCHNTA [RSI + 384]
+            PREFETCHNTA [RSI + 416]
+            PREFETCHNTA [RSI + 448]
+            PREFETCHNTA [RSI + 480]
+
+            ;# COPY 256 BYTES AT ONCE
+            MOVDQA  XMM0,  [RSI + 0  ]
+            MOVDQA  XMM1,  [RSI + 16 ]
+            MOVDQA  XMM2,  [RSI + 32 ]
+            MOVDQA  XMM3,  [RSI + 48 ]
+            MOVDQA  XMM4,  [RSI + 64 ]
+            MOVDQA  XMM5,  [RSI + 80 ]
+            MOVDQA  XMM6,  [RSI + 96 ]
+            MOVDQA  XMM7,  [RSI + 112]
+            MOVDQA  XMM8,  [RSI + 128]
+            MOVDQA  XMM9,  [RSI + 144]
+            MOVDQA  XMM10, [RSI + 160]
+            MOVDQA  XMM11, [RSI + 176]
+            MOVDQA  XMM12, [RSI + 192]
+            MOVDQA  XMM13, [RSI + 208]
+            MOVDQA  XMM14, [RSI + 224]
+            MOVDQA  XMM15, [RSI + 240]
+
+            ;# STORE 256 BYTES AT ONCE
+            MOVNTDQ [RDI + 0  ], XMM0
+            MOVNTDQ [RDI + 16 ], XMM1
+            MOVNTDQ [RDI + 32 ], XMM2
+            MOVNTDQ [RDI + 48 ], XMM3
+            MOVNTDQ [RDI + 64 ], XMM4
+            MOVNTDQ [RDI + 80 ], XMM5
+            MOVNTDQ [RDI + 96 ], XMM6
+            MOVNTDQ [RDI + 112], XMM7
+            MOVNTDQ [RDI + 128], XMM8
+            MOVNTDQ [RDI + 144], XMM9
+            MOVNTDQ [RDI + 160], XMM10
+            MOVNTDQ [RDI + 176], XMM11
+            MOVNTDQ [RDI + 192], XMM12
+            MOVNTDQ [RDI + 208], XMM13
+            MOVNTDQ [RDI + 224], XMM14
+            MOVNTDQ [RDI + 240], XMM15
+
+            ;# MOVE TO NEXT 256 BYTES
+            ADD     RSI, 256
+            ADD     RDI, 256
+            DEC     RCX
+            JNZ     12b
+
+            ;# SECOND: TRANSFER FROM MEMBUF TO MEMBUF
+            MOV      RSI, [RIP+KVGAVMEM]
+            MOV      RDI, [RIP+KVGAVMEM]
+            MOV      RCX, [RIP+KVGASIZE]
+            ADD      RSI, RAX
+            SUB      RCX, RAX
+            SHR      RCX, 8
+
+            ;# PREFETCH DATA TO SPEED UP THE PIPELINE
+13:         PREFETCHNTA [RSI + 256]
+            PREFETCHNTA [RSI + 288]
+            PREFETCHNTA [RSI + 320]
+            PREFETCHNTA [RSI + 352]
+            PREFETCHNTA [RSI + 384]
+            PREFETCHNTA [RSI + 416]
+            PREFETCHNTA [RSI + 448]
+            PREFETCHNTA [RSI + 480]
+
+            ;# COPY 256 BYTES AT ONCE
+            MOVDQA  XMM0,  [RSI + 0  ]
+            MOVDQA  XMM1,  [RSI + 16 ]
+            MOVDQA  XMM2,  [RSI + 32 ]
+            MOVDQA  XMM3,  [RSI + 48 ]
+            MOVDQA  XMM4,  [RSI + 64 ]
+            MOVDQA  XMM5,  [RSI + 80 ]
+            MOVDQA  XMM6,  [RSI + 96 ]
+            MOVDQA  XMM7,  [RSI + 112]
+            MOVDQA  XMM8,  [RSI + 128]
+            MOVDQA  XMM9,  [RSI + 144]
+            MOVDQA  XMM10, [RSI + 160]
+            MOVDQA  XMM11, [RSI + 176]
+            MOVDQA  XMM12, [RSI + 192]
+            MOVDQA  XMM13, [RSI + 208]
+            MOVDQA  XMM14, [RSI + 224]
+            MOVDQA  XMM15, [RSI + 240]
+
+            ;# STORE 256 BYTES AT ONCE
+            MOVNTDQ [RDI + 0  ], XMM0
+            MOVNTDQ [RDI + 16 ], XMM1
+            MOVNTDQ [RDI + 32 ], XMM2
+            MOVNTDQ [RDI + 48 ], XMM3
+            MOVNTDQ [RDI + 64 ], XMM4
+            MOVNTDQ [RDI + 80 ], XMM5
+            MOVNTDQ [RDI + 96 ], XMM6
+            MOVNTDQ [RDI + 112], XMM7
+            MOVNTDQ [RDI + 128], XMM8
+            MOVNTDQ [RDI + 144], XMM9
+            MOVNTDQ [RDI + 160], XMM10
+            MOVNTDQ [RDI + 176], XMM11
+            MOVNTDQ [RDI + 192], XMM12
+            MOVNTDQ [RDI + 208], XMM13
+            MOVNTDQ [RDI + 224], XMM14
+            MOVNTDQ [RDI + 240], XMM15
+
+            ;# MOVE TO NEXT 256 BYTES
+            ADD     RSI, 256
+            ADD     RDI, 256
+            DEC     RCX
+            JNZ     13b
 
             ;# COMPUTE ADDRESS OF THE FIRST PIXEL IN THE LINE
 18:         MOV      RAX, [RIP+KVGAY]        ;# RAX = KVGAY

@@ -52,8 +52,9 @@ EFI_API VOID BootVga(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
   /* allocate virtual frame buffer to be used by kernel */
   if (Status == EFI_SUCCESS) {
     if (ModeFound) {
-      BufSize = ModeInfo->PixelsPerScanLine*ModeInfo->VerticalResolution*4;
+      BufSize = ModeInfo->PixelsPerScanLine*ModeInfo->VerticalResolution*4+4096;
       Status = BootServices->AllocatePool(EfiLoaderData, BufSize, &BufAddr);
+      BufAddr = (BufAddr + 0xFFF) & ~0xFFFULL;
     }
   }
 

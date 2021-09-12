@@ -102,8 +102,46 @@ KCPUINIT:   ;# GET CPU MANUFACTURER
             MOV      RDI, '\n'
             CALL     KLOGCHR
 
+            ;# CLEAR COCPU EMU AND SET COCPU MONITORING
+            MOV      RAX, CR0
+            AND      AX, 0xFFFB		
+            OR       AX, 0x0002
+            MOV      CR0, RAX
+
+            ;# SET CR4.OSFXSR AND CR4.OSXMMEXCPT
+            MOV      RAX, CR4
+            OR       AX,  0x600
+            MOV      CR4, RAX
+
+            ;# READ MTRR CAPABILITY
+            MOV      ECX, MSR_MTRR_CAP
+            RDMSR
+
+            ;# DETERMINE LAST MTRR
+            AND      EAX, 0xFF
+            SHL      EAX, 1
+            ADD      EAX, MSR_MTRR_BASE
+            MOV      EDI, EAX
+            MOV      ECX, MSR_MTRR_BASE
+
+            ;# LOOP OVER MTRR REGISTERS
+1:          RDMSR
+            AND      EAX, 0xFFFFF000
+            CMP      EAX, [RIP+KVGAPMEM]
+            JE       2f
+            INC      ECX
+            INC      ECX
+            CMP      EDI, ECX
+            JNE      1b
+            JMP      3f
+
+            ;# IF MTRR REGISTER FOUND, ENABLE UC
+2:          OR       EAX, 1
+            WRMSR
+            RDMSR
+
             ;# DONE
-            XOR      RAX, RAX
+3:          XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#

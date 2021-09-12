@@ -42,6 +42,7 @@
 
             ;# GLOBAL SYMBOLS
             PUBLIC   KTMRINIT
+            PUBLIC   KTMRSETUP
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -61,6 +62,17 @@ KTMRINIT:   ;# PRINT INIT MSG
             CALL     KLOGSTR
             MOV      RDI, '\n'
             CALL     KLOGCHR
+
+            ;# DONE
+            XOR      RAX, RAX
+            RET
+
+;#-----------------------------------------------------------------------------#
+;#                               KTMRSETUP()                                   #
+;#-----------------------------------------------------------------------------#
+
+KTMRSETUP:  ;# SCHEDULE TIMER INTERRUPTS
+            CALL     KTSCUS
 
             ;# DONE
             XOR      RAX, RAX

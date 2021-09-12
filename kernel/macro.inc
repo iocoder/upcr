@@ -54,7 +54,9 @@
 
             .EQU     MSR_TSC,         0x00000010
             .EQU     MSR_APIC_BASE,   0x0000001B
+            .EQU     MSR_MTRR_CAP,    0x000000FE
             .EQU     MSR_MISC_ENABLE, 0x000001A0
+            .EQU     MSR_MTRR_BASE,   0x00000200
             .EQU     MSR_TSC_DEADLN,  0x000006E0
             .EQU     MSR_EFER,        0xC0000080
 
