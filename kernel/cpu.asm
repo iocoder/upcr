@@ -64,13 +64,13 @@ KCPUINIT:   ;# GET CPU MANUFACTURER
 
             ;# PRINT CPU MANUFACTURER
             LEA      RDI, [RIP+KCPUNAME]
-            CALL     KLOGMOD
+            CALL     KCONMOD
             LEA      RDI, [RIP+KCPUMANS]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             LEA      RDI, [RIP+KCPUMAN]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
 
             ;# GET CPU BRAND NAME
             MOV      EAX, 0x80000002
@@ -94,13 +94,13 @@ KCPUINIT:   ;# GET CPU MANUFACTURER
 
             ;# PRINT CPU BRAND NAME
             LEA      RDI, [RIP+KCPUNAME]
-            CALL     KLOGMOD
+            CALL     KCONMOD
             LEA      RDI, [RIP+KCPUBRNDS]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             LEA      RDI, [RIP+KCPUBRND]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
 
             ;# CLEAR COCPU EMU AND SET COCPU MONITORING
             MOV      RAX, CR0

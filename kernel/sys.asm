@@ -57,19 +57,28 @@
 KSYSINIT:   ;# TAKE A COPY OF BOOT INFO PTR
             MOV      R15, RDI
 
-            ;# INITIALIZE KERNEL MODULES
+            ;# INITIALIZE LOGGING FIRST
             CALL     KVGAINIT
-            CALL     KLOGINIT
+            CALL     KCONINIT
+            CALL     KSPLINIT
+
+            ;# INITIALIZE PROCESSOR
             CALL     KCPUINIT
-            CALL     KRAMINIT
-            CALL     KVMMINIT
             CALL     KGDTINIT
             CALL     KIDTINIT
             CALL     KTSSINIT
+
+            ;# INITIALIZE MEMORY
+            CALL     KRAMINIT
+            CALL     KVMMINIT
+
+            ;# INITIALIZE TIMERS
             CALL     KPITINIT
             CALL     KLATINIT
             CALL     KTSCINIT
             CALL     KTMRINIT
+
+            ;# INITIALIZE LAPICS
             CALL     KIRQINIT
             CALL     KSMPINIT
 

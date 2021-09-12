@@ -231,3 +231,12 @@
             .EQU     SFRAME_RFLAGS,     0xE8
             .EQU     SFRAME_RSP,        0xF0
             .EQU     SFRAME_SS,         0xF8
+
+# --------------------------------------
+# CONSOLE
+# --------------------------------------
+
+            .EQU     CONSOLE_WIDTH,      100
+            .EQU     CONSOLE_HEIGHT,     32
+            .EQU     CONSOLE_MAXLINES,   4096
+            .EQU     CONSOLE_PAGESIZE,   (128*4096)

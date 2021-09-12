@@ -60,14 +60,14 @@ KERRPANIC:  ;# SEND INIT IPI TO ALL CPU CORES
             ;# SET PANIC COLOUR
             MOV      RDI, 0x0A
             MOV      RSI, 0x01
-            CALL     KLOGATT
+            CALL     KCONATT
 
             ;# CLEAR SCREEN
-            CALL     KLOGCLR
+            ;#CALL     KLOGCLR
 
             ;# PRINT PANIC HEADING
             LEA      RDI, [RIP+KERRHDR]
-            CALL     KLOGSTR
+            CALL     KCONSTR
 
             ;# DUMP ALL CPU REGISTERS
             MOV      RDI, RSP

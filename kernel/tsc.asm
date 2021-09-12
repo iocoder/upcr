@@ -84,19 +84,19 @@ KTSCINIT:   ;# READ TSC STAMP
 
             ;# PRINT INIT MSG
             LEA      RDI, [RIP+KTSCNAME]
-            CALL     KLOGMOD
+            CALL     KCONMOD
             LEA      RDI, [RIP+KTSCMSG]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             MOV      RDI, [RIP+KTSCFREQ]
-            CALL     KLOGDEC
+            CALL     KCONDEC
             MOV      RDI, 'M'
-            CALL     KLOGCHR
+            CALL     KCONCHR
             MOV      RDI, 'H'
-            CALL     KLOGCHR
+            CALL     KCONCHR
             MOV      RDI, 'z'
-            CALL     KLOGCHR
+            CALL     KCONCHR
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
 
             ;# DONE
             XOR      RAX, RAX

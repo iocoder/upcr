@@ -93,19 +93,19 @@ KLATINIT:   ;# INITIALIZE TIMER DIVIDER REGISTER
 
             ;# PRINT TIMER FREQUENCY
             LEA      RDI, [RIP+KLATNAME]
-            CALL     KLOGMOD
+            CALL     KCONMOD
             LEA      RDI, [RIP+KLATMSG]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             MOV      RDI, [RIP+KLATFREQ]
-            CALL     KLOGDEC
+            CALL     KCONDEC
             MOV      RDI, 'M'
-            CALL     KLOGCHR
+            CALL     KCONCHR
             MOV      RDI, 'H'
-            CALL     KLOGCHR
+            CALL     KCONCHR
             MOV      RDI, 'z'
-            CALL     KLOGCHR
+            CALL     KCONCHR
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
 
             ;# DONE
             XOR      RAX, RAX

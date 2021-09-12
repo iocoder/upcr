@@ -68,39 +68,39 @@ KRAMINIT:   ;# READ KRAMAVL FROM INIT STRUCT
 
             ;# PRINT RAM START
             LEA      RDI, [RIP+KRAMNAME]
-            CALL     KLOGMOD
+            CALL     KCONMOD
             LEA      RDI, [RIP+KRAMSTARTS]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             MOV      RDI, [RIP+KRAMSTART]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
 
             ;# PRINT RAM END
             LEA      RDI, [RIP+KRAMNAME]
-            CALL     KLOGMOD
+            CALL     KCONMOD
             LEA      RDI, [RIP+KRAMENDS]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             MOV      RDI, [RIP+KRAMEND]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
 
             ;# PRINT RAM SIZE
             LEA      RDI, [RIP+KRAMNAME]
-            CALL     KLOGMOD
+            CALL     KCONMOD
             LEA      RDI, [RIP+KRAMESIZES]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             MOV      RDI, [RIP+KRAMEND]
             SUB      RDI, [RIP+KRAMSTART]
             SHR      RDI, 20
-            CALL     KLOGDEC
+            CALL     KCONDEC
             MOV      RDI, 'M'
-            CALL     KLOGCHR
+            CALL     KCONCHR
             MOV      RDI, 'B'
-            CALL     KLOGCHR
+            CALL     KCONCHR
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
 
             ;# DONE
             XOR      RAX, RAX

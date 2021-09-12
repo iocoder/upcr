@@ -56,11 +56,11 @@
 
 KTSSINIT:   ;# PRINT INIT MSG
             LEA      RDI, [RIP+KTSSNAME]
-            CALL     KLOGMOD
+            CALL     KCONMOD
             LEA      RDI, [RIP+KTSSMSG]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
 
             ;# DONE
             XOR      RAX, RAX

@@ -229,11 +229,11 @@ KIDTIRQS:   ;# IRQ GATES (TRIGGERED BY LAPIC)
 
 KIDTINIT:   ;# PRINT INIT MSG
             LEA      RDI, [RIP+KIDTNAME]
-            CALL     KLOGMOD
+            CALL     KCONMOD
             LEA      RDI, [RIP+KIDTMSG]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
 
             ;# INITIALIZE IDT EXCEPTION ENTRIES
             ;# RDI: ADDRESS OF FIRST IDT DESCRIPTOR TO FILL

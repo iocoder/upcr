@@ -60,11 +60,11 @@
 
 KIRQINIT:   ;# PRINT INIT MSG
             LEA      RDI, [RIP+KIRQNAME]
-            CALL     KLOGMOD
+            CALL     KCONMOD
             LEA      RDI, [RIP+KIRQMSG]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
 
             ;# DONE
             XOR      RAX, RAX
@@ -203,11 +203,11 @@ KIRQSIPI:   ;# BROADCAST THE SIPI IPI TO ALL PROCESSORS EXCEPT SELF
 KIRQISR:    ;# WE JUST RECEIVED AN IRQ DELIVERED BY LAPIC
             PUSH     RDI
             LEA      RDI, [RIP+KIRQNAME]
-            CALL     KLOGMOD
+            CALL     KCONMOD
             LEA      RDI, [RIP+KIRQRECV]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
             POP      RDI
 
             ;# PRINT REGISTER DUMP

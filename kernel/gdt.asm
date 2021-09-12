@@ -56,11 +56,11 @@
 
 KGDTINIT:   ;# PRINT INIT MSG
             LEA      RDI, [RIP+KGDTNAME]
-            CALL     KLOGMOD
+            CALL     KCONMOD
             LEA      RDI, [RIP+KGDTMSG]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
 
             ;# COPY THE GDTR DESCRIPTOR TO LOWER MEMORY
             MOV      RDI, MEM_GDTR

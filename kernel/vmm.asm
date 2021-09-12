@@ -56,11 +56,11 @@
 
 KVMMINIT:   ;# print init msg
             LEA      RDI, [RIP+KVMMNAME]
-            CALL     KLOGMOD
+            CALL     KCONMOD
             LEA      RDI, [RIP+KVMMMSG]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
 
             ;# INITIALIZE L3 IDENTITY TABLE
             MOV      RCX, 0x00000083

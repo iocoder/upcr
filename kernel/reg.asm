@@ -57,325 +57,325 @@
 KREGDUMP:   ;# PRINT HEADING
             PUSH     RDI
             LEA      RDI, [RIP+KREGHD]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
 
             ;# PRINT INTERRUPT NAME
             PUSH     RDI
             LEA      RDI, [RIP+KREGEXPN]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RAX, [RDI+SFRAME_NBR]
             SHL      RAX, 5
             LEA      RDI, [RIP+KREGSTR]
             ADD      RDI, RAX
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
 
             ;# NEW LINE
             PUSH     RDI
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
             POP      RDI
 
             ;# PRINT INTERRUPT CODE
             PUSH     RDI
             LEA      RDI, [RIP+KREGEXPC]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_NBR]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
 
             ;# NEW LINE
             PUSH     RDI
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
             POP      RDI
 
             ;# PRINT ERR CODE
             PUSH     RDI
             LEA      RDI, [RIP+KREGCODE]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_ERR]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
 
             ;# NEW LINE
             PUSH     RDI
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
             POP      RDI
 
             ;# PRINT CPU CORE NUMBER
             PUSH     RDI
             LEA      RDI, [RIP+KREGCORE]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             XOR      RAX, RAX
             MOV      EAX, [0xFEE00020]
             SHR      EAX, 24        
             MOV      RDI, RAX
-            CALL     KLOGDEC
+            CALL     KCONDEC
             POP      RDI
 
             ;# HORIZONTAL LINE
             PUSH     RDI
             LEA      RDI, [RIP+KREGHR]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             
             ;# PRINT CS
             PUSH     RDI
             LEA      RDI, [RIP+KREGCS]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_CS]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
             
             ;# PRINT RIP
             PUSH     RDI
             LEA      RDI, [RIP+KREGRIP]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_RIP]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
             
             ;# PRINT RFLAGS
             PUSH     RDI
             LEA      RDI, [RIP+KREGFLG]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_RFLAGS]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
 
             ;# NEW LINE
             PUSH     RDI
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
             POP      RDI
             
             ;# PRINT SS
             PUSH     RDI
             LEA      RDI, [RIP+KREGSS]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_SS]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
             
             ;# PRINT RSP
             PUSH     RDI
             LEA      RDI, [RIP+KREGRSP]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_RSP]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
 
             ;# HORIZONTAL LINE
             PUSH     RDI
             LEA      RDI, [RIP+KREGHR]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             
             ;# PRINT RAX
             PUSH     RDI
             LEA      RDI, [RIP+KREGRAX]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_RAX]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
             
             ;# PRINT RBX
             PUSH     RDI
             LEA      RDI, [RIP+KREGRBX]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_RBX]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
             
             ;# PRINT RCX
             PUSH     RDI
             LEA      RDI, [RIP+KREGRCX]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_RCX]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
 
             ;# NEW LINE
             PUSH     RDI
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
             POP      RDI
 
             ;# PRINT RDX
             PUSH     RDI
             LEA      RDI, [RIP+KREGRDX]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_RDX]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
 
             ;# PRINT RSI
             PUSH     RDI
             LEA      RDI, [RIP+KREGRSI]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_RSI]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
 
             ;# PRINT RDI
             PUSH     RDI
             LEA      RDI, [RIP+KREGRDI]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_RDI]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
 
             ;# NEW LINE
             PUSH     RDI
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
             POP      RDI
             
             ;# PRINT RBP
             PUSH     RDI
             LEA      RDI, [RIP+KREGRBP]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_RBP]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
 
             ;# HORIZONTAL LINE
             PUSH     RDI
             LEA      RDI, [RIP+KREGHR]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             
             ;# PRINT R8
             PUSH     RDI
             LEA      RDI, [RIP+KREGR8]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_R8]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
             
             ;# PRINT R9
             PUSH     RDI
             LEA      RDI, [RIP+KREGR9]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_R9]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
             
             ;# PRINT R10
             PUSH     RDI
             LEA      RDI, [RIP+KREGR10]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_R10]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
 
             ;# NEW LINE
             PUSH     RDI
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
             POP      RDI
             
             ;# PRINT R11
             PUSH     RDI
             LEA      RDI, [RIP+KREGR11]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_R11]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
             
             ;# PRINT R12
             PUSH     RDI
             LEA      RDI, [RIP+KREGR12]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_R12]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
             
             ;# PRINT R13
             PUSH     RDI
             LEA      RDI, [RIP+KREGR13]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_R13]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
 
             ;# NEW LINE
             PUSH     RDI
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
             POP      RDI
             
             ;# PRINT R14
             PUSH     RDI
             LEA      RDI, [RIP+KREGR14]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_R14]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
             
             ;# PRINT R15
             PUSH     RDI
             LEA      RDI, [RIP+KREGR15]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
             PUSH     RDI
             MOV      RDI, [RDI+SFRAME_R15]
-            CALL     KLOGHEX
+            CALL     KCONHEX
             POP      RDI
 
             ;# HORIZONTAL LINE
             PUSH     RDI
             LEA      RDI, [RIP+KREGHR]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             POP      RDI
 
             ;# DONE

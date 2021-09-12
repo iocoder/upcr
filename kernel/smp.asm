@@ -180,11 +180,11 @@ KSMP64:     ;# 64-BIT CODE
 
 KSMPINIT:   ;# PRINT INIT MSG
             LEA      RDI, [RIP+KSMPNAME]
-            CALL     KLOGMOD
+            CALL     KCONMOD
             LEA      RDI, [RIP+KSMPMSG]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
 
             ;# COPY THE TRAMPOLINE TO LOWER MEMORY
             MOV      RDI, MEM_TRUMP
@@ -209,21 +209,21 @@ KSMPINIT:   ;# PRINT INIT MSG
 
             ;# PRINT NUMBER OF DETECTED CORES
             LEA      RDI, [RIP+KSMPNAME]
-            CALL     KLOGMOD
+            CALL     KCONMOD
             LEA      RDI, [RIP+KSMPDET]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             MOV      RDI, [RIP+KSMPCORES]
-            CALL     KLOGDEC
+            CALL     KCONDEC
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
 
             ;# PRINT SUCCESS MESSAGE
             LEA      RDI, [RIP+KSMPNAME]
-            CALL     KLOGMOD
+            CALL     KCONMOD
             LEA      RDI, [RIP+KSMPSUC]
-            CALL     KLOGSTR
+            CALL     KCONSTR
             MOV      RDI, '\n'
-            CALL     KLOGCHR
+            CALL     KCONCHR
 
             ;# DONE
             XOR      RAX, RAX

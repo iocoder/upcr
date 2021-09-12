@@ -1,6 +1,6 @@
 ;###############################################################################
-;# File name:    KERNEL/TMR.ASM
-;# DESCRIPTION:  KERNEL TIMER MANAGEMENT
+;# File name:    KERNEL/SPL.ASM
+;# DESCRIPTION:  PRINT SPLASH AND WELCOME MESSAGES
 ;# AUTHOR:       RAMSES A.
 ;###############################################################################
 ;#
@@ -41,8 +41,7 @@
 ;###############################################################################
 
             ;# GLOBAL SYMBOLS
-            PUBLIC   KTMRINIT
-            PUBLIC   KTMRSETUP
+            PUBLIC   KSPLINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -52,27 +51,40 @@
             SEGMENT  ".text"
 
 ;#-----------------------------------------------------------------------------#
-;#                               KTMRINIT()                                    #
+;#                               KSPLINIT()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KTMRINIT:   ;# PRINT INIT MSG
-            LEA      RDI, [RIP+KTMRNAME]
-            CALL     KCONMOD
-            LEA      RDI, [RIP+KTMRMSG]
+KSPLINIT:   ;# HEADER COLOUR
+            MOV      RDI, 0x0A
+            MOV      RSI, -1
+            CALL     KCONATT
+
+            ;# PRINT HEADER
+            LEA      RDI, [RIP+KSPLHDR]
             CALL     KCONSTR
-            MOV      RDI, '\n'
-            CALL     KCONCHR
 
-            ;# DONE
-            XOR      RAX, RAX
-            RET
+            ;# WELCOME MSG COLOUR
+            MOV      RDI, 0x0E
+            MOV      RSI, -1
+            CALL     KCONATT
 
-;#-----------------------------------------------------------------------------#
-;#                               KTMRSETUP()                                   #
-;#-----------------------------------------------------------------------------#
+            ;# PRINT WELCOME MSG
+            LEA      RDI, [RIP+KSPLWEL]
+            CALL     KCONSTR
 
-KTMRSETUP:  ;# SCHEDULE TIMER INTERRUPTS
-            CALL     KTSCUS
+            ;# LICENSE COLOUR
+            MOV      RDI, 0x0F
+            MOV      RSI, -1
+            CALL     KCONATT
+
+            ;# PRINT LICENSE
+            LEA      RDI, [RIP+KSPLLIC]
+            CALL     KCONSTR
+
+            ;# SET PRINTING COLOUR TO YELLOW
+            MOV      RDI, 0x0B
+            MOV      RSI, -1
+            CALL     KCONATT
 
             ;# DONE
             XOR      RAX, RAX
@@ -89,6 +101,14 @@ KTMRSETUP:  ;# SCHEDULE TIMER INTERRUPTS
 ;#                            LOGGING STRINGS                                  #
 ;#-----------------------------------------------------------------------------#
 
-            ;# TMR HEADING AND ASCII STRINGS
-KTMRNAME:   DB       "KERNEL TMR\0"
-KTMRMSG:    DB       "TSC IS SELECTED TO BE THE MAIN TIMER.\0"
+            ;# HEADER TEXT
+KSPLHDR:    INCBIN   "kernel/header.txt"
+            DB       "\0"
+
+            ;# WELCOME TEXT
+KSPLWEL:    INCBIN   "kernel/welcome.txt"
+            DB       "\0"
+
+            ;# LICENSE TEXT
+KSPLLIC:    INCBIN   "kernel/license.txt"
+            DB       "\0"
