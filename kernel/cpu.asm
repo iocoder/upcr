@@ -128,20 +128,16 @@ KCPUINIT:   ;# GET CPU MANUFACTURER
 1:          RDMSR
             AND      EAX, 0xFFFFF000
             CMP      EAX, [RIP+KVGAPMEM]
-            JE       2f
-            INC      ECX
+            JNE      2f
+            OR       EAX, 1
+            WRMSR
+2:          INC      ECX
             INC      ECX
             CMP      EDI, ECX
             JNE      1b
-            JMP      3f
-
-            ;# IF MTRR REGISTER FOUND, ENABLE UC
-2:          OR       EAX, 1
-            WRMSR
-            RDMSR
 
             ;# DONE
-3:          XOR      RAX, RAX
+            XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -162,6 +158,29 @@ KCPUSETUP:  ;# INVALIDATE CACHE
             ;# INITIALIZE CR8
             MOV      RAX, 0x00000000   ;# PRI = 0
             MOV      CR8, RAX
+
+            ;# READ MTRR CAPABILITY
+            MOV      ECX, MSR_MTRR_CAP
+            RDMSR
+
+            ;# DETERMINE LAST MTRR
+            AND      EAX, 0xFF
+            SHL      EAX, 1
+            ADD      EAX, MSR_MTRR_BASE
+            MOV      EDI, EAX
+            MOV      ECX, MSR_MTRR_BASE
+
+            ;# LOOP OVER MTRR REGISTERS
+1:          RDMSR
+            AND      EAX, 0xFFFFF000
+            CMP      EAX, [RIP+KVGAPMEM]
+            JNE      2f
+            OR       EAX, 1
+            WRMSR
+2:          INC      ECX
+            INC      ECX
+            CMP      EDI, ECX
+            JNE      1b
 
             ;# DONE
             XOR      RAX, RAX

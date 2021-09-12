@@ -63,12 +63,12 @@ KGDTINIT:   ;# PRINT INIT MSG
             CALL     KLOGCHR
 
             ;# COPY THE GDTR DESCRIPTOR TO LOWER MEMORY
-            MOV      RDI, GDTR_ADDR
+            MOV      RDI, MEM_GDTR
             MOV      RAX, [RIP+KGDTDESC]
             MOV      [RDI], RAX
 
             ;# COPY THE GDT TABLE TO LOWER MEMORY
-            MOV      RDI, GDT_ADDR
+            MOV      RDI, MEM_GDT_TABLE
             LEA      RSI, [RIP+KGDTSTART]
             LEA      RCX, [RIP+KGDTDESC]
             SUB      RCX, RSI
@@ -81,7 +81,7 @@ KGDTINIT:   ;# PRINT INIT MSG
             LOOP     1b
 
             ;# LOAD GDTR DESCRIPTOR
-            LGDT     [GDTR_ADDR]
+            LGDT     [MEM_GDTR]
 
             ;# MAKE A FAR JUMP TO RELOAD CS USING LONG-MODE LRETQ
             MOV      RAX, 0x20
@@ -125,7 +125,7 @@ KGDTSTART:  ;# GDT TABLE FOR PROTECTED AND LONG MODE
 
 KGDTDESC:   ;# GDTR DESCRIPTOR
             DW       0xFFF
-            DD       GDT_ADDR
+            DD       MEM_GDT_TABLE
             DW       0
 
 ;###############################################################################

@@ -62,20 +62,23 @@ KVMMINIT:   ;# print init msg
             MOV      RDI, '\n'
             CALL     KLOGCHR
 
-            ;# initialize PML4Table
-            MOV      RSI, CR3
-            MOV      RDI, PM4L_ADDR
-            MOV      RCX, 0x1000
+            ;# INITIALIZE L3 IDENTITY TABLE
+            MOV      RCX, 0x00000083
+            MOV      RDI, MEM_IDN_PTABLE
+1:          MOV      [RDI], RCX
+            ADD      RCX, 0x40000000
+            ADD      RDI, 8
+            CMP      RDI, MEM_IDN_PTABLE+0x1000
+            JNE      1b
 
-            ;# copy LOOP
-1:          MOV      AL, [RSI]
-            MOV      [RDI], AL
-            INC      RSI
-            INC      RDI
-            LOOP     1b
+            ;# INITIALIZE L4 ROOT TABLES
+            MOV      RDI, MEM_CPU_PTABLES
+            MOV      RCX, MEM_IDN_PTABLE
+            OR       RCX, 0x00000003
+            MOV      [RDI], RCX
 
             ;# load CR3 with PML4 table base
-            MOV      RAX, PM4L_ADDR
+            MOV      RAX, MEM_CPU_PTABLES
             MOV      CR3, RAX
 
             ;# done

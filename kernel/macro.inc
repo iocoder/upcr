@@ -39,14 +39,16 @@
 # LOWER 1MB OF MEMORY
 # --------------------------------------
 
-            .EQU     TRUMP_ADDR,      0x00000000     ;# SMP trampoline
-            .EQU     GDTR_ADDR,       0x00001000     ;# GDTR Descriptor
-            .EQU     IDTR_ADDR,       0x00001800     ;# IDTR Descriptor
-            .EQU     GDT_ADDR,        0x00002000     ;# GDT Table
-            .EQU     IDT_ADDR,        0x00003000     ;# IDT Table
-            .EQU     TSS_ADDR,        0x00004000     ;# TSS Segments (32 segments for 32 CPUs)
-            .EQU     STACK_ADDR,      0x00010000     ;# Kernel Stacks (32 stacks for 32 CPUs)    
-            .EQU     PM4L_ADDR,       0x00030000     ;# Kernel root page table
+            .EQU     MEM_TRUMP,       0x00000000     ;# SMP trampoline
+            .EQU     MEM_GDTR,        0x00001000     ;# GDTR Descriptor
+            .EQU     MEM_IDTR,        0x00001800     ;# IDTR Descriptor
+            .EQU     MEM_GDT_TABLE,   0x00002000     ;# GDT Table
+            .EQU     MEM_IDT_TABLE,   0x00003000     ;# IDT Table
+            .EQU     MEM_TSS_TABLE,   0x00004000     ;# TSS Segments (32 segments for 32 CPUs)
+            .EQU     MEM_IDN_PTABLE,  0x00005000     ;# L3 PAGE TABLE
+            .EQU     MEM_CPU_PTABLES, 0x00010000     ;# Kernel root page table
+            .EQU     MEM_CPU_STACKS,  0x00030000     ;# Kernel Stacks (32 stacks for 32 CPUs)    
+            .EQU     MEM_LAST_ADDR,   0x00050000     ;# LAST ADDRESS IN LOWER 640KB
 
 # --------------------------------------
 # MSR REGISTERS

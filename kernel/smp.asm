@@ -71,7 +71,7 @@ KSMP16:     ;# 16-BIT CODE
             MOV      SS, BX
 
             ;# LOAD GDTR REGISTER
-            LGDT     [GDTR_ADDR]
+            LGDT     [MEM_GDTR]
 
             ;# ENTER PROTECTED MODE
             MOV      EAX, CR0
@@ -108,7 +108,7 @@ KSMP32:     ;# 32-BIT CODE
             WRMSR
 
             ;# LOAD CR3 WITH PML4 TABLE BASE
-            MOV      EAX, PM4L_ADDR
+            MOV      EAX, MEM_CPU_PTABLES
             MOV      CR3, EAX
 
             ;# ENABLE PAGING; THIS ACTIVATES LONG MODE
@@ -160,13 +160,13 @@ KSMP64:     ;# 64-BIT CODE
             ;# USE THIS PARTICULAR CPU STACK
             MOV      RSP, RAX
             SHL      RSP, 12
-            ADD      RSP, STACK_ADDR
+            ADD      RSP, MEM_CPU_STACKS
             ADD      RSP, 0x1000
             MOV      RBP, RSP
             NOP
 
             ;# INITIALIZE IDT
-            LIDT     [IDTR_ADDR]
+            LIDT     [MEM_IDTR]
 
             ;# ENABLE THE CORE
             INT      IVT_SMP_EN
@@ -187,7 +187,7 @@ KSMPINIT:   ;# PRINT INIT MSG
             CALL     KLOGCHR
 
             ;# COPY THE TRAMPOLINE TO LOWER MEMORY
-            MOV      RDI, TRUMP_ADDR
+            MOV      RDI, MEM_TRUMP
             LEA      RSI, [RIP+KSMP16]
             LEA      RCX, [RIP+KSMPINIT]
             SUB      RCX, RSI

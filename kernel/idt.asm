@@ -239,8 +239,8 @@ KIDTINIT:   ;# PRINT INIT MSG
             ;# RDI: ADDRESS OF FIRST IDT DESCRIPTOR TO FILL
             ;# RCX: ADDRESS OF THE IDT DESCRIPTOR TO STOP AT
             ;# RSI: ADDRESS OF KIDTEXPS
-            MOV      RDI, IDT_ADDR
-            MOV      RCX, IDT_ADDR
+            MOV      RDI, MEM_IDT_TABLE
+            MOV      RCX, MEM_IDT_TABLE
             ADD      RDI, IVT_EXP_START*16
             ADD      RCX, IVT_EXP_START*16+IVT_EXP_COUNT*16
             LEA      RSI, [RIP+KIDTEXPS]
@@ -271,8 +271,8 @@ KIDTINIT:   ;# PRINT INIT MSG
             ;# RDI: ADDRESS OF FIRST IDT DESCRIPTOR TO FILL
             ;# RCX: ADDRESS OF THE IDT DESCRIPTOR TO STOP AT
             ;# RSI: ADDRESS OF KIDTSVCS
-            MOV      RDI, IDT_ADDR
-            MOV      RCX, IDT_ADDR
+            MOV      RDI, MEM_IDT_TABLE
+            MOV      RCX, MEM_IDT_TABLE
             ADD      RDI, IVT_SVC_START*16
             ADD      RCX, IVT_SVC_START*16+IVT_SVC_COUNT*16
             LEA      RSI, [RIP+KIDTSVCS]
@@ -303,8 +303,8 @@ KIDTINIT:   ;# PRINT INIT MSG
             ;# RDI: ADDRESS OF FIRST IDT DESCRIPTOR TO FILL
             ;# RCX: ADDRESS OF THE IDT DESCRIPTOR TO STOP AT
             ;# RSI: ADDRESS OF KIDTSMPS
-            MOV      RDI, IDT_ADDR
-            MOV      RCX, IDT_ADDR
+            MOV      RDI, MEM_IDT_TABLE
+            MOV      RCX, MEM_IDT_TABLE
             ADD      RDI, IVT_SMP_START*16
             ADD      RCX, IVT_SMP_START*16+IVT_SMP_COUNT*16
             LEA      RSI, [RIP+KIDTSMPS]
@@ -335,8 +335,8 @@ KIDTINIT:   ;# PRINT INIT MSG
             ;# RDI: ADDRESS OF FIRST IDT DESCRIPTOR TO FILL
             ;# RCX: ADDRESS OF THE IDT DESCRIPTOR TO STOP AT
             ;# RSI: ADDRESS OF KIDTIRQS
-            MOV      RDI, IDT_ADDR
-            MOV      RCX, IDT_ADDR
+            MOV      RDI, MEM_IDT_TABLE
+            MOV      RCX, MEM_IDT_TABLE
             ADD      RDI, IVT_IRQ_START*16
             ADD      RCX, IVT_IRQ_START*16+IVT_IRQ_COUNT*16
             LEA      RSI, [RIP+KIDTIRQS]
@@ -365,12 +365,12 @@ KIDTINIT:   ;# PRINT INIT MSG
 
             ;# INITIALIZE IDTR DESCRIPTOR
             MOV      AX, 0xFFF
-            MOV      [IDTR_ADDR+0], AX
-            MOV      EAX, IDT_ADDR 
-            MOV      [IDTR_ADDR+2], EAX
+            MOV      [MEM_IDTR+0], AX
+            MOV      EAX, MEM_IDT_TABLE 
+            MOV      [MEM_IDTR+2], EAX
 
             ;# LOAD IDT TABLE
-            LIDT     [IDTR_ADDR]
+            LIDT     [MEM_IDTR]
 
             ;# DONE
 3:          XOR      RAX, RAX
