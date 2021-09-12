@@ -201,6 +201,7 @@ KIRQSIPI:   ;# BROADCAST THE SIPI IPI TO ALL PROCESSORS EXCEPT SELF
 ;#-----------------------------------------------------------------------------#
 
 KIRQISR:    ;# WE JUST RECEIVED AN IRQ DELIVERED BY LAPIC
+#if 0
             PUSH     RDI
             LEA      RDI, [RIP+KIRQNAME]
             CALL     KCONMOD
@@ -212,6 +213,7 @@ KIRQISR:    ;# WE JUST RECEIVED AN IRQ DELIVERED BY LAPIC
 
             ;# PRINT REGISTER DUMP
             CALL     KREGDUMP
+#endif
 
             ;# SEND END OF INTERRUPT SIGNAL
             MOV      EAX, 0x00

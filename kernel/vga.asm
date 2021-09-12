@@ -87,10 +87,19 @@ KVGAINIT:   ;# READ KVGAAVL FROM INIT STRUCT
             ;# DID THE USER PROVIDE VGA INFORMATION ANYWAYS?
             MOV      RAX, [RIP+KVGAAVL]
             CMP      RAX, 0
-            JZ       1f
+            JZ       2f
+
+            ;# CLEAN UP VGA
+            MOV      RSI, [RIP+KVGAPMEM]
+            MOV      RCX, [RIP+KVGASIZE]
+            MOV      EAX, [RIP+KVGAPAL+0x01*8]
+1:          MOV      [RSI], EAX
+            ADD      RSI, 4
+            SUB      RCX, 4
+            JNZ      1b
 
             ;# DONE
-1:          XOR      RAX, RAX
+2:          XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -210,9 +219,9 @@ KVGAHIGH:   DQ       0
             ;# COLOUR PALETTE
 KVGAPAL:    DQ       0x00000000  ;# 00: BLACK
             DQ       0x00800000  ;# 01: MAROON
-            DQ       0x00008000  ;# 02: GREEN
+            DQ       0x00002000  ;# 02: GREEN
             DQ       0x00808000  ;# 03: OLIVE
-            DQ       0x00000080  ;# 04: NAVY
+            DQ       0x00000010  ;# 04: NAVY
             DQ       0x00800080  ;# 05: PURBLE
             DQ       0x00008080  ;# 06: TEAL
             DQ       0x00808080  ;# 07: SILVER

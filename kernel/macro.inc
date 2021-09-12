@@ -237,6 +237,7 @@
 # --------------------------------------
 
             .EQU     CONSOLE_WIDTH,      100
-            .EQU     CONSOLE_HEIGHT,     32
+            .EQU     CONSOLE_HEIGHT,     31
+            .EQU     CONSOLE_HEADROWS,   5
             .EQU     CONSOLE_MAXLINES,   4096
             .EQU     CONSOLE_PAGESIZE,   (128*4096)

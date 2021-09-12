@@ -106,7 +106,7 @@ KTSCINIT:   ;# READ TSC STAMP
 ;#                                KTSCUS()                                     #
 ;#-----------------------------------------------------------------------------#
 
-KTSCUS:     MOV      RDI, 2000000
+KTSCUS:     MOV      RDI, 20000000
 
             MOV      RAX, [RIP+KTSCFREQ]
             MUL      RDI

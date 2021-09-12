@@ -64,18 +64,46 @@
 KCONINIT:   ;# CLEAR SCREEN
             CALL     KCONCLR
 
+            ;# PRINT SCREEN HEADER
+            LEA      RSI, [RIP+KCONHD]
+            MOV      R8, 0
+            MOV      R9, 0
+1:          MOV      ECX, 0x020F0000
+            MOV      CL, [RSI]
+            PUSH     RSI
+            CALL     KCONDRAW
+            POP      RSI
+            INC      RSI
+            INC      R8
+            CMP      R8, CONSOLE_WIDTH
+            JNE      1b
+            XOR      R8, R8
+            INC      R9
+            CMP      R9, 5
+            JNE      1b
+
+            ;# PRINT SCREEN FOOTER
+            MOV      R8, 0
+            MOV      R9, CONSOLE_HEIGHT+CONSOLE_HEADROWS
+1:          MOV      ECX, 0x010F0000
+            CALL     KCONDRAW
+            INC      R8
+            CMP      R8, CONSOLE_WIDTH
+            JNE      1b
+
             ;# DONE
             XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
-;#                               KCONUPD()                                     #
+;#                               KCONDRAW()                                    #
 ;#-----------------------------------------------------------------------------#
 ;#
 ;# @BRIEF:  DRAW A CHAR ON ACTIVE DISPLAY
 ;# @INPUT:  R8:  X OFFSET OF THE WHOLE SCREEN
 ;#          R9:  Y OFFSET OF THE WHOLE SCREEN
 ;#          ECX: CHARACTER TO DRAW AND ITS ATTRIBS
+
 KCONDRAW:   ;# PLOT THE CHARACTER ON VGA
             PUSH     RCX
             PUSH     R8
@@ -122,7 +150,7 @@ KCONPUT:    ;# CHECK FOR CONTROL CHARS
             DIV      R8
             MOV      R8, RDX
             MOV      R9, RAX
-            ADD      R9, 3
+            ADD      R9, CONSOLE_HEADROWS
             CALL     KCONDRAW
 
             ;# MOVE CURSOR TO NEXT POSITION
@@ -180,9 +208,9 @@ KCONPUT:    ;# CHECK FOR CONTROL CHARS
             ;# DRAW CUR CHAR
 91:         PUSH     RSI
             MOV      ECX, [RSI]
-            ADD      R9, 3
+            ADD      R9, CONSOLE_HEADROWS
             CALL     KCONDRAW
-            SUB      R9, 3
+            SUB      R9, CONSOLE_HEADROWS
             POP      RSI
 
             ;# MOVE TO NEXT ONE
@@ -426,8 +454,20 @@ KCONMOD:    ;# SAVE A COPY OF RDI
             ;# CONSOLE PAGE 0
 KCONPAGE:   .SPACE   (CONSOLE_PAGESIZE*4)
 KCONCUR:    DQ       0
-KCONATTR:   DQ       0x0600
+KCONATTR:   DQ       0x0400
 KCONOFF:    DQ       0
 
             ;# ALL HEX DIGIT SYMBOLS
 KCONDIGS:   DB       "0123456789ABCDEF"
+
+            ;# SCREEN HEADING
+KCONHD:     DB       "                                                 "
+            DB       "                                                 "
+            DB       "                              UNIVERSAL PLATFORM "
+            DB       "FOR CONFIGURABLE ROUTING                         "
+            DB       "                                   UPCR VERSION  "
+            DB       "21.09 - X86_64 KERNEL                                  "
+            DB       "                                 COPYRIGHT (C) 20"
+            DB       "21 RAMSES NAGIB                                  "
+            DB       "                                                 "
+            DB       "                                                 "
