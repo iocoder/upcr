@@ -43,6 +43,7 @@
             ;# GLOBAL SYMBOLS
             PUBLIC   KTMRINIT
             PUBLIC   KTMRSETUP
+            PUBLIC   KTMRINTR
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -77,6 +78,21 @@ KTMRSETUP:  ;# SCHEDULE TIMER INTERRUPTS
             ;# DONE
             XOR      RAX, RAX
             RET
+
+;#-----------------------------------------------------------------------------#
+;#                               KTMRSYNC()                                    #
+;#-----------------------------------------------------------------------------#
+
+KTMRINTR:   ;# SCHEDULE ANOTHER INTERRUPT
+            CALL     KTSCUS
+
+            ;# UPDATE RTC TIMER
+            CALL     KRTCSYNC
+
+            ;# DONE
+            XOR      RAX, RAX
+            RET
+
 
 ;###############################################################################
 ;#                              DATA SECTION                                   #

@@ -89,14 +89,24 @@ KVGAINIT:   ;# READ KVGAAVL FROM INIT STRUCT
             CMP      RAX, 0
             JZ       2f
 
-            ;# CLEAN UP VGA
-            MOV      RSI, [RIP+KVGAPMEM]
-            MOV      RCX, [RIP+KVGASIZE]
+            ;# COMPUTE THE START OF VGA STATUS BAR
+            XOR      RDX, RDX
+            MOV      RAX, CONSOLE_TOTROWS-1
+            SHL      RAX, 4
+            MOV      RCX, [RIP+KVGALINE]
+            SHL      RCX, 2
+            MUL      RCX
+            
+            ;# DRAW STATUS BAR TO END OF SCREEN
+            MOV      RDI, [RIP+KVGAPMEM]
+            ADD      RDI, RAX
+            MOV      RCX, [RIP+KVGAPMEM]
+            ADD      RCX, [RIP+KVGASIZE]
             MOV      EAX, [RIP+KVGAPAL+0x01*8]
-1:          MOV      [RSI], EAX
-            ADD      RSI, 4
-            SUB      RCX, 4
-            JNZ      1b
+1:          MOV      [RDI], EAX
+            ADD      RDI, 4
+            CMP      RDI, RCX
+            JNE      1b
 
             ;# DONE
 2:          XOR      RAX, RAX
@@ -126,8 +136,16 @@ KVGAPLOT:   ;# CONVERT Y TO PIXEL OFFSET FROM THE BEGINNING OF THE BUFFER
             MOV      RDX, [RIP+KVGALINE]     ;# RDX = PPL
             MUL      RDX                     ;# RAX = Y*16*PPL (PPL=PIXELS PER LINE)
 
+            ;# ADJUSTMENT FOR STATUS BAR
+            CMP      R9,  CONSOLE_TOTROWS-1
+            JNE      1f
+            ADD      RAX, [RIP+KVGALINE]
+            ADD      RAX, [RIP+KVGALINE]
+            ADD      RAX, [RIP+KVGALINE]
+            ADD      RAX, [RIP+KVGALINE]
+
             ;# ADD AMOUNT OF HORIZONTAL PIXELS TO THE OFFSET
-            MOV      RDX, R8                 ;# RDX = X
+1:          MOV      RDX, R8                 ;# RDX = X
             SHL      RDX, 3                  ;# RDX = X*8 (CHAR WIDTH IS 8 PIXELS)
             ADD      RAX, RDX                ;# RAX = Y*16*PPL + X*8
 

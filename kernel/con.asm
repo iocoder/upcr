@@ -49,6 +49,7 @@
             PUBLIC   KCONATT
             PUBLIC   KCONCLR
             PUBLIC   KCONMOD
+            PUBLIC   KCONDATE
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -84,7 +85,7 @@ KCONINIT:   ;# CLEAR SCREEN
 
             ;# PRINT SCREEN FOOTER
             MOV      R8, 0
-            MOV      R9, CONSOLE_HEIGHT+CONSOLE_HEADROWS
+            MOV      R9, CONSOLE_WINDROWS+CONSOLE_HEADROWS
 1:          MOV      ECX, 0x010F0000
             CALL     KCONDRAW
             INC      R8
@@ -191,7 +192,7 @@ KCONPUT:    ;# CHECK FOR CONTROL CHARS
 90:         MOV      RAX, [RIP+KCONCUR]
             MOV      RCX, [RIP+KCONOFF]
             SUB      RAX, RCX
-            CMP      RAX, CONSOLE_WIDTH*CONSOLE_HEIGHT*4
+            CMP      RAX, CONSOLE_WIDTH*CONSOLE_WINDROWS*4
             JNE      99f
 
             ;# UPDATE SCREEN OFFSET
@@ -220,7 +221,7 @@ KCONPUT:    ;# CHECK FOR CONTROL CHARS
             JNE      91b
             XOR      R8, R8
             INC      R9
-            CMP      R9, CONSOLE_HEIGHT
+            CMP      R9, CONSOLE_WINDROWS
             JNE      91b
 
             ;# DONE
@@ -383,7 +384,7 @@ KCONATT:    ;# FOREGROUND COLOUR SPECIFIED?
 ;#-----------------------------------------------------------------------------#
 
 KCONCLR:    ;# CLEAR THE CONSOLE WINDOW 
-            MOV      RCX, CONSOLE_HEIGHT
+            MOV      RCX, CONSOLE_WINDROWS
 1:          PUSH     RCX
             MOV      RDI, '\n'
             CALL     KCONPUT
@@ -435,6 +436,36 @@ KCONMOD:    ;# SAVE A COPY OF RDI
 
             ;# DONE
             XOR      RAX, RAX
+            RET
+
+;#-----------------------------------------------------------------------------#
+;#                               KCONDATE()                                    #
+;#-----------------------------------------------------------------------------#
+
+KCONDATE:   ;# SET RSI TO DATE/TIME STRING
+            MOV      RSI, RDI
+            MOV      R8, 2
+            MOV      R9, CONSOLE_HEADROWS+CONSOLE_WINDROWS
+
+            ;# READ NEXT BYTE
+1:          XOR      ECX, ECX
+            MOV      CL, [RSI]
+            CMP      CL, 0
+            JE       2f
+
+            ;# DRAW BYTE
+            ADD      ECX, 0x010B0000
+            PUSH     RSI
+            CALL     KCONDRAW
+            POP      RSI
+
+            ;# LOOP BACK AGAIN
+            INC      RSI
+            INC      R8
+            JMP      1b
+
+            ;# DONE
+2:          XOR      RAX, RAX
             RET
 
 ;###############################################################################

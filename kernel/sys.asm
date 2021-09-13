@@ -73,6 +73,7 @@ KSYSINIT:   ;# TAKE A COPY OF BOOT INFO PTR
             CALL     KVMMINIT
 
             ;# INITIALIZE TIMERS
+            CALL     KRTCINIT
             CALL     KPITINIT
             CALL     KLATINIT
             CALL     KTSCINIT
