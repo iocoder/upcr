@@ -89,6 +89,19 @@ KVGAINIT:   ;# READ KVGAAVL FROM INIT STRUCT
             CMP      RAX, 0
             JZ       2f
 
+            ;# DRAW HEADING BAR
+            MOV      RDI, [RIP+KVGAPMEM]
+            MOV      RCX, [RIP+KVGALINE]
+            MOV      RAX, CONSOLE_HEADROWS*4*16
+            MUL      RCX
+            MOV      RCX, RAX
+            ADD      RCX, RDI
+            MOV      EAX, [RIP+KVGAPAL+(CONSOLE_HEADATTR>>24)*8]
+1:          MOV      [RDI], EAX
+            ADD      RDI, 4
+            CMP      RDI, RCX
+            JNE      1b
+
             ;# COMPUTE THE START OF VGA STATUS BAR
             XOR      RDX, RDX
             MOV      RAX, CONSOLE_TOTROWS-1
@@ -102,7 +115,7 @@ KVGAINIT:   ;# READ KVGAAVL FROM INIT STRUCT
             ADD      RDI, RAX
             MOV      RCX, [RIP+KVGAPMEM]
             ADD      RCX, [RIP+KVGASIZE]
-            MOV      EAX, [RIP+KVGAPAL+0x01*8]
+            MOV      EAX, [RIP+KVGAPAL+(CONSOLE_STATATTR>>24)*8]
 1:          MOV      [RDI], EAX
             ADD      RDI, 4
             CMP      RDI, RCX
@@ -160,7 +173,8 @@ KVGAPLOT:   ;# CONVERT Y TO PIXEL OFFSET FROM THE BEGINNING OF THE BUFFER
             XOR      RAX, RAX                ;# RAX = 0
             MOV      AL, CL                  ;# RAX = ASCII
             SHL      RAX, 4                  ;# RCX = ASCII*16 (EACH GLYPH IS 16 BYTES)
-            LEA      RSI, [RIP+KVGAFONT]     ;# RSI = &FONT[0]
+            LEA      RSI, [RIP+KVGAFONT]
+            ADD      RSI, 0x65A
             ADD      RSI, RAX                ;# RSI = &FONT[IDX*16]
 
             ;# LOAD BG COLOUR IN EDX
@@ -238,20 +252,20 @@ KVGAHIGH:   DQ       0
 KVGAPAL:    DQ       0x00000000  ;# 00: BLACK
             DQ       0x00800000  ;# 01: MAROON
             DQ       0x00002000  ;# 02: GREEN
-            DQ       0x00808000  ;# 03: OLIVE
-            DQ       0x00000010  ;# 04: NAVY
-            DQ       0x00800080  ;# 05: PURBLE
+            DQ       0x00308000  ;# 03: OLIVE
+            DQ       0x00000030  ;# 04: NAVY
+            DQ       0x00400040  ;# 05: PURBLE
             DQ       0x00008080  ;# 06: TEAL
             DQ       0x00808080  ;# 07: SILVER
             DQ       0x00C0C0C0  ;# 08: GREY
             DQ       0x00FF0000  ;# 09: RED
             DQ       0x0000FF00  ;# 0A: LIME
-            DQ       0x00FFFF00  ;# 0B: YELLOW
-            DQ       0x000000FF  ;# 0C: BLUE
+            DQ       0x00FFDB58  ;# 0B: YELLOW
+            DQ       0x0000009F  ;# 0C: BLUE
             DQ       0x00FF00FF  ;# 0D: PURBLE
             DQ       0x0000FFFF  ;# 0E: CYAN
             DQ       0x00FFFFFF  ;# 0F: WHITE
 
             ;# FONT DATA
             ALIGN    256
-KVGAFONT:   INCBIN   "kernel/font.bin"
+KVGAFONT:   INCBIN   "fonts/ACM_VGA.FON"

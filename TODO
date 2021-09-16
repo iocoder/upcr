@@ -1,2 +1,152 @@
-TODO list.
+
+BUILD PROCESS:
+--------------
+- make install?  [support configuration --prefix paramater]
+
+IRQs:
+--------
+- ACPI MADT TABLES
+- I/O APIC
+- RTC IRQ Every 1 second TO UPDATE DATE TIME
+- COMPUTE WEEK DAY
+- INTERFACE TO GET DATE/TIME FROM USER SPACE (getHour, getMinute, etc. -- read 
+  directly from CMOS). sync() would use them to create format string.
+- support all formats instead of just BCD
+
+- PIT timer for ticks? irqs should be delivered to their modules not to TMR
+- Tick counter update on vga display
+- fire LAPIC IRQ every 10 seconds on all cores to keep things alive
+
+CONSOLE:
+--------
+- WE HAVE A CUTE CONSOLE. THE CONSOLE HAS PAGES: PAGE 0, PAGE 1, PAGE 2, ETC.
+
+  RROGRAMS CAN WRITE FORMATTED OUTPUT TO A PAGE
+  PROGRAMS CAN ALSO WAIT FOR FORMATTED INPUT ON A SPECIFIC PAGE
+
+  CONSOLE USES VGA AND UART FOR OUTPUT
+  CONSOLE USES KBD AND UART FOR INPUT
+
+  CONSOLE PAGE 0 IS USED FOR KERNEL LOGS
+
+- CONSOLE status bar with time and date and tick counter
+
+CONSOLE OUTPUT:
+---------------
+- ADD SERIAL PORT DRIVER (COM)
+
+CONSOLE INPUT:
+---------------
+- PS/2 KEYBOARD (Enable USB legacy mode from BIOS)
+- FUNCTIONS TO WAIT FOR FORMATTED INPUT?
+- INPUTS NEED TO BE BUFFERED TO ALLOW THREADS TO SLEEP
+- CONSOLE PAGE SCROLL UP AND DOWN
+
+MEMORY MANAGEMENT:
+------------------
+- page table for each CPU
+- RAM frames initialization
+
+MULTITASKING:
+-------------
+- kernel processes
+- kernel tasks
+- kernel scheduler (no need for shmem for now)
+
+MEMORY:
+-------
+ONE PAGE TABLE FOR EACH PROCESSOR
+this means L4 and L3 remain constant during runtime
+
+Or maybe we can have one page table for each process,
+this will allow processes to have more than one 1GB slot.
+But honestly the first option (one page table for all) seems
+more efficient and easy to implement.
+
+Each process has a specific 1GB slot
+The slot contains:
+ - process code and data
+ - pages allocated/deallocated by process
+ - shmem pages allocated/deallocated by process
+ - process stacks (to be used by different tasks)
+
+Each process has an ID for TLB identification
+You can have up to 4096 IDs (limit processes to 4096?)
+
+When task calls another process (routine call):
+  - turn off the caller process slot in CPU's page table O(1)
+  - turn on the callee process slot                      O(1)
+  - tell the TLB about the new process ID                O(1)
+  - select a free stack                                  O(1)
+  - jump into process' mailbox                           O(1)
+
+NO NEED TO SAVE COPIES OF REGISTERS during IPC calls. This saves time.
+
+USE REGISTERS TO PASS IPC PARAMETERS?
+
+------------------
+
+BETTER IDEA THAN IPC BUFFERS
+----------------------------
+
+Instead of blocks, we can have something called shared memory object
+
+ - Each shmem object can be of any size
+
+ - Each shmem object is divided into pages, and there is a multi-level page 
+   tables for that object
+
+ - Each shmem object can represent something... it can be a shared file for
+   example, shared buffer used in IPC, shared VGA buffer, etc.
+
+ - Each shmem has an identifier, a 16-byte GUID (256 bits).
+
+ - GUIDs are shared among processes as IPC calls parameters
+
+ - When a process opens a shmem object (using GUID), a counter for that
+   object is increased. If GUID is not provided, then create a new
+   shmem object. The process also gets a HANDLE which is a number
+   between 0 and 1024 to identify the shmem object during system calls.
+
+ - When a process closes a shmem object, the counter decreases. If reaches
+   0, the shmem object is destroyed and all its pages are removed
+ 
+ - shmem object starts with size 0. The size can be increased or truncated.
+   when increased, the OS allocates pages and updates the shmem object
+   page table. When size is drecreased, the OS removes unneeded pages
+   from the end.
+
+ - a process choses to remap any page(s) from the shmem object into the
+   process slot at anytime as long as shmem object is opened. Remap
+   can also let shmem object frames to be allocated from physical
+   memory only on demand.
+
+ - shmem obj can provide functions such as:
+   -----------------------------------------
+   lock:      lock the shmem object
+   unlock:    unlock the shmem object
+   sync:      read data from disk into part of the file shmem object
+   flush:     write data from file shmem object into disk
+   resize:    change size of shmem obj
+   
+   Each shmem obj can have API function pointers for sync, flush,
+   and resize. They can then be implemented by FS (if shared obj
+   represents a file), by hard disk driver (if shared obj represents
+   a hard disk), by terminal emulator (if shared obj represents
+   a terminal window), etc.
+
+ - when a process maps a shmem object page, the process L1 page table entry
+   for that shmem object will contain the HANDLE. This helps implement
+   a counter to make sure the process unmaps all pages for a given HANDLE
+   before a close is issued on that HANDLE
+
+ - GUID ALTERNATIVE
+   ----------------
+   A less secure version than GUID is by just using public IDs for shmem
+   objects, and assume anyone can open/close any shmem obj. For applications
+   that require security, they can use SSL in user space to encrypt the
+   data passed in the shmem object
+   
+   or maybe have a bitmap for processes that are allowed to access the shmem
+   object
 

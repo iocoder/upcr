@@ -67,18 +67,18 @@ KCONINIT:   ;# CLEAR SCREEN
 
             ;# PRINT SCREEN HEADER
             LEA      RSI, [RIP+KCONHD]
-            MOV      R8, 0
+            MOV      R8, CONSOLE_WIDTH/2-0x38/2
             MOV      R9, 0
-1:          MOV      ECX, 0x020F0000
+1:          MOV      ECX, CONSOLE_HEADATTR
             MOV      CL, [RSI]
             PUSH     RSI
             CALL     KCONDRAW
             POP      RSI
             INC      RSI
             INC      R8
-            CMP      R8, CONSOLE_WIDTH
+            CMP      R8, CONSOLE_WIDTH/2+0x38/2
             JNE      1b
-            XOR      R8, R8
+            MOV      R8, CONSOLE_WIDTH/2-0x38/2
             INC      R9
             CMP      R9, 5
             JNE      1b
@@ -86,7 +86,7 @@ KCONINIT:   ;# CLEAR SCREEN
             ;# PRINT SCREEN FOOTER
             MOV      R8, 0
             MOV      R9, CONSOLE_WINDROWS+CONSOLE_HEADROWS
-1:          MOV      ECX, 0x010F0000
+1:          MOV      ECX, CONSOLE_STATATTR
             CALL     KCONDRAW
             INC      R8
             CMP      R8, CONSOLE_WIDTH
@@ -454,7 +454,7 @@ KCONDATE:   ;# SET RSI TO DATE/TIME STRING
             JE       2f
 
             ;# DRAW BYTE
-            ADD      ECX, 0x010B0000
+            ADD      ECX, CONSOLE_STATATTR
             PUSH     RSI
             CALL     KCONDRAW
             POP      RSI
@@ -492,13 +492,9 @@ KCONOFF:    DQ       0
 KCONDIGS:   DB       "0123456789ABCDEF"
 
             ;# SCREEN HEADING
-KCONHD:     DB       "                                                 "
-            DB       "                                                 "
-            DB       "                              UNIVERSAL PLATFORM "
-            DB       "FOR CONFIGURABLE ROUTING                         "
-            DB       "                                   UPCR VERSION  "
-            DB       "21.09 - X86_64 KERNEL                                  "
-            DB       "                                 COPYRIGHT (C) 20"
-            DB       "21 RAMSES NAGIB                                  "
-            DB       "                                                 "
-            DB       "                                                 "
+KCONHD:     DB       "                                                        "
+            DB       "       UNIVERSAL PLATFORM FOR CONFIGURABLE ROUTING      "
+            DB       "           UPCR VERSION 21.09 - X86_64 KERNEL           "
+            DB       "  COPYRIGHT (C) 2021 RAMSES NAGIB -- MONTREAL, CANADA   "
+            DB       "                                                        "
+            DB       "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF01234567"

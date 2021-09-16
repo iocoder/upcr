@@ -237,9 +237,13 @@
 # --------------------------------------
 
             .EQU     CONSOLE_WIDTH,      100
+            .EQU     CONSOLE_MAXLINES,   4096
+            .EQU     CONSOLE_PAGESIZE,   (CONSOLE_WIDTH*CONSOLE_MAXLINES)
+
             .EQU     CONSOLE_HEADROWS,   5
             .EQU     CONSOLE_WINDROWS,   31
             .EQU     CONSOLE_STATROWS,   1
-            .EQU     CONSOLE_TOTROWS,    (5+31+1)
-            .EQU     CONSOLE_MAXLINES,   4096
-            .EQU     CONSOLE_PAGESIZE,   (128*4096)
+            .EQU     CONSOLE_TOTROWS,    (CONSOLE_HEADROWS+CONSOLE_WINDROWS+CONSOLE_STATROWS)
+
+            .EQU     CONSOLE_HEADATTR,   0x0B000000
+            .EQU     CONSOLE_STATATTR,   0x010B0000
