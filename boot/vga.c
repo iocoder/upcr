@@ -16,10 +16,6 @@ EFI_API VOID BootVga(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
   UINT32 ModeFound = 0;
   EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *ModeInfo = NULL;
 
-  /* virtual frame buf */
-  UINT64 BufAddr = 0;
-  INTN   BufSize = 0;
-
   /* BootService pointer retrieved from EFI system table */
   EFI_BOOT_SERVICES *BootServices = NULL;
 
@@ -49,30 +45,17 @@ EFI_API VOID BootVga(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
     }
   }
 
-  /* allocate virtual frame buffer to be used by kernel */
-  if (Status == EFI_SUCCESS) {
-    if (ModeFound) {
-      BufSize = ModeInfo->PixelsPerScanLine*ModeInfo->VerticalResolution*4+4096;
-      Status = BootServices->AllocatePool(EfiLoaderData, BufSize, &BufAddr);
-      BufAddr = (BufAddr + 0xFFF) & ~0xFFFULL;
-    }
-  }
-
   /* finally, store information in BootVgaInfo structure */
   if (Status == EFI_SUCCESS) {
     if (ModeFound) {
-      /* initialize kernel boot info structure */
-      BootDataKernInit.VgaInfo.VgaAvailable = 1;
-
       /* load framebuffer info */
-      BootDataKernInit.VgaInfo.VgaMemVirt = BufAddr;
-      BootDataKernInit.VgaInfo.VgaMemPhys = Gop->Mode->FrameBufferBase;
-      BootDataKernInit.VgaInfo.VgaMemSize = Gop->Mode->FrameBufferSize;
+      BootDataKernInit.FrameBuffBase = Gop->Mode->FrameBufferBase;
+      BootDataKernInit.FrameBuffSize = Gop->Mode->FrameBufferSize;
 
       /* load mode info */
-      BootDataKernInit.VgaInfo.VgaScreenWidth  = ModeInfo->HorizontalResolution;
-      BootDataKernInit.VgaInfo.VgaScreenHeight = ModeInfo->VerticalResolution;
-      BootDataKernInit.VgaInfo.VgaScreenLine   = ModeInfo->PixelsPerScanLine;
+      BootDataKernInit.FrameBuffWidt = ModeInfo->HorizontalResolution;
+      BootDataKernInit.FrameBuffHigt = ModeInfo->VerticalResolution;
+      BootDataKernInit.FrameBuffLine = ModeInfo->PixelsPerScanLine;
     }
   }
 }

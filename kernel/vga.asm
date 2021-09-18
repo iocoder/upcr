@@ -43,7 +43,7 @@
             ;# GLOBAL SYMBOLS
             PUBLIC    KVGAINIT
             PUBLIC    KVGAPLOT
-            PUBLIC    KVGAPMEM
+            PUBLIC    KVGABUFF
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -56,41 +56,28 @@
 ;#                               KVGAINIT()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KVGAINIT:   ;# READ KVGAAVL FROM INIT STRUCT
-            MOV      RAX, [R15+0x00]
-            MOV      [RIP+KVGAAVL], RAX
-
-            ;# READ KVGAVMEM FROM INIT STRUCT
-            MOV      RAX, [R15+0x08]
-            MOV      [RIP+KVGAVMEM], RAX
-
-            ;# READ KVGAPMEM FROM INIT STRUCT
-            MOV      RAX, [R15+0x10]
-            MOV      [RIP+KVGAPMEM], RAX
+KVGAINIT:   ;# READ KVGABUFF FROM INIT STRUCT
+            MOV      RAX, [R15+0x28]
+            MOV      [RIP+KVGABUFF], RAX
 
             ;# READ KVGASIZE FROM INIT STRUCT
-            MOV      RAX, [R15+0x18]
+            MOV      RAX, [R15+0x30]
             MOV      [RIP+KVGASIZE], RAX
 
             ;# READ KVGAWIDE FROM INIT STRUCT
-            MOV      RAX, [R15+0x20]
+            MOV      RAX, [R15+0x38]
             MOV      [RIP+KVGAWIDE], RAX
 
             ;# READ KVGAHIGH FROM INIT STRUCT
-            MOV      RAX, [R15+0x28]
+            MOV      RAX, [R15+0x40]
             MOV      [RIP+KVGAHIGH], RAX
 
             ;# READ KVGALINE FROM INIT STRUCT
-            MOV      RAX, [R15+0x30]
+            MOV      RAX, [R15+0x48]
             MOV      [RIP+KVGALINE], RAX
 
-            ;# DID THE USER PROVIDE VGA INFORMATION ANYWAYS?
-            MOV      RAX, [RIP+KVGAAVL]
-            CMP      RAX, 0
-            JZ       2f
-
             ;# DRAW HEADING BAR
-            MOV      RDI, [RIP+KVGAPMEM]
+            MOV      RDI, [RIP+KVGABUFF]
             MOV      RCX, [RIP+KVGALINE]
             MOV      RAX, CONSOLE_HEADROWS*4*16
             MUL      RCX
@@ -111,9 +98,9 @@ KVGAINIT:   ;# READ KVGAAVL FROM INIT STRUCT
             MUL      RCX
             
             ;# DRAW STATUS BAR TO END OF SCREEN
-            MOV      RDI, [RIP+KVGAPMEM]
+            MOV      RDI, [RIP+KVGABUFF]
             ADD      RDI, RAX
-            MOV      RCX, [RIP+KVGAPMEM]
+            MOV      RCX, [RIP+KVGABUFF]
             ADD      RCX, [RIP+KVGASIZE]
             MOV      EAX, [RIP+KVGAPAL+(CONSOLE_STATATTR>>24)*8]
 1:          MOV      [RDI], EAX
@@ -122,7 +109,7 @@ KVGAINIT:   ;# READ KVGAAVL FROM INIT STRUCT
             JNE      1b
 
             ;# DONE
-2:          XOR      RAX, RAX
+            XOR      RAX, RAX
             RET
 
 ;#-----------------------------------------------------------------------------#
@@ -166,7 +153,7 @@ KVGAPLOT:   ;# CONVERT Y TO PIXEL OFFSET FROM THE BEGINNING OF THE BUFFER
             SHL      RAX, 2                  ;# RAX = (Y*16*PPL + X*8)*4
 
             ;# STORE MEMORY ADDRESS OF THE PIXEL IN RDI
-            MOV      RDI, [RIP+KVGAPMEM]     ;# RDI = &VGA[0]
+            MOV      RDI, [RIP+KVGABUFF]     ;# RDI = &VGA[0]
             ADD      RDI, RAX                ;# RDI = &BUF[PIXEL]
 
             ;# GET OFFSET OF THE FONT GLYPH TO DRAW IN RSI
@@ -240,9 +227,7 @@ KVGAPLOT:   ;# CONVERT Y TO PIXEL OFFSET FROM THE BEGINNING OF THE BUFFER
 ;#-----------------------------------------------------------------------------#
 
             ;# VGAINITINFO STRUCTURE
-KVGAAVL:    DQ       0
-KVGAVMEM:   DQ       0
-KVGAPMEM:   DQ       0
+KVGABUFF:   DQ       0
 KVGASIZE:   DQ       0
 KVGAWIDE:   DQ       0
 KVGALINE:   DQ       0

@@ -54,45 +54,97 @@
 ;#                              KRAMINIT()                                     #
 ;#-----------------------------------------------------------------------------#
 
-KRAMINIT:   ;# READ KRAMAVL FROM INIT STRUCT
-            MOV      RAX, [R15+0x38]
-            MOV      [RIP+KRAMAVL], RAX
+KRAMINIT:   ;# READ MEMORY MAP INFO
+            MOV      RSI, [R15+0x08]  ;# MemoryMapBase
+            MOV      RCX, [R15+0x10]  ;# MemoryMapSize
 
-            ;# READ KRAMSTART FROM INIT STRUCT
-            MOV      RAX, [R15+0x40]
-            MOV      [RIP+KRAMSTART], RAX
+            ;# LOOP OVER MAP ENTRIES
+1:          MOV      RAX, [RSI+0x00]
+            CMP      RAX, [R15+0x20]  ;# MemoryMapType
+            JNE      2f
 
-            ;# READ KRAMEND FROM INIT STRUCT
-            MOV      RAX, [R15+0x48]
-            MOV      [RIP+KRAMEND], RAX
+            ;# SAVE REGISTERS
+            PUSH     RSI
+            PUSH     RCX
 
-            ;# PRINT RAM START
+            ;# LOAD REGION INFORMATION
+            MOV      RDI, [RSI+0x08]  ;# RDI = BASE ADDRESS
+            MOV      RCX, [RSI+0x18]  ;# RCX = SIZE IN PAGES
+
+            ;# PRINT MODULE NAME
+            PUSH     RDI
+            PUSH     RCX
             LEA      RDI, [RIP+KRAMNAME]
             CALL     KCONMOD
-            LEA      RDI, [RIP+KRAMSTARTS]
-            CALL     KCONSTR
-            MOV      RDI, [RIP+KRAMSTART]
-            CALL     KCONHEX
-            MOV      RDI, '\n'
-            CALL     KCONCHR
+            POP      RCX
+            POP      RDI
 
-            ;# PRINT RAM END
-            LEA      RDI, [RIP+KRAMNAME]
-            CALL     KCONMOD
-            LEA      RDI, [RIP+KRAMENDS]
+            ;# PRINT REGION STRING
+            PUSH     RDI
+            PUSH     RCX
+            LEA      RDI, [RIP+KRAMREGION]
             CALL     KCONSTR
-            MOV      RDI, [RIP+KRAMEND]
+            POP      RCX
+            POP      RDI
+
+            ;# PRINT REGION START
+            PUSH     RDI
+            PUSH     RCX
             CALL     KCONHEX
+            POP      RCX
+            POP      RDI
+
+            ;# PRINT SEPARATOR
+            PUSH     RDI
+            PUSH     RCX
+            MOV      RDI, ' '
+            CALL     KCONCHR
+            MOV      RDI, '-'
+            CALL     KCONCHR
+            MOV      RDI, '>'
+            CALL     KCONCHR
+            MOV      RDI, ' '
+            CALL     KCONCHR
+            POP      RCX
+            POP      RDI
+
+            ;# PRINT REGION END
+            PUSH     RDI
+            PUSH     RCX
+            SHL      RCX, 12
+            ADD      RDI, RCX
+            CALL     KCONHEX
+            POP      RCX
+            POP      RDI
+
+            ;# PRINT NEWLINE
+            PUSH     RDI
+            PUSH     RCX
             MOV      RDI, '\n'
             CALL     KCONCHR
+            POP      RCX
+            POP      RDI
+
+            ;# TODO: LOOP OVER PAGES AND
+            ;# PUT THEM IN LINKED LIST
+            ADD      [RIP+KRAMSIZE], RCX
+
+            ;# RESTORE REGISTERS
+            POP      RCX
+            POP      RSI
+
+            ;# NEXT ENTRY
+2:          ADD      RSI, [R15+0x18]  ;# MemoryMapDesc
+            SUB      RCX, [R15+0x18]  ;# MemoryMapDesc
+            JNZ      1b
 
             ;# PRINT RAM SIZE
             LEA      RDI, [RIP+KRAMNAME]
             CALL     KCONMOD
-            LEA      RDI, [RIP+KRAMESIZES]
+            LEA      RDI, [RIP+KRAMTOTS]
             CALL     KCONSTR
-            MOV      RDI, [RIP+KRAMEND]
-            SUB      RDI, [RIP+KRAMSTART]
+            MOV      RDI, [RIP+KRAMSIZE]
+            SHL      RDI, 12
             SHR      RDI, 20
             CALL     KCONDEC
             MOV      RDI, 'M'
@@ -117,10 +169,9 @@ KRAMINIT:   ;# READ KRAMAVL FROM INIT STRUCT
 ;#                              MODULE DATA                                    #
 ;#-----------------------------------------------------------------------------#
 
-            ;# RAMINITINFO STRUCTURE
-KRAMAVL:    DQ       0
-KRAMSTART:  DQ       0
-KRAMEND:    DQ       0
+            ;# LINKED LIST OF FRAMES
+KRAMHEAD:   DQ       0
+KRAMSIZE:   DQ       0
 
 ;#-----------------------------------------------------------------------------#
 ;#                            LOGGING STRINGS                                  #
@@ -128,6 +179,5 @@ KRAMEND:    DQ       0
 
             ;# RAM HEADING AND MESSAGES
 KRAMNAME:   DB       "KERNEL RAM\0"
-KRAMSTARTS: DB       "DETECTED RAM BASE: \0"
-KRAMENDS:   DB       "DETECTED RAM LAST: \0"
-KRAMESIZES: DB       "DETECTED RAM SIZE: \0"
+KRAMREGION: DB       "DETECTED RAM REGION: \0"
+KRAMTOTS:   DB       "TOTAL RAM SIZE: \0"

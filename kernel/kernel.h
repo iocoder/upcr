@@ -17,29 +17,21 @@ typedef unsigned long int       uint64_t;
 typedef unsigned long int       uintn_t;
 
 typedef struct {
-  uint64_t  VgaAvailable;
-  uint64_t  VgaMemVirt;
-  uint64_t  VgaMemPhys;
-  uint64_t  VgaMemSize;
-  uint64_t  VgaScreenWidth;
-  uint64_t  VgaScreenHeight;
-  uint64_t  VgaScreenLine;
-} KernelInitVgaT;
+  /* the base address of ACPI root table, obtained by UEFI */
+  uint64_t  AcpiTableBase;
 
-typedef struct {
-  uint64_t  RamAvailable;
-  uint64_t  RamStart;
-  uint64_t  RamEnd;
-} KernelInitRamT;
+  /* memory map info as ACPI specs specify, obtained by UEFI */
+  uint64_t  MemoryMapBase;
+  uint64_t  MemoryMapSize;
+  uint64_t  MemoryMapDesc;
+  uint64_t  MemoryMapType;
 
-typedef struct {
-  uint64_t  ProcAvailable;
-} KernelInitProcT;
-
-typedef struct {
-  KernelInitVgaT   VgaInfo;
-  KernelInitRamT   RamInfo;
-  KernelInitProcT  ProcInfo;
+  /* frame buffer to use by kernel, obtained by UEFI */
+  uint64_t  FrameBuffBase;
+  uint64_t  FrameBuffSize;
+  uint64_t  FrameBuffWidt;
+  uint64_t  FrameBuffHigt;
+  uint64_t  FrameBuffLine;
 } KernelInitInfoT;
 
 #define KernelBootInit KSYSINIT

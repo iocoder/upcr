@@ -127,7 +127,7 @@ KCPUINIT:   ;# GET CPU MANUFACTURER
             ;# LOOP OVER MTRR REGISTERS
 1:          RDMSR
             AND      EAX, 0xFFFFF000
-            CMP      EAX, [RIP+KVGAPMEM]
+            CMP      EAX, [RIP+KVGABUFF]
             JNE      2f
             OR       EAX, 1
             WRMSR
@@ -173,7 +173,7 @@ KCPUSETUP:  ;# INVALIDATE CACHE
             ;# LOOP OVER MTRR REGISTERS
 1:          RDMSR
             AND      EAX, 0xFFFFF000
-            CMP      EAX, [RIP+KVGAPMEM]
+            CMP      EAX, [RIP+KVGABUFF]
             JNE      2f
             OR       EAX, 1
             WRMSR

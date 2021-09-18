@@ -6,12 +6,37 @@
 #define  EFI_API      __attribute__((ms_abi))
 #define  EFI_SUCCESS  0
 
+#define SAL_SYSTEM_TABLE_GUID \
+ {0xeb9d2d32,0x2d88,0x11d3,\
+  {0x9a,0x16,0x00,0x90,0x27,0x3f,0xc1,0x4d}}
+
+#define SMBIOS_TABLE_GUID \
+ {0xeb9d2d31,0x2d88,0x11d3,\
+  {0x9a,0x16,0x00,0x90,0x27,0x3f,0xc1,0x4d}}
+
+#define SMBIOS3_TABLE_GUID \
+ {0xf2fd1544, 0x9794, 0x4a2c,\
+  {0x99,0x2e,0xe5,0xbb,0xcf,0x20,0xe3,0x94})
+
+#define MPS_TABLE_GUID \
+ {0xeb9d2d2f,0x2d88,0x11d3,\
+  {0x9a,0x16,0x00,0x90,0x27,0x3f,0xc1,0x4d}}
+
+#define EFI_ACPI_TABLE_GUID \
+ {0x8868e871,0xe4f1,0x11d3,\
+  {0xbc,0x22,0x00,0x80,0xc7,0x3c,0x88,0x81}}
+
+#define EFI_ACPI_20_TABLE_GUID EFI_ACPI_TABLE_GUID
+
+#define ACPI_TABLE_GUID \
+ {0xeb9d2d30,0x2d88,0x11d3,\
+  {0x9a,0x16,0x00,0x90,0x27,0x3f,0xc1,0x4d}}
+
+#define ACPI_10_TABLE_GUID ACPI_TABLE_GUID
+
 #define  EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID \
-  { \
-    0x9042a9de, \
-    0x23dc, 0x4a38, \
-    {0x96, 0xfb, 0x7a, 0xde, 0xd0, 0x80, 0x51, 0x6a } \
-  }
+ {0x9042a9de,0x23dc,0x4a38, \
+  {0x96,0xfb,0x7a,0xde,0xd0,0x80,0x51,0x6a}}
 
 typedef void      VOID;
 
@@ -183,6 +208,12 @@ typedef struct {
   EFI_STATUS (* EFI_API CreateEventEx)();
 } EFI_BOOT_SERVICES;
 
+/* System Configuration Table */
+typedef struct {
+ EFI_GUID  VendorGuid;
+ VOID     *VendorTable;
+} EFI_CONFIGURATION_TABLE;
+
 /* EFI system table */
 typedef struct {
   EFI_TABLE_HEADER                   Hdr;
@@ -196,8 +227,8 @@ typedef struct {
   VOID                              *StdErr;
   VOID                              *RuntimeServices;
   EFI_BOOT_SERVICES                 *BootServices;
-  UINT64                             NumberOfTableEntries;
-  VOID                              *ConfigurationTable;
+  UINTN                              NumberOfTableEntries;
+  EFI_CONFIGURATION_TABLE           *ConfigurationTable;
 } EFI_SYSTEM_TABLE;
 
 /* bootloader global variables */
@@ -208,6 +239,7 @@ extern KernelInitInfoT BootDataKernInit;
 EFI_API VOID BootStart(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
 EFI_API VOID BootVga  (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
 EFI_API VOID BootRam  (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
+EFI_API VOID BootAcpi (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
 EFI_API VOID BootExit (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
 EFI_API VOID BootKern (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable);
 
