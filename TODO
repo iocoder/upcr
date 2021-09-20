@@ -5,17 +5,25 @@ BUILD PROCESS:
 
 IRQs:
 --------
-- ACPI MADT TABLES
-- I/O APIC
+
+- Any IRQ should be forwarded to all IRQ consumers (i.e. TMR and SCHEDULER)
+  Timer checks IRQ number:
+  if it is for LAPIC/TSC, update tick counter and program next IRQ
+  if it is for RTC, update date/time and schedule again
+  if it is for PIT, schedule another one
+  if it is for HPET, schedule another one
+
 - RTC IRQ Every 1 second TO UPDATE DATE TIME
 - COMPUTE WEEK DAY
 - INTERFACE TO GET DATE/TIME FROM USER SPACE (getHour, getMinute, etc. -- read 
   directly from CMOS). sync() would use them to create format string.
 - support all formats instead of just BCD
 
-- PIT timer for ticks? irqs should be delivered to their modules not to TMR
-- Tick counter update on vga display
-- fire LAPIC IRQ every 10 seconds on all cores to keep things alive
+- HPET Module
+
+
+- Tick counter update on VGA display
+- fire Schedule interrupt every 10 seconds on all cores to keep things alive
 
 CONSOLE:
 --------

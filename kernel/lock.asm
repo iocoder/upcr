@@ -1,6 +1,6 @@
 ;###############################################################################
-;# FILE NAME:    KERNEL/ERR.ASM
-;# DESCRIPTION:  KERNEL PANIC PROCEDURE
+;# File name:    KERNEL/LOCK.ASM
+;# DESCRIPTION:  KERNEL SEMAPHORE TO PROTECT KERNEL CODE ACCESS
 ;# AUTHOR:       RAMSES A.
 ;###############################################################################
 ;#
@@ -41,7 +41,8 @@
 ;###############################################################################
 
             ;# GLOBAL SYMBOLS
-            PUBLIC   KERRPANIC
+            PUBLIC   KLOCPEND
+            PUBLIC   KLOCPOST
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -51,30 +52,31 @@
             SEGMENT  ".text"
 
 ;#-----------------------------------------------------------------------------#
-;#                              KERRPANIC()                                    #
+;#                               KLOCPEND()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KERRPANIC:  ;# SEND INIT IPI TO ALL CPU CORES 
-            CALL     KIRQIIPI
+KLOCPEND:   ;# CMPXCHG LOOP TO ACQUIRE THE SEMAPHORE
+            XOR      EAX, EAX
+            MOV      ECX, 1
+            LOCK
+            CMPXCHG  [RIP+KLOC], ECX
+            JNE      KLOCPEND
 
-            ;# SET PANIC COLOUR
-            MOV      RDI, 0x0A
-            MOV      RSI, 0x01
-            CALL     KCONATT
+            ;# DONE
+            XOR      RAX, RAX
+            RET
 
-            ;# CLEAR SCREEN
-            ;#CALL     KLOGCLR
+;#-----------------------------------------------------------------------------#
+;#                               KLOCPOST()                                    #
+;#-----------------------------------------------------------------------------#
 
-            ;# PRINT PANIC HEADING
-            LEA      RDI, [RIP+KERRHDR]
-            CALL     KCONSTR
+KLOCPOST:   ;# RELEASE THE KERNEL ACCESS SEMAPHORE
+            XOR      ECX, ECX
+            MOV      [RIP+KLOC], ECX
 
-            ;# DUMP ALL CPU REGISTERS
-            MOV      RDI, RSP
-            CALL     KREGDUMP
-
-            ;# HALT FOREVER
-            JMP      .
+            ;# DONE
+            XOR      RAX, RAX
+            RET
 
 ;###############################################################################
 ;#                              DATA SECTION                                   #
@@ -84,26 +86,11 @@ KERRPANIC:  ;# SEND INIT IPI TO ALL CPU CORES
             SEGMENT  ".data"
 
 ;#-----------------------------------------------------------------------------#
-;#                            LOGGING STRINGS                                  #
+;#                              MODULE DATA                                    #
 ;#-----------------------------------------------------------------------------#
 
-            ;# PANIC HEADER
-KERRHDR:    DB       "\n"
-            DB       "\n"
-            DB       "  "
-            DB       "================================================"
-            DB       "================================================"
-            DB       "\n"
-            DB       "                                          "
-            DB       "KERNEL PANIC !!!"
-            DB       "\n"
-            DB       "  "
-            DB       "================================================"
-            DB       "================================================"
-            DB       "\n"
-            DB       "\n"
-            DB       "  "
-            DB       "KERNEL HAS PANICKED DUE TO AN EXCEPTION SIGNAL "
-            DB       "WHILST IN KERNEL MODE."
-            DB       "\n"
-            DB       "\0"
+            ;# ALIGNMENT TO 8 BYTES
+            ALIGN    8
+
+            ;# THE LOCK ITSELF
+KLOC:       DQ       0

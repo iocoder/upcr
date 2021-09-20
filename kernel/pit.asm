@@ -45,6 +45,7 @@
             PUBLIC   KPITCH0
             PUBLIC   KPITCH1
             PUBLIC   KPITCH2
+            PUBLIC   KPITUS
 
 ;###############################################################################
 ;#                                 MACROS                                      #
@@ -103,7 +104,21 @@
 ;#                               KPITINIT()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KPITINIT:   ;# PRINT INIT MSG
+KPITINIT:   ;# ENABLE CHANNEL 2
+            MOV      DX, 0x61
+            IN       AL, DX
+            OR       AL, 1
+            OUT      DX, AL
+
+            ;# RESET CHANNEL 0
+            MOV      RDI, 0x10
+            CALL     KPITCH0
+
+            ;# RESET CHANNEL 2
+            MOV      RDI, 0x10
+            CALL     KPITCH2
+
+            ;# PRINT INIT MSG
             LEA      RDI, [RIP+KPITNAME]
             CALL     KCONMOD
             LEA      RDI, [RIP+KPITMSG]
@@ -230,6 +245,34 @@ KPITCH2:    ;# WRITE CWD COMMAND
             IN       AL, DX
             AND      AL, FLAG_OUTPUT
             JZ       1b
+
+            ;# DONE
+            XOR      RAX, RAX
+            RET
+
+;#-----------------------------------------------------------------------------#
+;#                                KPITUS()                                     #
+;#-----------------------------------------------------------------------------#
+
+;#  @BRIEF: FIRE AN INTERRUPT AFTER RDI MICROSECONDS
+
+;#  @IN:    RDI: AMOUNT OF MICROSECONDS
+;#  @OUT:   RAX: ERROR CODE
+
+;#  @REGS:  RDX: USED FOR IN AND OUT COMMANDS
+
+KPITUS:     ;# WRITE CWD COMMAND
+            MOV      AL, CHANNEL0|BYTE_BOTH|MODE_INTR
+            MOV      DX, PORT_CWD
+            OUT      DX, AL
+
+            ;# WRITE COUNTER
+            MOV      EAX, EDI
+            MOV      DX, PORT_CH0
+            OUT      DX, AL
+            MOV      AL, AH
+            MOV      DX, PORT_CH0
+            OUT      DX, AL
 
             ;# DONE
             XOR      RAX, RAX

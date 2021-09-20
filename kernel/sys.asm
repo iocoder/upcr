@@ -57,7 +57,10 @@
 KSYSINIT:   ;# TAKE A COPY OF BOOT INFO PTR
             MOV      R15, RDI
 
-            ;# INITIALIZE LOGGING FIRST
+            ;# INITIALIZE ACPI
+            CALL     KACPINIT
+
+            ;# INITIALIZE CONSOLE
             CALL     KVGAINIT
             CALL     KCONINIT
             CALL     KSPLINIT
@@ -82,8 +85,6 @@ KSYSINIT:   ;# TAKE A COPY OF BOOT INFO PTR
             ;# INITIALIZE LAPICS
             CALL     KIRQINIT
             CALL     KSMPINIT
-
-            ;# CALL     KTSCUS
 
             ;# STORE SUCCESS CODE IN RAX
             XOR      RAX, RAX

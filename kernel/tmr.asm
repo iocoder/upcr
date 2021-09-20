@@ -72,8 +72,21 @@ KTMRINIT:   ;# PRINT INIT MSG
 ;#                               KTMRSETUP()                                   #
 ;#-----------------------------------------------------------------------------#
 
-KTMRSETUP:  ;# SCHEDULE TIMER INTERRUPTS
-            CALL     KTSCUS
+KTMRSETUP:  ;# SCHEDULE TSC INTERRUPT
+            ;#CALL     KTSCUS
+
+            ;# SCHEDULE LAPIC INTERRUPT
+            ;#CALL     KLATUS
+
+            ;# SCHEDULE RTC INTERRUPT
+            ;#CALL     KRTCUS
+
+            ;# SCHEDULE HPET INTERRUPT
+            ;#CALL     KHPTUS
+
+            ;# SCHEDULE PIT INTERRUPT
+            ;#MOV      RDI, 0xFFFF
+            ;#CALL     KPITUS
 
             ;# DONE
             XOR      RAX, RAX
@@ -83,11 +96,21 @@ KTMRSETUP:  ;# SCHEDULE TIMER INTERRUPTS
 ;#                               KTMRSYNC()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KTMRINTR:   ;# SCHEDULE ANOTHER INTERRUPT
-            CALL     KTSCUS
+KTMRINTR:   ;# TSC INTERRUPT
+            ;#CALL     KTSCUS
 
-            ;# UPDATE RTC TIMER
-            CALL     KRTCSYNC
+            ;# LAPIC INTERRUPT
+            ;#CALL     KLATUS
+
+            ;# RTC INTERRUPT
+            ;#CALL     KRTCUS
+
+            ;# HPET INTERRUPT
+            ;#CALL     KHPTUS
+
+            ;# PIT INTERRUPT
+            ;#MOV      RDI, 0xFFFF
+            ;#CALL     KPITUS
 
             ;# DONE
             XOR      RAX, RAX

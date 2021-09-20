@@ -64,7 +64,7 @@ KTSCINIT:   ;# READ TSC STAMP
 
             ;# WAIT FOR 10 MS.
             MOV      RDI, PIT_CTR_10MS
-            CALL     KPITCH0
+            CALL     KPITCH2
 
             ;# READ TSC STAMP AGAIN
             XOR      RAX, RAX

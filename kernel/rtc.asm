@@ -77,6 +77,14 @@ KRTCINIT:   ;# SET FORMAT TO 12-HOUR BCD
             MOV      RDI, '\n'
             CALL     KCONCHR
 
+            ;# PRINT CMOS FREQUENCY
+            LEA      RDI, [RIP+KRTCNAME]
+            CALL     KCONMOD
+            LEA      RDI, [RIP+KRTCFREQ]
+            CALL     KCONSTR
+            MOV      RDI, '\n'
+            CALL     KCONCHR
+
             ;# DONE
             XOR      RAX, RAX
             RET
@@ -309,3 +317,4 @@ KRTCSTR:    DB       "WWWWWWWWW - MMMMMMMMM DD, YYYY | HH:MM:SS XM\0"
             ;# RTC HEADING AND ASCII STRINGS
 KRTCNAME:   DB       "KERNEL RTC\0"
 KRTCMSG:    DB       "CMOS DATE/TIME: \0"
+KRTCFREQ:   DB       "CMOS TIMER FREQUENCY: 1000Hz\0"

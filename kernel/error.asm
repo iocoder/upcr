@@ -1,6 +1,6 @@
 ;###############################################################################
-;# File name:    KERNEL/SPL.ASM
-;# DESCRIPTION:  PRINT SPLASH AND WELCOME MESSAGES
+;# FILE NAME:    KERNEL/ERROR.ASM
+;# DESCRIPTION:  KERNEL PANIC PROCEDURE
 ;# AUTHOR:       RAMSES A.
 ;###############################################################################
 ;#
@@ -41,7 +41,7 @@
 ;###############################################################################
 
             ;# GLOBAL SYMBOLS
-            PUBLIC   KSPLINIT
+            PUBLIC   KERRPANIC
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -51,44 +51,30 @@
             SEGMENT  ".text"
 
 ;#-----------------------------------------------------------------------------#
-;#                               KSPLINIT()                                    #
+;#                              KERRPANIC()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KSPLINIT:   ;# HEADER COLOUR
+KERRPANIC:  ;# SEND INIT IPI TO ALL CPU CORES 
+            CALL     KIRQIIPI
+
+            ;# SET PANIC COLOUR
             MOV      RDI, 0x0A
-            MOV      RSI, -1
+            MOV      RSI, 0x01
             CALL     KCONATT
 
-            ;# PRINT HEADER
-            LEA      RDI, [RIP+KSPLHDR]
+            ;# CLEAR SCREEN
+            ;#CALL     KLOGCLR
+
+            ;# PRINT PANIC HEADING
+            LEA      RDI, [RIP+KERRHDR]
             CALL     KCONSTR
 
-            ;# WELCOME MSG COLOUR
-            MOV      RDI, 0x0E
-            MOV      RSI, -1
-            CALL     KCONATT
+            ;# DUMP ALL CPU REGISTERS
+            MOV      RDI, RSP
+            CALL     KREGDUMP
 
-            ;# PRINT WELCOME MSG
-            LEA      RDI, [RIP+KSPLWEL]
-            CALL     KCONSTR
-
-            ;# LICENSE COLOUR
-            MOV      RDI, 0x0F
-            MOV      RSI, -1
-            CALL     KCONATT
-
-            ;# PRINT LICENSE
-            LEA      RDI, [RIP+KSPLLIC]
-            CALL     KCONSTR
-
-            ;# SET PRINTING COLOUR TO YELLOW
-            MOV      RDI, 0x0B
-            MOV      RSI, -1
-            CALL     KCONATT
-
-            ;# DONE
-            XOR      RAX, RAX
-            RET
+            ;# HALT FOREVER
+            JMP      .
 
 ;###############################################################################
 ;#                              DATA SECTION                                   #
@@ -101,14 +87,23 @@ KSPLINIT:   ;# HEADER COLOUR
 ;#                            LOGGING STRINGS                                  #
 ;#-----------------------------------------------------------------------------#
 
-            ;# HEADER TEXT
-KSPLHDR:    INCBIN   "kernel/header.txt"
-            DB       "\0"
-
-            ;# WELCOME TEXT
-KSPLWEL:    INCBIN   "kernel/welcome.txt"
-            DB       "\0"
-
-            ;# LICENSE TEXT
-KSPLLIC:    INCBIN   "kernel/license.txt"
+            ;# PANIC HEADER
+KERRHDR:    DB       "\n"
+            DB       "\n"
+            DB       "  "
+            DB       "================================================"
+            DB       "================================================"
+            DB       "\n"
+            DB       "                                          "
+            DB       "KERNEL PANIC !!!"
+            DB       "\n"
+            DB       "  "
+            DB       "================================================"
+            DB       "================================================"
+            DB       "\n"
+            DB       "\n"
+            DB       "  "
+            DB       "KERNEL HAS PANICKED DUE TO AN EXCEPTION SIGNAL "
+            DB       "WHILST IN KERNEL MODE."
+            DB       "\n"
             DB       "\0"

@@ -1,6 +1,6 @@
 ;###############################################################################
-;# File name:    KERNEL/LOC.ASM
-;# DESCRIPTION:  KERNEL SEMAPHORE TO PROTECT KERNEL CODE ACCESS
+;# File name:    KERNEL/SPLASH.ASM
+;# DESCRIPTION:  PRINT SPLASH AND WELCOME MESSAGES
 ;# AUTHOR:       RAMSES A.
 ;###############################################################################
 ;#
@@ -41,8 +41,7 @@
 ;###############################################################################
 
             ;# GLOBAL SYMBOLS
-            PUBLIC   KLOCPEND
-            PUBLIC   KLOCPOST
+            PUBLIC   KSPLINIT
 
 ;###############################################################################
 ;#                              TEXT SECTION                                   #
@@ -52,27 +51,40 @@
             SEGMENT  ".text"
 
 ;#-----------------------------------------------------------------------------#
-;#                               KLOCPEND()                                    #
+;#                               KSPLINIT()                                    #
 ;#-----------------------------------------------------------------------------#
 
-KLOCPEND:   ;# CMPXCHG LOOP TO ACQUIRE THE SEMAPHORE
-            XOR      EAX, EAX
-            MOV      ECX, 1
-            LOCK
-            CMPXCHG  [RIP+KLOC], ECX
-            JNE      KLOCPEND
+KSPLINIT:   ;# HEADER COLOUR
+            MOV      RDI, 0x0A
+            MOV      RSI, -1
+            CALL     KCONATT
 
-            ;# DONE
-            XOR      RAX, RAX
-            RET
+            ;# PRINT HEADER
+            LEA      RDI, [RIP+KSPLHDR]
+            CALL     KCONSTR
 
-;#-----------------------------------------------------------------------------#
-;#                               KLOCPOST()                                    #
-;#-----------------------------------------------------------------------------#
+            ;# WELCOME MSG COLOUR
+            MOV      RDI, 0x0E
+            MOV      RSI, -1
+            CALL     KCONATT
 
-KLOCPOST:   ;# RELEASE THE KERNEL ACCESS SEMAPHORE
-            XOR      ECX, ECX
-            MOV      [RIP+KLOC], ECX
+            ;# PRINT WELCOME MSG
+            LEA      RDI, [RIP+KSPLWEL]
+            CALL     KCONSTR
+
+            ;# LICENSE COLOUR
+            MOV      RDI, 0x0F
+            MOV      RSI, -1
+            CALL     KCONATT
+
+            ;# PRINT LICENSE
+            LEA      RDI, [RIP+KSPLLIC]
+            CALL     KCONSTR
+
+            ;# SET PRINTING COLOUR TO YELLOW
+            MOV      RDI, 0x0B
+            MOV      RSI, -1
+            CALL     KCONATT
 
             ;# DONE
             XOR      RAX, RAX
@@ -86,11 +98,17 @@ KLOCPOST:   ;# RELEASE THE KERNEL ACCESS SEMAPHORE
             SEGMENT  ".data"
 
 ;#-----------------------------------------------------------------------------#
-;#                              MODULE DATA                                    #
+;#                            LOGGING STRINGS                                  #
 ;#-----------------------------------------------------------------------------#
 
-            ;# ALIGNMENT TO 8 BYTES
-            ALIGN    8
+            ;# HEADER TEXT
+KSPLHDR:    INCBIN   "kernel/header.txt"
+            DB       "\0"
 
-            ;# THE LOCK ITSELF
-KLOC:       DQ       0
+            ;# WELCOME TEXT
+KSPLWEL:    INCBIN   "kernel/welcome.txt"
+            DB       "\0"
+
+            ;# LICENSE TEXT
+KSPLLIC:    INCBIN   "kernel/license.txt"
+            DB       "\0"

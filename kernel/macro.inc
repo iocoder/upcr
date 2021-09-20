@@ -51,6 +51,42 @@
             .EQU     MEM_LAST_ADDR,   0x00050000     ;# LAST ADDRESS IN LOWER 640KB
 
 # --------------------------------------
+# ACPI TABLE NAMES
+# --------------------------------------
+
+            .EQU     ACPI_TBL_MADT,   0x43495041
+            .EQU     ACPI_TBL_BERT,   0x54524542
+            .EQU     ACPI_TBL_BGRT,   0x54524742
+            .EQU     ACPI_TBL_CPEP,   0x50455043
+            .EQU     ACPI_TBL_DSDT,   0x54445344
+            .EQU     ACPI_TBL_ECDT,   0x54444345
+            .EQU     ACPI_TBL_EINJ,   0x4a4e4945
+            .EQU     ACPI_TBL_ERST,   0x54535245
+            .EQU     ACPI_TBL_FADT,   0x50434146
+            .EQU     ACPI_TBL_FACS,   0x53434146
+            .EQU     ACPI_TBL_FPDT,   0x54445046
+            .EQU     ACPI_TBL_GTDT,   0x54445447
+            .EQU     ACPI_TBL_HEST,   0x54534548
+            .EQU     ACPI_TBL_HPET,   0x54455048
+            .EQU     ACPI_TBL_MSCT,   0x5443534d
+            .EQU     ACPI_TBL_MPST,   0x5453504d
+            .EQU     ACPI_TBL_NFIT,   0x5449464e
+            .EQU     ACPI_TBL_OEMX,   0x004d454f
+            .EQU     ACPI_TBL_PCCT,   0x54434350
+            .EQU     ACPI_TBL_PHAT,   0x54414850
+            .EQU     ACPI_TBL_PMTT,   0x54544d50
+            .EQU     ACPI_TBL_PSDT,   0x54445350
+            .EQU     ACPI_TBL_RASF,   0x46534152
+            .EQU     ACPI_TBL_RSDP,   0x50445352
+            .EQU     ACPI_TBL_RSDT,   0x54445352
+            .EQU     ACPI_TBL_SBST,   0x54534253
+            .EQU     ACPI_TBL_SDEV,   0x56454453
+            .EQU     ACPI_TBL_SLIT,   0x54494c53
+            .EQU     ACPI_TBL_SRAT,   0x54415253
+            .EQU     ACPI_TBL_SSDT,   0x54445353
+            .EQU     ACPI_TBL_XSDT,   0x54445358
+
+# --------------------------------------
 # MSR REGISTERS
 # --------------------------------------
 
